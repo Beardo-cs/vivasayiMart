@@ -9,7 +9,8 @@
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "build": "cd client && npm install && npm run build && cd .. && mkdir -p public && cp -r client/build/* public/"
+    "build": "cd client && npm install && npm run build && cd .. && mkdir -p public && cp -r client/build/* public/",
+    "vercel-build": "cd client && npm install && npm run build"
   },
   "dependencies": {
     "@google/genai": "^1.40.0",

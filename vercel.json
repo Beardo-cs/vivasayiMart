@@ -31,12 +31,26 @@
       "dest": "client/build/manifest.json"
     },
     {
-      "src": "/logo(.*).png",
+      "src": "/logo(.*)\\.png",
       "dest": "client/build/logo$1.png"
+    },
+    {
+      "src": "/(.*\\.(js|css|json|ico|png|jpg|jpeg|svg|gif|woff|woff2|ttf|eot))",
+      "dest": "client/build/$1"
     },
     {
       "src": "/(.*)",
       "dest": "client/build/index.html"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "env": {
