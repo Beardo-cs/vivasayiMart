@@ -37,12 +37,18 @@ app.use('/api/ai', require('./routes/api/ai'));
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
     // Set static folder. Built in middleware
-    app.use (express.static('client/build'));
+    app.use(express.static('client/build'));
 
     // Serve React app for all non-API routes
     // Express 5 doesn't support '*' - use a catch-all route instead
-    app.use((req, res) => {
-        res.sendFile(path.resolve(__dirname,'client', 'build', 'index.html'));
+    // Only serve index.html if the request doesn't match a file
+    app.get('*', (req, res, next) => {
+        // Don't serve index.html for API routes or static files
+        if (req.path.startsWith('/api/') ||
+            req.path.match(/\.(js|css|json|ico|png|jpg|jpeg|svg|gif|woff|woff2|ttf|eot|txt|xml|map)$/)) {
+            return next();
+        }
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
     });
 }
 //process.env.PORT will look at the Port variable to run the server on corres. port
