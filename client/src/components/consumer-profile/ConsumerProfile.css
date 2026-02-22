@@ -1,0 +1,52 @@
+/* Import base styles from farmer profile */
+@import '../farmer-profile/FarmerProfile.css';
+
+/* Consumer-specific header gradient */
+.consumer-header {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+    box-shadow: 0 10px 40px rgba(79, 172, 254, 0.3) !important;
+}
+
+/* Consumer-specific title color */
+.consumer-title {
+    color: #4facfe !important;
+}
+
+/* Consumer primary button */
+.btn-consumer-primary {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+}
+
+.btn-consumer-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+}
+
+/* Info Box */
+.info-box {
+    background: linear-gradient(135deg, #e0f7ff 0%, #f0f9ff 100%);
+    border-left: 4px solid #4facfe;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.info-box h3 {
+    color: #4facfe;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.info-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-box li {
+    padding: 0.5rem 0;
+    color: #333;
+    font-size: 0.95rem;
+}
+

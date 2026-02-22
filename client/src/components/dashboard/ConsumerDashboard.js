@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Spinner from '../layout/Spinner';
+import './Dashboard.css';
 
 const ConsumerDashboard = ({
     auth: { user, loading }
@@ -11,128 +12,82 @@ const ConsumerDashboard = ({
         <Spinner />
     ) : (
         <Fragment>
-            <h1 className="large text-primary">🛒 Consumer Dashboard</h1>
-            <p className="lead">
-                <i className="fas fa-user"></i> Welcome {user && user.name}
-            </p>
-            
-            <div className="dash-buttons">
-                <Link to="/posts" className="btn btn-primary">
-                    <i className="fas fa-shopping-basket"></i> Browse All Products
+            <div className="dashboard-header consumer-header">
+                <div className="header-content">
+                    <h1 className="dashboard-title">🛒 Consumer Dashboard</h1>
+                    <p className="dashboard-subtitle">Welcome back, {user && user.name}!</p>
+                </div>
+            </div>
+
+            <div className="dashboard-actions-modern">
+                <Link to="/posts" className="action-card consumer-card primary">
+                    <div className="card-icon">🛍️</div>
+                    <h3>Browse Products</h3>
+                    <p>Fresh from local farms</p>
                 </Link>
-                <Link to="/farmers" className="btn btn-light">
-                    <i className="fas fa-users text-primary"></i> Find Farmers Near Me
+                <Link to="/farmers" className="action-card consumer-card">
+                    <div className="card-icon">👨‍🌾</div>
+                    <h3>Find Farmers</h3>
+                    <p>Connect with local farmers</p>
                 </Link>
-                <Link to="/market-price" className="btn btn-light">
-                    <i className="fas fa-chart-line text-primary"></i> Check Market Prices
+                <Link to="/market-price" className="action-card consumer-card">
+                    <div className="card-icon">📊</div>
+                    <h3>Market Prices</h3>
+                    <p>Check current rates</p>
                 </Link>
-                <Link to="/consumer-profile" className="btn btn-light">
-                    <i className="fas fa-user-circle text-primary"></i> My Profile
+                <Link to="/consumer-profile" className="action-card consumer-card">
+                    <div className="card-icon">👤</div>
+                    <h3>My Profile</h3>
+                    <p>Manage preferences</p>
                 </Link>
             </div>
 
-            <div className="my-2">
-                <h2 className="text-primary">Featured Categories</h2>
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
-                    gap: '1rem',
-                    marginTop: '1rem'
-                }}>
-                    <Link to="/posts?category=Vegetables" style={{ textDecoration: 'none' }}>
-                        <div style={{ 
-                            padding: '1.5rem', 
-                            background: '#f4f4f4', 
-                            borderRadius: '5px',
-                            textAlign: 'center',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s'
-                        }}>
-                            <h3 style={{ fontSize: '2rem' }}>🥬</h3>
-                            <p style={{ margin: '0.5rem 0', fontWeight: 'bold', color: '#333' }}>Vegetables</p>
-                        </div>
+            <div className="categories-section">
+                <h2 className="section-title">🌾 Featured Categories</h2>
+                <div className="categories-grid">
+                    <Link to="/posts?category=Vegetables" className="category-card">
+                        <div className="category-icon">🥬</div>
+                        <h3>Vegetables</h3>
                     </Link>
-                    <Link to="/posts?category=Fruits" style={{ textDecoration: 'none' }}>
-                        <div style={{ 
-                            padding: '1.5rem', 
-                            background: '#f4f4f4', 
-                            borderRadius: '5px',
-                            textAlign: 'center',
-                            cursor: 'pointer'
-                        }}>
-                            <h3 style={{ fontSize: '2rem' }}>🍎</h3>
-                            <p style={{ margin: '0.5rem 0', fontWeight: 'bold', color: '#333' }}>Fruits</p>
-                        </div>
+                    <Link to="/posts?category=Fruits" className="category-card">
+                        <div className="category-icon">🍎</div>
+                        <h3>Fruits</h3>
                     </Link>
-                    <Link to="/posts?category=Grains" style={{ textDecoration: 'none' }}>
-                        <div style={{ 
-                            padding: '1.5rem', 
-                            background: '#f4f4f4', 
-                            borderRadius: '5px',
-                            textAlign: 'center',
-                            cursor: 'pointer'
-                        }}>
-                            <h3 style={{ fontSize: '2rem' }}>🌾</h3>
-                            <p style={{ margin: '0.5rem 0', fontWeight: 'bold', color: '#333' }}>Grains</p>
-                        </div>
+                    <Link to="/posts?category=Grains" className="category-card">
+                        <div className="category-icon">🌾</div>
+                        <h3>Grains</h3>
                     </Link>
-                    <Link to="/posts?category=Dairy" style={{ textDecoration: 'none' }}>
-                        <div style={{ 
-                            padding: '1.5rem', 
-                            background: '#f4f4f4', 
-                            borderRadius: '5px',
-                            textAlign: 'center',
-                            cursor: 'pointer'
-                        }}>
-                            <h3 style={{ fontSize: '2rem' }}>🥛</h3>
-                            <p style={{ margin: '0.5rem 0', fontWeight: 'bold', color: '#333' }}>Dairy</p>
-                        </div>
+                    <Link to="/posts?category=Dairy" className="category-card">
+                        <div className="category-icon">🥛</div>
+                        <h3>Dairy</h3>
                     </Link>
-                    <Link to="/posts?category=Poultry" style={{ textDecoration: 'none' }}>
-                        <div style={{ 
-                            padding: '1.5rem', 
-                            background: '#f4f4f4', 
-                            borderRadius: '5px',
-                            textAlign: 'center',
-                            cursor: 'pointer'
-                        }}>
-                            <h3 style={{ fontSize: '2rem' }}>🐔</h3>
-                            <p style={{ margin: '0.5rem 0', fontWeight: 'bold', color: '#333' }}>Poultry</p>
-                        </div>
+                    <Link to="/posts?category=Poultry" className="category-card">
+                        <div className="category-icon">🐔</div>
+                        <h3>Poultry</h3>
                     </Link>
-                    <Link to="/posts?category=Other" style={{ textDecoration: 'none' }}>
-                        <div style={{ 
-                            padding: '1.5rem', 
-                            background: '#f4f4f4', 
-                            borderRadius: '5px',
-                            textAlign: 'center',
-                            cursor: 'pointer'
-                        }}>
-                            <h3 style={{ fontSize: '2rem' }}>🌱</h3>
-                            <p style={{ margin: '0.5rem 0', fontWeight: 'bold', color: '#333' }}>Other</p>
-                        </div>
+                    <Link to="/posts?category=Other" className="category-card">
+                        <div className="category-icon">🌱</div>
+                        <h3>Other</h3>
                     </Link>
                 </div>
             </div>
 
-            <div className="my-2">
-                <h2 className="text-primary">Why Buy Direct from Farmers?</h2>
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-                    gap: '1rem',
-                    marginTop: '1rem'
-                }}>
-                    <div style={{ padding: '1rem', background: '#f4f4f4', borderRadius: '5px' }}>
-                        <h4>🌱 Fresh & Organic</h4>
+            <div className="benefits-section">
+                <h2 className="section-title">✨ Why Buy Direct from Farmers?</h2>
+                <div className="benefits-grid">
+                    <div className="benefit-card">
+                        <div className="benefit-icon">🌱</div>
+                        <h3>Fresh & Organic</h3>
                         <p>Get farm-fresh produce directly from local farmers</p>
                     </div>
-                    <div style={{ padding: '1rem', background: '#f4f4f4', borderRadius: '5px' }}>
-                        <h4>💰 Fair Prices</h4>
+                    <div className="benefit-card">
+                        <div className="benefit-icon">💰</div>
+                        <h3>Fair Prices</h3>
                         <p>No middlemen - better prices for you and farmers</p>
                     </div>
-                    <div style={{ padding: '1rem', background: '#f4f4f4', borderRadius: '5px' }}>
-                        <h4>🤝 Support Local</h4>
+                    <div className="benefit-card">
+                        <div className="benefit-icon">🤝</div>
+                        <h3>Support Local</h3>
                         <p>Help local farmers and strengthen your community</p>
                     </div>
                 </div>
