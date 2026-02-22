@@ -8,15 +8,16 @@ import { register } from '../../actions/auth';
 import PropTypes from 'prop-types';
 
 // instead of using props.setAlert we changed props to setAlert
-const Register = ({ setAlert, register, isAuthenticated  }) => {
+const Register = ({ setAlert, register, isAuthenticated, user  }) => {
   const  [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    password2: ''
+    password2: '',
+    userType: 'farmer'
   });
 
-  const { name, email, password,password2 } = formData;
+  const { name, email, password, password2, userType } = formData;
 
 // change the name to value of the input, instead of using name, can use e.taget.name..
   const onChange = e =>
@@ -30,27 +31,59 @@ const Register = ({ setAlert, register, isAuthenticated  }) => {
       setAlert('Passwords do not match', 'danger');
     } else {
 //console.log("SUCESS");
-      register ({ name, email, password});
+      register ({ name, email, password, userType});
     }
   };
 
-  if (isAuthenticated) {
-    return <Navigate to ='/dashboard' />
+  if (isAuthenticated && user) {
+    if (user.userType === 'farmer') {
+      return <Navigate to="/farmer-dashboard" />
+    } else if (user.userType === 'consumer') {
+      return <Navigate to="/consumer-dashboard" />
+    }
+    return <Navigate to="/dashboard" />
   }
    return (
-     <Fragment> 
+     <Fragment>
    <h1 className="large text-primary">Sign Up</h1>
       <p className="lead"><i className="fas fa-user"></i> Create Your Account</p>
       <form className="form" onSubmit ={e => onSubmit(e)}>
         <div className="form-group">
-          <input 
-          type="text" 
-          placeholder="Name" 
-          name="name" 
-          value={name} 
+          <label className="form-label"><strong>I am a:</strong></label>
+          <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <input
+                type="radio"
+                name="userType"
+                value="farmer"
+                checked={userType === 'farmer'}
+                onChange={e => onChange(e)}
+                style={{ marginRight: '8px' }}
+              />
+              <span>🌾 Farmer</span>
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <input
+                type="radio"
+                name="userType"
+                value="consumer"
+                checked={userType === 'consumer'}
+                onChange={e => onChange(e)}
+                style={{ marginRight: '8px' }}
+              />
+              <span>🛒 Consumer</span>
+            </label>
+          </div>
+        </div>
+        <div className="form-group">
+          <input
+          type="text"
+          placeholder="Name"
+          name="name"
+          value={name}
   // onChange function
-          onChange= {e=> onChange(e)}  
-          //required 
+          onChange= {e=> onChange(e)}
+          //required
         />
         </div>
         <div className="form-group">
@@ -98,11 +131,13 @@ const Register = ({ setAlert, register, isAuthenticated  }) => {
 Register.propTypes = {
   setAlert: PropTypes.func.isRequired,
   register: PropTypes.func.isRequired,
-  isAuthenticated: PropTypes.bool                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+  isAuthenticated: PropTypes.bool,
+  user: PropTypes.object
 };
 
 const mapStateToProps = state=> ({
-    isAuthenticated : state.auth.isAuthenticated
+    isAuthenticated : state.auth.isAuthenticated,
+    user: state.auth.user
 });
 
 export default connect(

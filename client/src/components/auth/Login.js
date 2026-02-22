@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { login } from '../../actions/auth';
 
 //isAuthenticated is a props here
-const Login = ({ login, isAuthenticated }) => {
+const Login = ({ login, isAuthenticated, user }) => {
   const  [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -24,8 +24,13 @@ const { email, password } = formData;
     login(email, password);
   };
 
-  // Redirected if logged in
-  if(isAuthenticated) {
+  // Redirected if logged in based on user type
+  if(isAuthenticated && user) {
+    if (user.userType === 'farmer') {
+      return <Navigate to="/farmer-dashboard" />
+    } else if (user.userType === 'consumer') {
+      return <Navigate to="/consumer-dashboard" />
+    }
     return <Navigate to="/dashboard" />
   }
    return (
@@ -64,12 +69,14 @@ const { email, password } = formData;
 
 Login.propTypes = {
   login: PropTypes.func.isRequired,
-  isAuthenticated:  PropTypes.bool
+  isAuthenticated:  PropTypes.bool,
+  user: PropTypes.object
 };
 
 const mapStateToProps = state=> ({
   //we dont need all the things like authenticated loading type and all. we need only authenticated.
-    isAuthenticated : state.auth.isAuthenticated
+    isAuthenticated : state.auth.isAuthenticated,
+    user: state.auth.user
 });
 
 export default connect(
