@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {check, validationResult } = require('express-validator');
 const auth = require('../../middleware/auth');
+const { checkFarmer } = require('../../middleware/checkRole');
 
 const Post = require('../../models/Post');
 const Profile = require('../../models/Profile');
@@ -9,9 +10,10 @@ const User = require('../../models/User');
 
 // @route     POST api/posts
 // @desc      Create a post (Agricultural Product)
-// @access    Private
+// @access    Private (Farmer only)
 router.post('/',
 [ auth,
+  checkFarmer,
     [
         check('text','Description is required')
         .not()

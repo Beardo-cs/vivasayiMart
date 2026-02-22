@@ -48,6 +48,17 @@ const PostSchema =  new Schema ( {
         type: String,
         required: true
     },
+    // Product category
+    category: {
+        type: String,
+        enum: ['Vegetables', 'Fruits', 'Grains', 'Dairy', 'Poultry', 'Other'],
+        default: 'Other'
+    },
+    // Product availability status
+    available: {
+        type: Boolean,
+        default: true
+    },
     likes: [
         {
             user: {

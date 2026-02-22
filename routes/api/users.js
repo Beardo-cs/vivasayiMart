@@ -36,16 +36,18 @@ router.post(
     [   // below checks are sec params of post router.
         check('name', 'Name is required')
         // returns elements that do not match a certain criteria.
-            .not()    
-        // It is used to check whether a list, array, string, object etc is empty or not.  
-            .isEmpty(), 
+            .not()
+        // It is used to check whether a list, array, string, object etc is empty or not.
+            .isEmpty(),
         check('email', 'Please include a valid email')
         //checking email whether it is in required format & valid one
-        .isEmail(),   
+        .isEmail(),
         check(
         'password','Please enter a password with 6 or more characters')
         //checking the length of the password
-            .isLength({ min: 6})    
+            .isLength({ min: 6}),
+        check('userType', 'User type is required (farmer or consumer)')
+            .isIn(['farmer', 'consumer'])
 ],
 async (req, res) => {      
     // set errors. It extracts the validation error from req and makes them available in a errors obj.
@@ -58,30 +60,31 @@ async (req, res) => {
     }
 
     //pulling name email & pw from req.body
-    const { name, email, password} = req.body;  
+    const { name, email, password, userType} = req.body;
 
     try {
     // see if user exists
     // to select data from collections in MongoDB findOne method is used.It makes the user to wait util the returns the result of the promise
-        let user= await User.findOne({ email}); 
+        let user= await User.findOne({ email});
 
         if (user) {
             return res.status (400).json({errors: [ { msg: 'User already exists'}]});
         }
 
     //Get users gravatar
-    const avatar = gravatar.url(email, {    
+    const avatar = gravatar.url(email, {
         s: '200',  // default size
         r: 'pg',   // rating
         d: 'mm'    //default (give default image)
     });
 
     //which is created above and set tat to new User
-    user = new User({  
+    user = new User({
         name,
         email,
         avatar,
-        password     //here pw is nmo hasded
+        password,     //here pw is nmo hasded
+        userType      // farmer or consumer
     });
 
     // Encrypt password
