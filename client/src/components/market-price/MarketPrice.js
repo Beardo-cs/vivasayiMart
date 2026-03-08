@@ -548,7 +548,7 @@ const MarketPrice = () => {
 
   return (
     <div className="container">
-      <div className="dashboard-header">
+      <div className="dashboard-header farmer-header">
         <div className="header-content">
           <h1 className="dashboard-title">📊 Market Price</h1>
           <p className="dashboard-subtitle">Check current market prices from data.gov.in</p>
