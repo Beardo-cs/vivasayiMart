@@ -6,9 +6,10 @@ import { Link, Navigate } from 'react-router-dom';
 import { setAlert } from '../../actions/alert';
 import { register } from '../../actions/auth';
 import PropTypes from 'prop-types';
+import Loader from '../layout/Loader';
 
 // instead of using props.setAlert we changed props to setAlert
-const Register = ({ setAlert, register, isAuthenticated, user  }) => {
+const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
   const  [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -34,6 +35,11 @@ const Register = ({ setAlert, register, isAuthenticated, user  }) => {
       register ({ name, email, password, userType});
     }
   };
+
+  // Show loader while registering
+  if(loading && !user) {
+    return <Loader message="Creating your account..." fullPage={true} />
+  }
 
   if (isAuthenticated && user) {
     if (user.userType === 'farmer') {
@@ -132,12 +138,14 @@ Register.propTypes = {
   setAlert: PropTypes.func.isRequired,
   register: PropTypes.func.isRequired,
   isAuthenticated: PropTypes.bool,
-  user: PropTypes.object
+  user: PropTypes.object,
+  loading: PropTypes.bool
 };
 
 const mapStateToProps = state=> ({
     isAuthenticated : state.auth.isAuthenticated,
-    user: state.auth.user
+    user: state.auth.user,
+    loading: state.auth.loading
 });
 
 export default connect(

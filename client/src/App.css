@@ -1,10 +1,32 @@
-/* Global Styles */
+/* Global Styles - Greenaries Theme */
 :root {
-  --primary-color: #6a9ada;
-  --dark-color: #6B911B;
-  --light-color: #f4f4f4;
-  --danger-color: #dc3545;
-  --success-color: #28a745;
+  /* Greenaries Color Palette */
+  --primary-color: #2d5016;        /* Deep Leaf Green */
+  --secondary-color: #7cb342;      /* Light Green */
+  --accent-color: #8bc34a;         /* Mint Green */
+  --dark-color: #1b3409;           /* Dark Forest Green */
+  --light-color: #f5f5dc;          /* Beige/Off-white */
+  --earth-color: #8b7355;          /* Warm Brown */
+  --danger-color: #d32f2f;         /* Red */
+  --success-color: #4caf50;        /* Green Success */
+  --warning-color: #ff9800;        /* Orange */
+  --info-color: #2196f3;           /* Blue */
+
+  /* Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fdf7;         /* Very light green tint */
+  --bg-card: #ffffff;
+
+  /* Text Colors */
+  --text-primary: #1b3409;
+  --text-secondary: #4a5f3a;
+  --text-light: #6b7c5e;
+
+  /* Border & Shadow */
+  --border-color: #d4e4c8;
+  --shadow-sm: 0 2px 8px rgba(45, 80, 22, 0.08);
+  --shadow-md: 0 4px 16px rgba(45, 80, 22, 0.12);
+  --shadow-lg: 0 8px 32px rgba(45, 80, 22, 0.16);
 }
 
 * {
@@ -17,8 +39,8 @@ body {
   font-family: 'Raleway', sans-serif;
   font-size: 1rem;
   line-height: 1.6;
-  background-color: #fff;
-  color: #333;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 a {
@@ -298,7 +320,7 @@ button {
   background: var(--light-color);
 }
 
-/* Navbar - Modern Design */
+/* Navbar - Greenaries Theme */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -308,10 +330,10 @@ button {
   z-index: 1000;
   width: 100%;
   top: 0;
-  border-bottom: none;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  background: var(--dark-color);
+  border-bottom: solid 2px var(--secondary-color);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%);
 }
 
 .navbar h1 {

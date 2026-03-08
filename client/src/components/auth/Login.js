@@ -4,9 +4,10 @@ import { Link, Navigate } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { login } from '../../actions/auth';
+import Loader from '../layout/Loader';
 
 //isAuthenticated is a props here
-const Login = ({ login, isAuthenticated, user }) => {
+const Login = ({ login, isAuthenticated, user, loading }) => {
   const  [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -24,6 +25,11 @@ const { email, password } = formData;
     login(email, password);
   };
 
+  // Show loader while authenticating
+  if(loading && !user) {
+    return <Loader message="Signing you in..." fullPage={true} />
+  }
+
   // Redirected if logged in based on user type
   if(isAuthenticated && user) {
     if (user.userType === 'farmer') {
@@ -34,7 +40,7 @@ const { email, password } = formData;
     return <Navigate to="/dashboard" />
   }
    return (
-     <Fragment> 
+     <Fragment>
       <h1 className="large text-primary">Sign in</h1>
       <p className="lead"><i className="fas fa-user"></i> Sign Into Your Account</p>
 
@@ -70,13 +76,15 @@ const { email, password } = formData;
 Login.propTypes = {
   login: PropTypes.func.isRequired,
   isAuthenticated:  PropTypes.bool,
-  user: PropTypes.object
+  user: PropTypes.object,
+  loading: PropTypes.bool
 };
 
 const mapStateToProps = state=> ({
   //we dont need all the things like authenticated loading type and all. we need only authenticated.
     isAuthenticated : state.auth.isAuthenticated,
-    user: state.auth.user
+    user: state.auth.user,
+    loading: state.auth.loading
 });
 
 export default connect(

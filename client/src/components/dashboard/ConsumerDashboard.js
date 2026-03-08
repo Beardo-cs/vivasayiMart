@@ -2,14 +2,14 @@ import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import Spinner from '../layout/Spinner';
+import Loader from '../layout/Loader';
 import './Dashboard.css';
 
 const ConsumerDashboard = ({
     auth: { user, loading }
 }) => {
     return loading ? (
-        <Spinner />
+        <Loader message="Loading your consumer dashboard..." fullPage={true} />
     ) : (
         <Fragment>
             <div className="dashboard-header consumer-header">

@@ -2,7 +2,7 @@ import React, { useEffect, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import Spinner from '../layout/Spinner';
+import Loader from '../layout/Loader';
 import DashboardActions from './DashboardActions';
 import './Dashboard.css';
 
@@ -11,7 +11,7 @@ const FarmerDashboard = ({
     profile: { profile, loading }
 }) => {
     return loading && profile === null ? (
-        <Spinner />
+        <Loader message="Loading your farmer dashboard..." fullPage={true} />
     ) : (
         <Fragment>
             <div className="dashboard-header farmer-header">

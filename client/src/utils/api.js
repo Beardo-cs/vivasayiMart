@@ -5,7 +5,7 @@ import axios from 'axios';
 // In development, use the local backend server
 const API_URL = process.env.NODE_ENV === 'production'
   ? '' // Empty string for relative URLs in production
-  : (process.env.REACT_APP_API_URL || 'http://192.168.0.103:4000');
+  : (process.env.REACT_APP_API_URL || 'http://localhost:4000');
 
 const api = axios.create({
   baseURL: API_URL,

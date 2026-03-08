@@ -12,14 +12,27 @@ connectDB();
 
 const allowedOrigins = [
     "http://localhost:3000",
-    "http://192.168.0.103:3000",
+    "http://127.0.0.1:3000",
+    "http://192.168.1.74:3000",
     "https://vivasayimart.vercel.app"
 ];
 
-// Enable CORS for all routes
+// Enable CORS for all routes with proper preflight handling
 app.use(cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps, curl, Postman)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
+    exposedHeaders: ['x-auth-token']
 }));
 //application level Middleware. req.body is populated when we use middleware called body parser such as express.json() or urlencoded()
 // it allows us to get data from user.js (req.body)
@@ -67,7 +80,7 @@ if (process.env.VERCEL !== '1') {
         console.log(`Server started on port ${PORT}`);
         console.log(`Server accessible at:`);
         console.log(`  - Local:   http://localhost:${PORT}`);
-        console.log(`  - Network: http://192.168.0.103:${PORT}`);
+        console.log(`  - Network: http://192.168.1.74:${PORT}`);
     });
 }
 

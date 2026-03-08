@@ -62,11 +62,19 @@
 }
 
 .farmer-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2d5016 0%, #7cb342 50%, #8bc34a 100%);
+    box-shadow:
+        0 24px 72px rgba(45, 80, 22, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+        0 8px 16px rgba(45, 80, 22, 0.15);
 }
 
 .consumer-header {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #558b2f 0%, #7cb342 50%, #9ccc65 100%);
+    box-shadow:
+        0 24px 72px rgba(85, 139, 47, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+        0 8px 16px rgba(85, 139, 47, 0.15);
 }
 
 .header-content {
@@ -134,7 +142,7 @@
     isolation: isolate;
 }
 
-/* Gradient overlay on hover */
+/* Gradient overlay on hover - Greenaries */
 .action-card::before {
     content: '';
     position: absolute;
@@ -142,7 +150,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, transparent 100%);
+    background: linear-gradient(135deg, rgba(124, 179, 66, 0.05) 0%, transparent 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
     z-index: 0;
@@ -160,24 +168,24 @@
 }
 
 .farmer-card:hover {
-    border-color: #667eea;
+    border-color: #7cb342;
     box-shadow:
-        0 12px 32px rgba(102, 126, 234, 0.25),
-        0 0 0 1px rgba(102, 126, 234, 0.15) inset;
+        0 12px 32px rgba(124, 179, 66, 0.3),
+        0 0 0 1px rgba(124, 179, 66, 0.2) inset;
 }
 
 .consumer-card:hover {
-    border-color: #4facfe;
+    border-color: #8bc34a;
     box-shadow:
-        0 12px 32px rgba(79, 172, 254, 0.25),
-        0 0 0 1px rgba(79, 172, 254, 0.15) inset;
+        0 12px 32px rgba(139, 195, 74, 0.3),
+        0 0 0 1px rgba(139, 195, 74, 0.2) inset;
 }
 
 .action-card.primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2d5016 0%, #7cb342 100%);
     color: white;
     box-shadow:
-        0 8px 24px rgba(102, 126, 234, 0.3),
+        0 8px 24px rgba(45, 80, 22, 0.35),
         0 0 0 1px rgba(255, 255, 255, 0.15) inset;
 }
 
@@ -187,7 +195,7 @@
 
 .action-card.primary:hover {
     box-shadow:
-        0 16px 40px rgba(102, 126, 234, 0.4),
+        0 16px 40px rgba(45, 80, 22, 0.45),
         0 0 0 1px rgba(255, 255, 255, 0.25) inset;
 }
 
