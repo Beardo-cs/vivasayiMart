@@ -2,13 +2,15 @@
 import React from 'react';
 
 // DOM-Document Object Modal, is a program interface for web documents
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 
 import App from './App';
 
-// To render the React element into root DOM node, we are passing both(element and root) to ReactDOM.render()
-ReactDOM.render(
- <App />,
-  document.getElementById('root')
+// React 18: Use createRoot instead of ReactDOM.render
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
 );
 

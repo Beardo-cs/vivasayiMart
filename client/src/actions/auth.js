@@ -51,10 +51,13 @@ export const register = ({ name, email, password, userType }) => async dispatch 
 
         dispatch(loadUser());
     } catch (err) {
-        const errors = err.response.data.errors;
+        const errors = err.response?.data?.errors;
 
         if (errors) {
             errors.forEach(error => dispatch (setAlert(error.msg, 'danger')));
+        } else {
+            // Handle network errors or server not responding
+            dispatch(setAlert('Server error. Please try again later.', 'danger'));
         }
         dispatch({
             type: REGISTER_FAIL
@@ -69,7 +72,7 @@ export const login = ( email, password ) => async dispatch => {
             'Content-Type': 'application/json'
         }
     }
-    
+
     const body = JSON.stringify ({ email, password });
 
     try {
@@ -83,10 +86,13 @@ export const login = ( email, password ) => async dispatch => {
 
         dispatch(loadUser());
     } catch (err) {
-        const errors = err.response.data.errors;
+        const errors = err.response?.data?.errors;
 
         if (errors) {
             errors.forEach(error => dispatch (setAlert(error.msg, 'danger')));
+        } else {
+            // Handle network errors or server not responding
+            dispatch(setAlert('Server error. Please try again later.', 'danger'));
         }
         dispatch({
             type: LOGIN_FAIL

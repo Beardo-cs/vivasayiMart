@@ -1,12 +1,13 @@
 /* Import base styles from farmer profile */
 @import '../farmer-profile/FarmerProfile.css';
 
-/* Consumer-specific header gradient - Premium */
+/* Consumer-specific header gradient - Modern */
 .consumer-header {
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
     box-shadow:
-        0 20px 60px rgba(79, 172, 254, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+        0 24px 72px rgba(79, 172, 254, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+        0 8px 16px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Consumer-specific title color */
@@ -14,19 +15,25 @@
     color: #4facfe !important;
 }
 
-/* Consumer primary button - Enhanced */
+/* Consumer-specific section title accent */
+.section-title::before {
+    background: linear-gradient(180deg, #4facfe, #00f2fe) !important;
+}
+
+/* Consumer primary button - Modern */
 .btn-consumer-primary {
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     color: white;
-    padding: 1.1rem 2.5rem;
-    border-radius: 16px;
-    font-weight: 700;
+    padding: 1.1rem 2.8rem;
+    border-radius: 14px;
+    font-weight: 600;
     box-shadow:
-        0 8px 24px rgba(79, 172, 254, 0.3),
+        0 4px 16px rgba(79, 172, 254, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    letter-spacing: 0.3px;
 }
 
 .btn-consumer-primary::before {
@@ -36,8 +43,8 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    transition: left 0.6s ease;
 }
 
 .btn-consumer-primary:hover::before {
@@ -45,27 +52,37 @@
 }
 
 .btn-consumer-primary:hover {
-    transform: translateY(-3px) scale(1.02);
+    transform: translateY(-2px);
     box-shadow:
-        0 12px 32px rgba(79, 172, 254, 0.5),
+        0 8px 24px rgba(79, 172, 254, 0.4),
         0 0 0 1px rgba(255, 255, 255, 0.2) inset;
 }
 
-/* Info Box - Premium Design */
+.btn-consumer-primary:active {
+    transform: translateY(0);
+}
+
+/* Focus visible for accessibility */
+.btn-consumer-primary:focus-visible {
+    outline: 3px solid #4facfe;
+    outline-offset: 3px;
+}
+
+/* Info Box - Modern Design */
 .info-box {
-    background: linear-gradient(135deg, rgba(79, 172, 254, 0.08) 0%, rgba(0, 242, 254, 0.05) 100%);
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(79, 172, 254, 0.2);
+    background: white;
+    border: 2px solid rgba(79, 172, 254, 0.15);
     border-radius: 24px;
     padding: 2.5rem;
     margin: 2.5rem 0;
     box-shadow:
-        0 8px 32px rgba(79, 172, 254, 0.15),
-        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+        0 4px 16px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(0, 0, 0, 0.04) inset;
     position: relative;
     overflow: hidden;
 }
 
+/* Top accent bar */
 .info-box::before {
     content: '';
     position: absolute;
@@ -77,10 +94,7 @@
 }
 
 .info-box h3 {
-    background: linear-gradient(135deg, #4facfe, #00f2fe);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #4facfe;
     margin-bottom: 1.5rem;
     font-size: 1.4rem;
     font-weight: 700;
@@ -96,7 +110,7 @@
 .info-box li {
     padding: 0.8rem 0;
     padding-left: 2rem;
-    color: #555;
+    color: #4a5568;
     font-size: 1rem;
     line-height: 1.6;
     position: relative;
