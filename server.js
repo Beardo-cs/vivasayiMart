@@ -59,10 +59,16 @@ if (process.env.NODE_ENV === 'production') {
 }
 //process.env.PORT will look at the Port variable to run the server on corres. port
 const PORT = process.env.PORT || 4000;
+const HOST = process.env.HOST || '0.0.0.0'; // Listen on all network interfaces
 
 // Only start the server if not in Vercel serverless environment
 if (process.env.VERCEL !== '1') {
-    app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+    app.listen(PORT, HOST, () => {
+        console.log(`Server started on port ${PORT}`);
+        console.log(`Server accessible at:`);
+        console.log(`  - Local:   http://localhost:${PORT}`);
+        console.log(`  - Network: http://192.168.0.103:${PORT}`);
+    });
 }
 
 // Export for Vercel serverless functions
