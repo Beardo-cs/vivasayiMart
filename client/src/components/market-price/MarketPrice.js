@@ -1,5 +1,7 @@
 import React, { useState, useRef, Fragment } from 'react';
 import { DATA_GOV_API_KEY } from '../../config';
+import Loader from '../layout/Loader';
+import '../dashboard/Dashboard.css';
 
 const MarketPrice = () => {
   // Cache for API responses to prevent redundant calls
@@ -539,12 +541,19 @@ const MarketPrice = () => {
     }
   };
 
+  // Show loader while fetching market price data
+  if (loading) {
+    return <Loader message="Fetching market price data..." fullPage={false} />;
+  }
+
   return (
     <div className="container">
-      <h1 className="large text-primary">Market Price API</h1>
-      <p className="lead">
-        <i className="fas fa-chart-line"></i> Fetch market price data from data.gov.in
-      </p>
+      <div className="dashboard-header">
+        <div className="header-content">
+          <h1 className="dashboard-title">📊 Market Price</h1>
+          <p className="dashboard-subtitle">Check current market prices from data.gov.in</p>
+        </div>
+      </div>
 
       <form className="form" onSubmit={onSubmit}>
         <div className="form-group">

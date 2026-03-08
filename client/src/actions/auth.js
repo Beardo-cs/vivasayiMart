@@ -8,6 +8,7 @@ import {
     LOGIN_SUCCESS,
     LOGIN_FAIL,
     LOGOUT,
+    LOGOUT_START,
     CLEAR_PROFILE
 } from './types';
 import setAuthToken from '../utils/setAuthToken';
@@ -49,7 +50,13 @@ export const register = ({ name, email, password, userType }) => async dispatch 
             payload: res.data
         });
 
-        dispatch(loadUser());
+        // Load user data after successful registration
+        await dispatch(loadUser());
+
+        // Small delay to show success state before redirect
+        setTimeout(() => {
+            // The redirect will be handled by the Register component
+        }, 500);
     } catch (err) {
         const errors = err.response?.data?.errors;
 
@@ -84,7 +91,13 @@ export const login = ( email, password ) => async dispatch => {
             payload: res.data
         });
 
-        dispatch(loadUser());
+        // Load user data after successful login
+        await dispatch(loadUser());
+
+        // Small delay to show success state before redirect
+        setTimeout(() => {
+            // The redirect will be handled by the Login component
+        }, 500);
     } catch (err) {
         const errors = err.response?.data?.errors;
 
@@ -102,6 +115,15 @@ export const login = ( email, password ) => async dispatch => {
 
 // Logout / Clear Profile
 export const logout = () => dispatch => {
-    dispatch ({ type: LOGOUT});
-    dispatch ({ type: CLEAR_PROFILE});
+    // Dispatch logout start to show loader
+    dispatch ({ type: LOGOUT_START });
+
+    // Small delay to show the loader animation
+    setTimeout(() => {
+        dispatch ({ type: LOGOUT });
+        dispatch ({ type: CLEAR_PROFILE });
+
+        // Reload the page after logout to ensure clean state
+        window.location.href = '/';
+    }, 1000);
 };

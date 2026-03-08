@@ -1,9 +1,8 @@
-import React, { useEffect, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Loader from '../layout/Loader';
-import DashboardActions from './DashboardActions';
 import './Dashboard.css';
 
 const FarmerDashboard = ({

@@ -4,8 +4,14 @@ import { Link} from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { logout } from '../../actions/auth';
+import Loader from './Loader';
 
 const Navbar = ({  auth: { isAuthenticated, loading, user }, logout }) => {
+  // Show loader during logout
+  if (loading && !isAuthenticated && !user) {
+    return <Loader message="Logging you out..." fullPage={true} />;
+  }
+
   // Farmer Links
   const farmerLinks = (
     <ul>
