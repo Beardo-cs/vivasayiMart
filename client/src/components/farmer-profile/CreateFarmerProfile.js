@@ -30,11 +30,7 @@ const CreateFarmerProfile = ({ setAlert }) => {
         farmingSpecializations,
         yearsOfExperience,
         farmSize,
-        certifications,
-        profileImage,
-        facebook,
-        instagram,
-        whatsapp
+        profileImage
     } = formData;
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });

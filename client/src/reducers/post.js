@@ -16,7 +16,7 @@ const initialState = {
     error: {}
 }
 
-function postReducer(state = initialState, action) {
+export default function postReducer(state = initialState, action) {
     const {type, payload} =action;
 
     switch (type) {
@@ -79,5 +79,3 @@ function postReducer(state = initialState, action) {
                 return state;
     }
 }
-
-export default postReducer;
