@@ -99,3 +99,6 @@ Thumbs.db
 *.pid.lock
 .vercel
 .env*
+
+# Brainstorming visual companion (mockups and session keys)
+.superpowers/
