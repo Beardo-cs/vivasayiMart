@@ -645,6 +645,7 @@ button {
   /* the tab bar replaces the main top links; logo, language, admin and logout stay on top */
   .navbar .nav-main { display: none; }
   .container { padding-bottom: 5.5rem; }
+  :root { --banner-bottom: 4.2rem; }               /* sit above the bottom tab bar */
 
   .bottom-nav {
     display: flex;
@@ -854,15 +855,23 @@ a { text-underline-offset: 3px; }
 .status-banner.acting {
   z-index: 970;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem 0.9rem;
+  gap: 0.75rem;
+  padding: 0.45rem 0.9rem;
+  text-align: left;
+  line-height: 1.3;
   background: #5c3d00;
   color: #fff;
   border-top: 3px solid #f0b400;
 }
-.status-banner.acting .btn { margin: 0; padding: 0.3rem 1.1rem; min-height: 36px; }
+.status-banner.acting small { display: block; font-size: 0.78rem; font-weight: 400; opacity: 0.85; }
+.status-banner.acting .btn { flex-shrink: 0; margin: 0; padding: 0.3rem 1rem; min-height: 36px; }
+/* the banner is fixed, so pages need room to scroll their last buttons above it */
+body.is-acting .container { padding-bottom: 5rem; }
+@media (max-width: 900px) {
+  body.is-acting .container { padding-bottom: 10.5rem; }
+}
 
 /* ---- Top bar: calmer, bigger targets ---- */
 .navbar { padding: 0.7rem 1.5rem; }
@@ -899,7 +908,6 @@ a { text-underline-offset: 3px; }
   .navbar { padding: 0.6rem 1rem; }
   .navbar h1 { margin-bottom: 0.4rem; }
   .toast-stack { top: 6.4rem; }
-  :root { --banner-bottom: 4.2rem; }               /* sit above the bottom tab bar */
   .btn { width: auto; }
   .wizard-actions .btn, .order-actions .btn { flex: 1 1 auto; }
   .legal { padding: 1.1rem; border-radius: var(--radius-sm); }
@@ -1132,5 +1140,7 @@ a { text-underline-offset: 3px; }
   cursor: help;
 }
 .badge-list { list-style: none; padding: 0; margin: 0.5rem 0; }
+/* phones hide lists inside .profile (700px rules); the badges must stay */
+.profile .badge-list { display: block; }
 .badge-list li { display: flex; flex-direction: column; margin: 0.4rem 0; }
 .badge-list li span { color: #5a6b4a; font-size: 0.9rem; }

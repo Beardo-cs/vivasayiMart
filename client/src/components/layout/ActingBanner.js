@@ -15,12 +15,16 @@ const ActingBanner = () => {
 
   useEffect(() => {
     if (!until) return undefined;
+    document.body.classList.add('is-acting');
     const timer = setTimeout(async () => {
       await dispatch(stopActing());
       dispatch(setAlert(t('acting.ended'), 'success'));
       navigate('/admin');
     }, Math.max(until - Date.now(), 0));
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      document.body.classList.remove('is-acting');
+    };
   }, [until, dispatch, navigate, t]);
 
   if (!until) return null;
@@ -32,7 +36,10 @@ const ActingBanner = () => {
 
   return (
     <div className='status-banner acting' role='status'>
-      <span>🧑‍🌾 {t('acting.banner', { name: user.name })}</span>
+      <span>
+        🧑‍🌾 {t('acting.banner', { name: user.name })}
+        <small>{t('acting.saved')}</small>
+      </span>
       <button type='button' className='btn btn-light' onClick={stop}>{t('acting.stop')}</button>
     </div>
   );

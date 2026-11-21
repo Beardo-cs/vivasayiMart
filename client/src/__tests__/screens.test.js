@@ -208,12 +208,15 @@ describe('Acting for a farmer', () => {
     renderAt(<><ActingBanner /><Where /></>, { user, path: '/dashboard' });
 
     expect(screen.getByText(/Acting for Farmer Fay/)).toBeInTheDocument();
+    expect(screen.getByText('Changes are saved under your name')).toBeInTheDocument();
+    expect(document.body).toHaveClass('is-acting');  // pages make room for the fixed banner
     fireEvent.click(screen.getByRole('button', { name: 'Stop' }));
     await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/admin'));
     expect(api.post).toHaveBeenCalledWith('/api/auth/stop-acting');
     expect(localStorage.getItem('token')).toBe('admin-token');
     expect(localStorage.getItem('adminToken')).toBeNull();
     expect(screen.queryByText(/Acting for/)).not.toBeInTheDocument();  // back as the admin
+    expect(document.body).not.toHaveClass('is-acting');
   });
 
   test('no banner in your own account', () => {
