@@ -176,10 +176,6 @@ const Navbar = ({  auth: { isAuthenticated, loading, user }, cartCount, logout, 
 
   const guestLinks = (
     <ul>
-          <li className="nav-secondary"><Link to="/farmers">
-            <i className="fas fa-users"></i>{' '}
-            <span className="hide-sm">{t('nav.farmers')}</span>
-          </Link></li>
           <li className="nav-secondary"><Link to="/market-price">
             <i className="fas fa-chart-line"></i>{' '}
             <span className="hide-sm">{t('nav.marketPrice')}</span>
