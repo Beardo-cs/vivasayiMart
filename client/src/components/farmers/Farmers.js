@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import Loader from '../layout/Loader';
 import PageHeader from '../layout/PageHeader';
 import { getFarmers } from '../../actions/profile';
+import Badges from './Badges';
 import '../posts/Posts.css';
 
 export const Stars = ({ rating }) => {
@@ -38,7 +39,7 @@ const Farmers = ({ getFarmers, profile: { profiles, loading } }) => {
             <div>
               <h4 className='text-primary'>
                 {p.farmName}
-                {p.user.farmerVerified && <small title={t('product.verified')} style={{ color: '#1e88e5' }}> ✔</small>}
+                {' '}<Badges badges={p.user.badges} compact />
               </h4>
               <p><strong>{p.user.name}</strong> · {p.location}</p>
               <p><Stars rating={p.rating} /></p>

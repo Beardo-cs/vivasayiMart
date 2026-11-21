@@ -604,3 +604,7 @@
     }
 }
 
+
+/* Self-signup farmers: waiting for approval, or why they were declined */
+.approval-note { margin: 1rem 0; background: #fff8e1; border-color: #f0d98a; font-weight: 600; }
+.approval-note.declined { background: #fdecea; border-color: #f5c2c7; }

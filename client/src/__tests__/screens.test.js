@@ -64,6 +64,12 @@ describe('PostItem', () => {
     address: 'Salem', comments: [], date: new Date().toISOString(), bulkPricing: []
   };
 
+  test('badges show the checks our team did, compactly next to the farmer', () => {
+    renderAt(<PostItem post={{ ...post, farmerBadges: [{ type: 'phone' }, { type: 'visit', visitedOn: '2026-11-20' }] }} />, { user: BUYER });
+    expect(screen.getByRole('img', { name: 'Phone verified' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Farm visited' })).toBeInTheDocument();
+  });
+
   test('buyer sees price + stock first, details on demand, and no phone number', () => {
     renderAt(<PostItem post={post} />, { user: BUYER });
     expect(screen.getByText('₹20')).toBeInTheDocument();
@@ -268,5 +274,25 @@ describe('Admin console', () => {
     expect(localStorage.getItem('adminToken')).toBe('admin-token');
     expect(localStorage.getItem('token')).toBe('acting-token');
     localStorage.clear();
+  });
+});
+
+describe('Badges on the farmer page', () => {
+  const Badges = require('../components/farmers/Badges').default;
+
+  test('each badge says what was checked and when, in the chosen language', async () => {
+    const badges = [{ type: 'phone', at: '2026-11-18T10:00:00Z' }, { type: 'visit', visitedOn: '2026-11-20T00:00:00Z' }, { type: 'unknown' }];
+    renderAt(<Badges badges={badges} />);
+    expect(screen.getByText(/Our team called this number and the farmer answered/)).toBeInTheDocument();
+    expect(screen.getByText(/visited this farm on 20 Nov 2026/)).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem')).toHaveLength(2);              // unknown kinds are not shown
+
+    await setLanguage('ta');
+    expect(await screen.findByText(/பண்ணை பார்வையிடப்பட்டது/)).toBeInTheDocument();
+  });
+
+  test('no badges, nothing shown', () => {
+    const { container } = renderAt(<Badges badges={[]} />);
+    expect(container).toBeEmptyDOMElement();
   });
 });

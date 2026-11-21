@@ -8,6 +8,7 @@ import { deletePost, updatePost } from '../../actions/post';
 import EditPostPanel from './EditPostPanel';
 import OrderPanel from './OrderPanel';
 import ReportPanel from './ReportPanel';
+import Badges from '../farmers/Badges';
 import api from '../../utils/api';
 import { useTranslation } from 'react-i18next';
 import './PostItem.css';
@@ -48,7 +49,7 @@ const PostItem = ({
       <div className="farmer-details">
         <h4 className="farmer-name">
           {farmerName || name}
-          {post.farmerVerified && <small title={t('product.verified')} style={{marginLeft: 6, color: '#1e88e5'}}>✔</small>}
+          <Badges badges={post.farmerBadges} compact />
           {rating && rating.count > 0 && (
             <small title={t('farmerPage.reviews', { count: rating.count })} style={{marginLeft: 6, color: '#f9a825'}}>
               ★ {rating.average} ({rating.count})

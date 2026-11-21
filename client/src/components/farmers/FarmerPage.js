@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 import Loader from '../layout/Loader';
 import { Stars } from './Farmers';
+import Badges from './Badges';
 import PageHeader from '../layout/PageHeader';
 import { setAlert } from '../../actions/alert';
 import { PUBLIC_SITE, isNative, shareLink } from '../../utils/native';
@@ -67,7 +68,7 @@ const FarmerPage = ({ isAuthenticated, setAlert }) => {
 
       <PageHeader
         icon="🌾"
-        title={<>{(profile && profile.farmName) || farmer.name}{farmer.verified && <small title={t('product.verified')} style={{ marginLeft: 6 }}>✔</small>}</>}
+        title={(profile && profile.farmName) || farmer.name}
         subtitle={`${farmer.name}${profile && profile.location ? ` · ${profile.location}` : ''}`}
       />
 
@@ -75,7 +76,7 @@ const FarmerPage = ({ isAuthenticated, setAlert }) => {
         <img src={farmer.avatar} alt='' className='round-img' />
         <div>
           <p><Stars rating={rating} /></p>
-          {farmer.verified && <p style={{ color: '#1e88e5' }}>✔ {t('product.verified')}</p>}
+          <Badges badges={farmer.badges} />
           <div className='order-actions'>
             <a className='btn btn-primary' href={whatsappShare} target='_blank' rel='noopener noreferrer'>
               <i className='fab fa-whatsapp'></i> {t('farmerPage.share')}

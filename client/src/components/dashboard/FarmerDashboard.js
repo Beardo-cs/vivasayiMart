@@ -25,6 +25,13 @@ const FarmerDashboard = ({ auth: { user }, profile: { profile, loading }, getCur
         <Fragment>
             <PageHeader icon="🌾" title={t('dashboard.farmerTitle')} subtitle={t('dashboard.welcome', { name: user && user.name })} />
 
+            {user && user.approval && user.approval.status === 'pending' && (
+                <div className="order-card approval-note" role="status">⏳ {t('approval.pending')}</div>
+            )}
+            {user && user.approval && user.approval.status === 'declined' && (
+                <div className="order-card approval-note declined" role="status">{t('approval.declined', { reason: user.approval.note })}</div>
+            )}
+
             {(() => {
                 const steps = [
                     { done: profile !== null, label: t('dashboard.todoProfile'), to: '/create-farmer-profile' },
