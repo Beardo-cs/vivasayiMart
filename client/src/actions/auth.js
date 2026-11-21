@@ -14,6 +14,7 @@ import {
 } from './types';
 import setAuthToken from '../utils/setAuthToken';
 import { clearApiCache } from '../utils/offline';
+import { ADMIN_TOKEN_KEY } from '../utils/actingSession';
 import i18n from '../i18n';
 
 // Load user
@@ -29,8 +30,19 @@ export const loadUser = () => async dispatch => {
          payload: res.data
      });
 } catch (err) {
-    // Only a server "no" (bad/expired token) logs the user out. Being offline must not.
     const status = err.response?.status;
+    const adminToken = localStorage.getItem(ADMIN_TOKEN_KEY);
+    if (status === 401 && adminToken) {
+        // the hour of acting for a farmer ran out: back to the admin's own account
+        localStorage.removeItem(ADMIN_TOKEN_KEY);
+        localStorage.setItem('token', adminToken);
+        setAuthToken(adminToken);
+        await clearApiCache();
+        dispatch({ type: CLEAR_PROFILE });
+        dispatch(setAlert(i18n.t('acting.ended'), 'success'));
+        return dispatch(loadUser());
+    }
+    // Only a server "no" (bad/expired token) logs the user out. Being offline must not.
     dispatch({ type: status === 401 || status === 404 ? AUTH_ERROR : AUTH_NETWORK_ERROR });
  }
 };
@@ -121,6 +133,7 @@ export const login = ( email, password ) => async dispatch => {
 // Logout / Clear Profile
 export const logout = () => dispatch => {
     clearApiCache();
+    localStorage.removeItem(ADMIN_TOKEN_KEY);
     // Dispatch logout start to show loader
     dispatch ({ type: LOGOUT_START });
 

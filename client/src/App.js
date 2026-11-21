@@ -5,6 +5,7 @@ import Landing from './components/layout/Landing';
 import Routes from './components/routing/Routes';
 import Loader from './components/layout/Loader';
 import OfflineBanner from './components/layout/OfflineBanner';
+import ActingBanner from './components/layout/ActingBanner';
 import BottomNav from './components/layout/BottomNav';
 import Footer from './components/layout/Footer';
 
@@ -47,6 +48,7 @@ const AppContent = () => {
             <Fragment>
                 <OfflineBanner />
                 <Navbar />
+                <ActingBanner />
                 <RouterRoutes>
                     <Route exact path='/' element={<Landing />} />
                     <Route path='/*' element={<Routes />} />

@@ -184,6 +184,11 @@
   "offline": {
     "banner": "You are offline. Showing saved information; ordering needs a connection."
   },
+  "acting": {
+    "banner": "Acting for {{name}} · everything you do is saved with your name",
+    "stop": "Stop",
+    "ended": "Your time acting for the farmer ended. You're back in your own account."
+  },
   "register": {
     "title": "Sign Up",
     "subtitle": "Create Your Account",

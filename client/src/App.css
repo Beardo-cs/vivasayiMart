@@ -850,6 +850,19 @@ a { text-underline-offset: 3px; }
 }
 .status-banner.offline { background: #fff3cd; color: #664d03; border-top: 1px solid #f0d98a; z-index: 960; }
 .status-banner.verify { background: #e8f3dc; color: var(--primary-color); border-top: 1px solid var(--border-color); }
+/* above the offline bar: acting for a farmer must never be hidden */
+.status-banner.acting {
+  z-index: 970;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem 0.9rem;
+  background: #5c3d00;
+  color: #fff;
+  border-top: 3px solid #f0b400;
+}
+.status-banner.acting .btn { margin: 0; padding: 0.3rem 1.1rem; min-height: 36px; }
 
 /* ---- Top bar: calmer, bigger targets ---- */
 .navbar { padding: 0.7rem 1.5rem; }

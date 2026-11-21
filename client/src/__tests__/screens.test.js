@@ -11,7 +11,7 @@ jest.mock('uuid', () => ({ v4: () => 'test-id' })); // uuid ships ESM only, whic
 
 jest.mock('../utils/api', () => ({
   __esModule: true,
-  default: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() }
+  default: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn(), defaults: { headers: { common: {} } } }
 }));
 const api = require('../utils/api').default;
 
@@ -188,3 +188,30 @@ describe('Return to the page you were on after login', () => {
 });
 
 afterAll(() => i18n.changeLanguage('en'));
+
+describe('Acting for a farmer', () => {
+  const ActingBanner = require('../components/layout/ActingBanner').default;
+  afterEach(() => localStorage.clear());
+
+  test('the banner names the farmer, and Stop goes back to your own account and the console', async () => {
+    localStorage.setItem('token', 'acting-token');
+    localStorage.setItem('adminToken', 'admin-token');
+    api.post.mockResolvedValue({ data: {} });
+    api.get.mockResolvedValue({ data: { _id: 'a1', name: 'Founder', isAdmin: true } });
+    const user = { ...FARMER, acting: { by: 'Founder', until: Date.now() + 60 * 60 * 1000 } };
+    renderAt(<><ActingBanner /><Where /></>, { user, path: '/dashboard' });
+
+    expect(screen.getByText(/Acting for Farmer Fay/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Stop' }));
+    await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/admin'));
+    expect(api.post).toHaveBeenCalledWith('/api/auth/stop-acting');
+    expect(localStorage.getItem('token')).toBe('admin-token');
+    expect(localStorage.getItem('adminToken')).toBeNull();
+    expect(screen.queryByText(/Acting for/)).not.toBeInTheDocument();  // back as the admin
+  });
+
+  test('no banner in your own account', () => {
+    renderAt(<ActingBanner />, { user: FARMER });
+    expect(screen.queryByText(/Acting for/)).not.toBeInTheDocument();
+  });
+});
