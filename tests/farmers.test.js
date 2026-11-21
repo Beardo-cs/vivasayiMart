@@ -13,6 +13,7 @@ const User = require('../models/User');
 const Post = require('../models/Post');
 const Order = require('../models/Order');
 const FarmerProfile = require('../models/FarmerProfile');
+const Activity = require('../models/Activity');
 require('../models/Review');
 require('../models/Favorite');
 
@@ -37,6 +38,11 @@ const listing = (ownerId, overrides = {}) =>
 const browse = user => request(app).get('/api/posts').set(as(user));
 const order = (user, postId) => request(app).post('/api/orders').set(as(user)).send({ postId, quantity: 1 });
 
+const addFarmer = (fields = {}) => request(app).post('/api/admin/farmers').set(as(boss)).send({
+    name: 'Murugan', mobileNumber: '98765 43210', location: 'Melur', farmName: 'Murugan Thottam',
+    farmingSpecializations: ['Vegetables'], ...fields
+});
+
 before(async () => {
     mongod = await MongoMemoryServer.create();
     await mongoose.connect(mongod.getUri());
@@ -57,7 +63,7 @@ after(async () => {
 
 beforeEach(async () => {
     process.env.ADMIN_EMAILS = 'boss@test.com';
-    await Promise.all([User, Post, Order, FarmerProfile].map(m => m.deleteMany({})));
+    await Promise.all([User, Post, Order, FarmerProfile, Activity].map(m => m.deleteMany({})));
     boss = await makeUser('boss', { userType: 'consumer' });
     buyer = await makeUser('buyer', { userType: 'consumer' });
 });
@@ -130,4 +136,97 @@ test('test farmers are seen only by test accounts and admins', async () => {
     assert.equal((await browse(tester)).body.total, 1);
     assert.equal((await browse(boss)).body.total, 1);
     assert.equal((await order(tester, post.id)).status, 200);
+});
+
+test('admin adds a farmer who has no smartphone', async () => {
+    const res = await addFarmer({ phoneVerified: true, visitedOn: '2026-11-20' });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.managed, true);
+    assert.equal(res.body.email, null);                                     // no real email to show
+    assert.equal(res.body.approval.status, 'approved');
+    assert.deepEqual(res.body.badges.map(b => b.type).sort(), ['phone', 'visit']);
+
+    const saved = await User.findById(res.body._id);
+    assert.match(saved.email, /^farmer-[0-9a-f]{24}@managed\.invalid$/);
+    assert.equal((await FarmerProfile.findOne({ user: saved._id })).mobileNumber, '9876543210');
+    assert.equal((await Activity.findOne({ account: saved._id, action: 'farmer.create' })).actor.toString(), boss.id);
+    assert.equal((await browse(buyer)).body.total, 0);                      // no listings yet, but visible:
+    assert.equal((await request(app).get(`/api/farmer-profile/${saved.id}/public`)).status, 200);
+
+    assert.equal((await addFarmer({ mobileNumber: '12345' })).status, 400);
+    assert.equal((await addFarmer({ farmingSpecializations: [] })).status, 400);
+    assert.equal((await request(app).post('/api/admin/farmers').set(as(buyer)).send({})).status, 403);
+});
+
+test('approving and declining records who, when and why', async () => {
+    const kumar = await makeFarmer('kumar', { approval: { status: 'pending' } });
+    const attention = await request(app).get('/api/admin/attention').set(as(boss));
+    assert.deepEqual(attention.body.pendingFarmers.map(f => f.name), ['kumar']);
+    assert.deepEqual((await request(app).get('/api/admin/farmers?status=pending').set(as(boss))).body.map(f => f.name), ['kumar']);
+
+    const decide = body => request(app).put(`/api/admin/farmers/${kumar.id}/approval`).set(as(boss)).send(body);
+    assert.equal((await decide({ status: 'declined' })).status, 400);       // declining needs a reason
+    assert.equal((await decide({ status: 'maybe' })).status, 400);
+    const ok = await decide({ status: 'approved', note: 'Called, grows brinjal in Melur' });
+    assert.equal(ok.status, 200);
+    assert.equal(ok.body.approval.status, 'approved');
+
+    const saved = await User.findById(kumar._id);
+    assert.equal(saved.approval.status, 'approved');
+    assert.equal(saved.approval.by.toString(), boss.id);
+    assert.ok(saved.approval.at instanceof Date);
+    assert.equal(saved.approval.note, 'Called, grows brinjal in Melur');
+    assert.ok(await Activity.findOne({ account: kumar._id, action: 'farmer.approve' }));
+    assert.equal((await request(app).get('/api/admin/attention').set(as(boss))).body.pendingFarmers.length, 0);
+
+    const declined = await decide({ status: 'declined', note: 'Not a farmer' });
+    assert.equal(declined.status, 200);
+    assert.ok(await Activity.findOne({ account: kumar._id, action: 'farmer.decline', 'details.note': 'Not a farmer' }));
+});
+
+test('badges show on listings and farmer pages without saying who added them', async () => {
+    const f = await makeFarmer('f');
+    await listing(f._id);
+    await FarmerProfile.create({ user: f._id, farmName: 'F Farm', location: 'Salem', mobileNumber: '9876543210', farmingSpecializations: ['Rice'] });
+    const setBadge = body => request(app).put(`/api/admin/farmers/${f.id}/badges`).set(as(boss)).send(body);
+    assert.equal((await setBadge({ type: 'visit', on: true })).status, 400); // a visit needs its date
+    assert.equal((await setBadge({ type: 'gold', on: true })).status, 400);
+    assert.equal((await setBadge({ type: 'phone', on: true })).status, 200);
+    assert.equal((await setBadge({ type: 'visit', on: true, visitedOn: '2026-11-19' })).status, 200);
+
+    const card = (await browse(buyer)).body.posts[0];
+    assert.deepEqual(card.farmerBadges.map(b => b.type), ['phone', 'visit']);
+    assert.equal(card.farmerBadges[0].by, undefined);
+    assert.equal(card.farmerVerified, undefined);
+
+    const page = await request(app).get(`/api/farmer-profile/${f.id}/public`);
+    assert.deepEqual(page.body.farmer.badges.map(b => b.type), ['phone', 'visit']);
+    assert.equal(page.body.farmer.badges[1].by, undefined);
+    const directory = await request(app).get('/api/farmer-profile');
+    assert.deepEqual(directory.body[0].user.badges.map(b => b.type), ['phone', 'visit']);
+    assert.equal(directory.body[0].user.badges[0].by, undefined);
+
+    assert.equal((await setBadge({ type: 'phone', on: false })).status, 200);
+    assert.deepEqual((await browse(buyer)).body.posts[0].farmerBadges.map(b => b.type), ['visit']);
+    assert.equal(await Activity.countDocuments({ account: f._id, action: 'badge.add' }), 2);
+    assert.equal(await Activity.countDocuments({ account: f._id, action: 'badge.remove' }), 1);
+});
+
+test('admin finds any account and marks test accounts', async () => {
+    const found = await request(app).get('/api/admin/users?q=buyer').set(as(boss));
+    assert.deepEqual(found.body.map(u => u.name), ['buyer']);
+    assert.equal(found.body[0].email, 'buyer@test.com');
+
+    const res = await request(app).put(`/api/admin/users/${buyer.id}/test`).set(as(boss)).send({ isTest: true });
+    assert.equal(res.status, 200);
+    assert.equal((await User.findById(buyer._id)).isTest, true);
+    assert.ok(await Activity.findOne({ account: buyer._id, action: 'account.test' }));
+
+    await request(app).put(`/api/admin/users/${buyer.id}/test`).set(as(boss)).send({ isTest: false });
+    assert.equal((await User.findById(buyer._id)).isTest, undefined);
+
+    const log = await request(app).get(`/api/admin/activity?account=${buyer.id}`).set(as(boss));
+    assert.equal(log.body.length, 2);
+    assert.equal(log.body[0].actor.name, 'boss');
+    assert.equal(log.body[0].account.name, 'buyer');
 });

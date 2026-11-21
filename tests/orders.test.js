@@ -318,7 +318,7 @@ test('cart checkout: one order per product, all-or-nothing validation', async ()
     assert.equal((await request(app).post('/api/orders/checkout').set(as(farmer)).send({ items: [{ postId: b.id, quantity: 1 }] })).status, 403);
 });
 
-test('admin: moderation and farmer verification', async () => {
+test('admin: moderation', async () => {
     const admin = await makeUser('boss', 'consumer');
     process.env.ADMIN_EMAILS = 'boss@test.com';
     const post = await makePost();
@@ -342,12 +342,9 @@ test('admin: moderation and farmer verification', async () => {
     assert.equal((await request(app).get(`/api/posts/${post.id}`).set(as(buyer))).status, 404);
     assert.equal((await request(app).get(`/api/posts/${post.id}`).set(as(admin))).status, 200);
 
-    // restore, then verify farmer -> badge on listing
+    // restore: back in search for buyers
     await request(app).put(`/api/admin/posts/${post.id}/hidden`).set(as(admin)).send({ hidden: false });
-    assert.equal((await request(app).get('/api/posts').set(as(buyer))).body.posts[0].farmerVerified, false);
-    assert.equal((await request(app).put(`/api/admin/farmers/${farmer.id}/verify`).set(as(buyer)).send({ verified: true })).status, 403);
-    assert.equal((await request(app).put(`/api/admin/farmers/${farmer.id}/verify`).set(as(admin)).send({ verified: true })).status, 200);
-    assert.equal((await request(app).get('/api/posts').set(as(buyer))).body.posts[0].farmerVerified, true);
+    assert.equal((await request(app).get('/api/posts').set(as(buyer))).body.total, 1);
     assert.equal((await request(app).get('/api/admin/farmers?q=farmer2').set(as(admin))).body.length, 1);
     delete process.env.ADMIN_EMAILS;
 });
@@ -437,11 +434,11 @@ test('public farmer page: no login, no phone numbers, only in-stock visible list
     await makePost({ productName: 'Rice' });
     await makePost({ productName: 'SoldOut', quantityAvailable: 0, available: false });
     await makePost({ productName: 'Hidden', hidden: true });
-    await User.updateOne({ _id: farmer._id }, { farmerVerified: true });
+    await User.updateOne({ _id: farmer._id }, { badges: [{ type: 'phone' }] });
 
     const res = await request(app).get(`/api/farmer-profile/${farmer.id}/public`); // no auth header
     assert.equal(res.status, 200);
-    assert.equal(res.body.farmer.verified, true);
+    assert.deepEqual(res.body.farmer.badges.map(b => b.type), ['phone']);
     assert.equal(res.body.profile.farmName, 'Green Farm');
     assert.deepEqual(res.body.products.map(p => p.productName), ['Rice']);
     const text = JSON.stringify(res.body);
@@ -453,7 +450,7 @@ test('public farmer page: no login, no phone numbers, only in-stock visible list
     assert.equal((await request(app).get('/api/farmer-profile/nope/public')).status, 404);
 
     const list = await request(app).get('/api/farmer-profile');
-    assert.equal(list.body[0].user.farmerVerified, true);
+    assert.deepEqual(list.body[0].user.badges.map(b => b.type), ['phone']);
     const single = await request(app).get(`/api/farmer-profile/${farmer.id}`);
     assert.equal(JSON.stringify(single.body).includes('9999999999'), false);
 });

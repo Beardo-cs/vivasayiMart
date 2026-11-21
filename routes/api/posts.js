@@ -11,6 +11,7 @@ const Review = require('../../models/Review');
 const { normalizeTiers } = require('../../utils/pricing');
 const Favorite = require('../../models/Favorite');
 const { visibleFarmerIds, canSee } = require('../../services/visibility');
+const { publicBadges } = require('../../utils/badges');
 
 // Phone numbers are shared only after an order is confirmed (see routes/api/orders.js),
 // so listings never expose them to anyone except the farmer who owns the listing.
@@ -188,14 +189,13 @@ router.get('/', auth, async(req, res) => {
         const ratingByFarmer = {};
         ratings.forEach(r => { ratingByFarmer[r._id.toString()] = { average: Math.round(r.average * 10) / 10, count: r.count }; });
 
-        const verifiedFarmers = farmerIds.length
-            ? await User.find({ _id: { $in: farmerIds }, farmerVerified: true }).select('_id')
-            : [];
-        const verifiedSet = new Set(verifiedFarmers.map(u => u.id));
+        const badgeOwners = farmerIds.length ? await User.find({ _id: { $in: farmerIds } }).select('badges') : [];
+        const badgesOf = {};
+        badgeOwners.forEach(u => { badgesOf[u.id] = publicBadges(u.badges); });
 
         const result = posts.map(p => ({
             ...lightenImage(hideContact(p, req.user.id)),
-            farmerVerified: !!(p.user && verifiedSet.has(p.user.toString())),
+            farmerBadges: (p.user && badgesOf[p.user.toString()]) || [],
             isFavorite: favoriteIds.has(p.id),
             farmerRating: (p.user && ratingByFarmer[p.user.toString()]) || { average: 0, count: 0 }
         }));

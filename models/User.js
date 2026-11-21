@@ -34,10 +34,6 @@ const UserSchema = new mongoose.Schema( {
         enum: ['farmer', 'consumer'],
         required: true
     },
-    // Set by an admin after checking a farmer; shown as a badge on their listings
-    farmerVerified: {
-        type: Boolean
-    },
     // Admins are also granted via the ADMIN_EMAILS env var (see middleware/checkRole.js)
     isAdmin: {
         type: Boolean

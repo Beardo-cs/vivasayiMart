@@ -10,6 +10,7 @@ const Post = require('../../models/Post');
 const Review = require('../../models/Review');
 const mongoose = require('mongoose');
 const { visibleFarmerIds, canSee } = require('../../services/visibility');
+const { publicBadges } = require('../../utils/badges');
 
 const isObjectId = id => /^[0-9a-fA-F]{24}$/.test(id);
 
@@ -119,7 +120,7 @@ router.get('/', async (req, res) => {
     try {
         const profiles = await FarmerProfile.find({ user: { $in: await visibleFarmerIds(null) } })
             .sort({ date: -1 })
-            .populate('user', ['name', 'avatar', 'farmerVerified']);
+            .populate('user', ['name', 'avatar', 'badges']);
         const ids = profiles.map(p => p.user && p.user._id).filter(Boolean);
         const ratings = ids.length ? await Review.aggregate([
             { $match: { farmer: { $in: ids } } },
@@ -130,7 +131,11 @@ router.get('/', async (req, res) => {
 
         res.json(profiles
             .filter(p => p.user)
-            .map(p => ({ ...p.toObject(), rating: byFarmer[p.user._id.toString()] || { average: 0, count: 0 } })));
+            .map(p => ({
+                ...p.toObject(),
+                user: { _id: p.user._id, name: p.user.name, avatar: p.user.avatar, badges: publicBadges(p.user.badges) },
+                rating: byFarmer[p.user._id.toString()] || { average: 0, count: 0 }
+            })));
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -144,7 +149,7 @@ router.get('/', async (req, res) => {
 router.get('/:user_id/public', async (req, res) => {
     try {
         if (!isObjectId(req.params.user_id)) return res.status(404).json({ msg: 'Farmer not found' });
-        const user = await User.findOne({ _id: req.params.user_id, userType: 'farmer' }).select('name avatar farmerVerified');
+        const user = await User.findOne({ _id: req.params.user_id, userType: 'farmer' }).select('name avatar badges');
         if (!user || !canSee(await visibleFarmerIds(null), user._id)) return res.status(404).json({ msg: 'Farmer not found' });
 
         const [profile, products, summary] = await Promise.all([
@@ -160,7 +165,7 @@ router.get('/:user_id/public', async (req, res) => {
         ]);
 
         res.json({
-            farmer: { _id: user._id, name: user.name, avatar: user.avatar, verified: !!user.farmerVerified },
+            farmer: { _id: user._id, name: user.name, avatar: user.avatar, badges: publicBadges(user.badges) },
             profile,
             products,
             rating: summary[0]
