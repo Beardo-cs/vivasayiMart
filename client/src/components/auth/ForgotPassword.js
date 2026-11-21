@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 import { setAlert } from '../../actions/alert';
+import PageHeader from '../layout/PageHeader';
 
 const ForgotPassword = ({ setAlert }) => {
   const { t } = useTranslation();
@@ -30,8 +31,7 @@ const ForgotPassword = ({ setAlert }) => {
 
   return (
     <Fragment>
-      <h1 className='large text-primary'>{t('auth.forgotTitle')}</h1>
-      <p className='lead'>{t('auth.forgotHint')}</p>
+      <PageHeader icon="🔑" title={t('auth.forgotTitle')} subtitle={t('auth.forgotHint')} />
       {!done && (
         <form className='form' onSubmit={onSubmit}>
           <div className='form-group'>

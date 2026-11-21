@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import Moment from 'react-moment';
 import { useTranslation } from 'react-i18next';
 import { SkeletonRows } from '../layout/Skeleton';
+import PageHeader from '../layout/PageHeader';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import { addToCart } from '../../actions/cart';
@@ -223,7 +224,7 @@ const Orders = ({ auth: { user }, setAlert, addToCart }) => {
 
   return (
     <Fragment>
-      <h1 className='large text-primary'>{isFarmer ? t('orders.titleFarmer') : t('orders.titleBuyer')}</h1>
+      <PageHeader icon={isFarmer ? '📥' : '🧾'} title={isFarmer ? t('orders.titleFarmer') : t('orders.titleBuyer')} />
       <div className='posts-filters'>
         <select value={filter} onChange={e => setFilter(e.target.value)}>
           <option value='all'>{t('orders.allStatuses')}</option>

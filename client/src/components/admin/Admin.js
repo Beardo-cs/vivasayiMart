@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import Moment from 'react-moment';
 import api from '../../utils/api';
 import { setAlert } from '../../actions/alert';
+import PageHeader from '../layout/PageHeader';
 import '../posts/Posts.css';
 
 const Reports = ({ setAlert }) => {
@@ -142,7 +143,7 @@ const Admin = ({ auth: { user }, setAlert }) => {
   if (user && !user.isAdmin) return <p className='posts-count'>Admins only.</p>;
   return (
     <Fragment>
-      <h1 className='large text-primary'>🛡️ Admin</h1>
+      <PageHeader icon="🛡️" title="Admin" />
       <div className='order-actions' style={{ marginBottom: '1rem' }}>
         <button className={`btn ${tab === 'reports' ? 'btn-primary' : 'btn-light'}`} onClick={() => setTab('reports')}>Reports</button>
         <button className={`btn ${tab === 'farmers' ? 'btn-primary' : 'btn-light'}`} onClick={() => setTab('farmers')}>Farmer verification</button>

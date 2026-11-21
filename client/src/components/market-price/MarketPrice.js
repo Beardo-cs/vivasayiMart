@@ -1,5 +1,6 @@
 import React, { useState, useRef, Fragment } from 'react';
 import Loader from '../layout/Loader';
+import PageHeader from '../layout/PageHeader';
 import { API_BASE } from '../../utils/native';
 import { useTranslation } from 'react-i18next';
 import '../dashboard/Dashboard.css';
@@ -554,12 +555,7 @@ const MarketPrice = () => {
 
   return (
     <div className="container">
-      <div className="dashboard-header farmer-header">
-        <div className="header-content">
-          <h1 className="dashboard-title">📊 {t('nav.marketPrice')}</h1>
-          <p className="dashboard-subtitle">{t('market.subtitle')}</p>
-        </div>
-      </div>
+      <PageHeader icon="📊" title={t('nav.marketPrice')} subtitle={t('market.subtitle')} />
 
       <form className="form" onSubmit={onSubmit}>
         <div className="form-group">

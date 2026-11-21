@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 import { setAlert } from '../../actions/alert';
+import PageHeader from '../layout/PageHeader';
 import { removeFromCart, setCartQuantity, clearCart } from '../../actions/cart';
 import { unitPriceFor } from '../../utils/pricing';
 import '../posts/Posts.css';
@@ -41,7 +42,7 @@ const Cart = ({ items, setAlert, removeFromCart, setCartQuantity, clearCart }) =
   if (items.length === 0) {
     return (
       <Fragment>
-        <h1 className='large text-primary'>{t('cart.title')}</h1>
+        <PageHeader icon="🛒" title={t('cart.title')} />
         <p className='posts-count'>{t('cart.empty')}</p>
         <p style={{ textAlign: 'center' }}><Link to='/posts' className='btn btn-primary'>{t('cart.browse')}</Link></p>
       </Fragment>
@@ -50,7 +51,7 @@ const Cart = ({ items, setAlert, removeFromCart, setCartQuantity, clearCart }) =
 
   return (
     <Fragment>
-      <h1 className='large text-primary'>{t('cart.title')}</h1>
+      <PageHeader icon="🛒" title={t('cart.title')} />
 
       {items.map(i => (
         <div className='order-card' key={i.postId}>

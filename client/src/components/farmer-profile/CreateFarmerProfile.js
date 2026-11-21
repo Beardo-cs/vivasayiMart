@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { setAlert } from '../../actions/alert';
+import PageHeader from '../layout/PageHeader';
 import { getCurrentProfile, saveProfile } from '../../actions/profile';
 import './FarmerProfile.css';
 
@@ -66,10 +67,7 @@ const CreateFarmerProfile = ({ profile: { profile, loading }, getCurrentProfile,
     return loading && !profile ? null : (
         <Fragment>
             <div className="modern-container">
-                <div className="profile-header">
-                    <h1 className="gradient-text">🌾 {isEdit ? t('profileForm.titleEdit') : t('profileForm.titleCreate')}</h1>
-                    <p className="subtitle">{t('profileForm.farmerSubtitle')}</p>
-                </div>
+                <PageHeader icon="🌾" title={isEdit ? t('profileForm.titleEdit') : t('profileForm.titleCreate')} subtitle={t('profileForm.farmerSubtitle')} />
 
                 <form className="modern-form" onSubmit={onSubmit}>
                     <div className="form-section">

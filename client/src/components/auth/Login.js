@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { login } from '../../actions/auth';
 import Loader from '../layout/Loader';
+import PageHeader from '../layout/PageHeader';
 import { useTranslation } from 'react-i18next';
 
 //isAuthenticated is a props here
@@ -48,8 +49,7 @@ const { email, password } = formData;
   }
    return (
      <Fragment>
-      <h1 className="large text-primary">{t('login.title')}</h1>
-      <p className="lead"><i className="fas fa-user"></i> {t('login.subtitle')}</p>
+      <PageHeader icon="🔑" title={t('login.title')} subtitle={t('login.subtitle')} />
 
       <form className="form" onSubmit ={e => onSubmit(e)}>
         <div className="form-group">

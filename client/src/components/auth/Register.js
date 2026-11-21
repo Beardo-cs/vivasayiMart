@@ -7,6 +7,7 @@ import { setAlert } from '../../actions/alert';
 import { register } from '../../actions/auth';
 import PropTypes from 'prop-types';
 import Loader from '../layout/Loader';
+import PageHeader from '../layout/PageHeader';
 import { useTranslation } from 'react-i18next';
 
 // instead of using props.setAlert we changed props to setAlert
@@ -60,8 +61,7 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
   }
    return (
      <Fragment>
-   <h1 className="large text-primary">{t('register.title')}</h1>
-      <p className="lead"><i className="fas fa-user"></i> {t('register.subtitle')}</p>
+   <PageHeader icon="🌱" title={t('register.title')} subtitle={t('register.subtitle')} />
       <form className="form" onSubmit ={e => onSubmit(e)}>
         <div className="form-group">
           <label className="form-label"><strong>{t('register.iAm')}</strong></label>

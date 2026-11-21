@@ -5,6 +5,7 @@ import {connect } from 'react-redux';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { SkeletonCards } from '../layout/Skeleton';
+import PageHeader from '../layout/PageHeader';
 import { getPosts } from '../../actions/post';
 import PostItem from './PostItem';
 import PostFilters from './PostFilters';
@@ -54,12 +55,7 @@ const Posts = ({ getPosts, auth, post: {posts, loading, pagination }}) => {
     <SkeletonCards />
   ) : (
     <Fragment>
-      <div className="posts-header">
-        <h1 className="posts-title">{mine ? t('posts.myTitle') : t('posts.title')}</h1>
-        <p className="posts-subtitle">
-          {mine ? t('posts.mySubtitle') : t('posts.subtitle')}
-        </p>
-      </div>
+      <PageHeader icon={mine ? '📦' : '🌾'} title={mine ? t('posts.myTitle') : t('posts.title')} subtitle={mine ? t('posts.mySubtitle') : t('posts.subtitle')} />
 
       {isFarmer && (
         <p style={{ textAlign: 'center' }}>

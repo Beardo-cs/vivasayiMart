@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 import { logout } from '../../actions/auth';
 import { setAlert } from '../../actions/alert';
+import PageHeader from '../layout/PageHeader';
 import '../posts/Posts.css';
 
 const Account = ({ user, logout, setAlert }) => {
@@ -35,9 +36,9 @@ const Account = ({ user, logout, setAlert }) => {
   };
 
   return (
+    <>
+    <PageHeader icon="🔐" title={t('account.title')} subtitle={`${user.name} · ${user.email}`} />
     <div className="legal">
-      <h1 className="large text-primary">{t('account.title')}</h1>
-      <p className="lead">{user.name} · {user.email}</p>
       <p className="updated">{user.userType === 'farmer' ? t('register.farmer') : t('register.consumer')}</p>
 
       <div className="order-actions" style={{ margin: '1rem 0' }}>
@@ -69,6 +70,7 @@ const Account = ({ user, logout, setAlert }) => {
         </form>
       )}
     </div>
+    </>
   );
 };
 

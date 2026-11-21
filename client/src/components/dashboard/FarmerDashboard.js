@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import Loader from '../layout/Loader';
+import PageHeader from '../layout/PageHeader';
 import api from '../../utils/api';
 import { getCurrentProfile } from '../../actions/profile';
 import './Dashboard.css';
@@ -22,12 +23,7 @@ const FarmerDashboard = ({ auth: { user }, profile: { profile, loading }, getCur
         <Loader message={t('dashboard.loadingFarmer')} fullPage={true} />
     ) : (
         <Fragment>
-            <div className="dashboard-header farmer-header">
-                <div className="header-content">
-                    <h1 className="dashboard-title">🌾 {t('dashboard.farmerTitle')}</h1>
-                    <p className="dashboard-subtitle">{t('dashboard.welcome', { name: user && user.name })}</p>
-                </div>
-            </div>
+            <PageHeader icon="🌾" title={t('dashboard.farmerTitle')} subtitle={t('dashboard.welcome', { name: user && user.name })} />
 
             {(() => {
                 const steps = [

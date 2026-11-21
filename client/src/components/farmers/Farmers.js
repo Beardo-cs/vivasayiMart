@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Loader from '../layout/Loader';
+import PageHeader from '../layout/PageHeader';
 import { getFarmers } from '../../actions/profile';
 import '../posts/Posts.css';
 
@@ -26,8 +27,7 @@ const Farmers = ({ getFarmers, profile: { profiles, loading } }) => {
 
   return (
     <Fragment>
-      <h1 className='large text-primary'>{t('farmers.title')}</h1>
-      <p className='lead'><i className='fas fa-seedling'></i> {t('farmers.subtitle')}</p>
+      <PageHeader icon="👨‍🌾" title={t('farmers.title')} subtitle={t('farmers.subtitle')} />
 
       {profiles.length === 0 && <p className='posts-count'>{t('farmers.none')}</p>}
 

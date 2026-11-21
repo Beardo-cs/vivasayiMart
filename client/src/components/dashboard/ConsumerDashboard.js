@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import Loader from '../layout/Loader';
+import PageHeader from '../layout/PageHeader';
 import { getCurrentProfile } from '../../actions/profile';
 import './Dashboard.css';
 
@@ -20,12 +21,7 @@ const ConsumerDashboard = ({ auth: { user, loading }, profile, getCurrentProfile
         <Loader message={t('dashboard.loadingConsumer')} fullPage={true} />
     ) : (
         <Fragment>
-            <div className="dashboard-header consumer-header">
-                <div className="header-content">
-                    <h1 className="dashboard-title">🛒 {t('dashboard.consumerTitle')}</h1>
-                    <p className="dashboard-subtitle">{t('dashboard.welcome', { name: user && user.name })}</p>
-                </div>
-            </div>
+            <PageHeader icon="🛒" title={t('dashboard.consumerTitle')} subtitle={t('dashboard.welcome', { name: user && user.name })} />
 
             {!profile.loading && !profile.profile && (
                 <div className="order-card" style={{ margin: '1rem 0' }}>

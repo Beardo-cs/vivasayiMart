@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 import { setAlert } from '../../actions/alert';
+import PageHeader from '../layout/PageHeader';
 
 const ResetPassword = ({ setAlert }) => {
   const { t } = useTranslation();
@@ -36,7 +37,7 @@ const ResetPassword = ({ setAlert }) => {
 
   return (
     <Fragment>
-      <h1 className='large text-primary'>{t('auth.resetTitle')}</h1>
+      <PageHeader icon="🔑" title={t('auth.resetTitle')} />
       <form className='form' onSubmit={onSubmit}>
         <div className='form-group'>
           <input type='password' placeholder={t('auth.newPassword')} minLength='6' value={password} onChange={e => setPassword(e.target.value)} required />

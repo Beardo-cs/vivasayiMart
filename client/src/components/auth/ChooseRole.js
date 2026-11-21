@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 import { loadUser } from '../../actions/auth';
 import { setAlert } from '../../actions/alert';
+import PageHeader from '../layout/PageHeader';
 
 const ChooseRole = ({ user, loadUser, setAlert }) => {
   const { t } = useTranslation();
@@ -29,8 +30,7 @@ const ChooseRole = ({ user, loadUser, setAlert }) => {
 
   return (
     <div className='crash'>
-      <h1 className='large text-primary'>{t('chooseRole.title')}</h1>
-      <p className='lead'>{t('chooseRole.text')}</p>
+      <PageHeader icon="👋" title={t('chooseRole.title')} subtitle={t('chooseRole.text')} />
       <div className='landing-roles' style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
         <button className='btn btn-primary' disabled={saving} onClick={() => choose('farmer')}>🌾 {t('landing.imFarmer')}</button>
         <button className='btn btn-primary' disabled={saving} onClick={() => choose('consumer')}>🛒 {t('landing.imBuyer')}</button>

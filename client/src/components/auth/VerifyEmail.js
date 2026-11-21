@@ -2,6 +2,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
+import PageHeader from '../layout/PageHeader';
 
 const VerifyEmail = () => {
   const { t } = useTranslation();
@@ -21,8 +22,7 @@ const VerifyEmail = () => {
 
   return (
     <Fragment>
-      <h1 className='large text-primary'>{t('auth.verifyTitle')}</h1>
-      <p className='lead'>{state.loading ? t('auth.verifying') : state.msg}</p>
+      <PageHeader icon="✉️" title={t('auth.verifyTitle')} subtitle={state.loading ? t('auth.verifying') : state.msg} />
       {!state.loading && <Link to='/login' className='btn btn-primary'>{t('auth.backToLogin')}</Link>}
     </Fragment>
   );

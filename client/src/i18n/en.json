@@ -41,9 +41,9 @@
     "title": "Filters"
   },
   "posts": {
-    "title": "🌾 Agricultural Products",
+    "title": "Agricultural Products",
     "subtitle": "Browse fresh products directly from farmers",
-    "myTitle": "📦 My Products",
+    "myTitle": "My Products",
     "mySubtitle": "Manage your listings",
     "found_one": "{{count}} product found",
     "found_other": "{{count}} products found",
@@ -104,8 +104,8 @@
     "bulkApplied": "bulk price applied"
   },
   "orders": {
-    "titleFarmer": "📥 Orders Received",
-    "titleBuyer": "🧾 My Orders",
+    "titleFarmer": "Orders Received",
+    "titleBuyer": "My Orders",
     "allStatuses": "All statuses",
     "none": "No orders yet.",
     "loading": "Loading orders...",
@@ -150,7 +150,7 @@
     "pickupNoteBuyer": "🏬 You will pick it up"
   },
   "cart": {
-    "title": "🛒 My Cart",
+    "title": "My Cart",
     "empty": "Your cart is empty.",
     "browse": "Browse products",
     "remove": "Remove",

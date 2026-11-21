@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 import Loader from '../layout/Loader';
 import { Stars } from './Farmers';
+import PageHeader from '../layout/PageHeader';
 import { setAlert } from '../../actions/alert';
 import { PUBLIC_SITE, isNative, shareLink } from '../../utils/native';
 import '../posts/Posts.css';
@@ -38,7 +39,7 @@ const FarmerPage = ({ isAuthenticated, setAlert }) => {
   if (state === 'notfound') {
     return (
       <Fragment>
-        <h1 className='large text-primary'>{t('farmerPage.notFound')}</h1>
+        <PageHeader icon="🧭" title={t('farmerPage.notFound')} />
         <Link to='/farmers' className='btn btn-light'>{t('farmerPage.back')}</Link>
       </Fragment>
     );
@@ -64,14 +65,15 @@ const FarmerPage = ({ isAuthenticated, setAlert }) => {
     <Fragment>
       <Link to='/farmers' className='btn btn-light'>{t('farmerPage.back')}</Link>
 
+      <PageHeader
+        icon="🌾"
+        title={<>{(profile && profile.farmName) || farmer.name}{farmer.verified && <small title={t('product.verified')} style={{ marginLeft: 6 }}>✔</small>}</>}
+        subtitle={`${farmer.name}${profile && profile.location ? ` · ${profile.location}` : ''}`}
+      />
+
       <div className='profile bg-light my-1'>
         <img src={farmer.avatar} alt='' className='round-img' />
         <div>
-          <h1 className='large text-primary' style={{ marginBottom: 0 }}>
-            {(profile && profile.farmName) || farmer.name}
-            {farmer.verified && <small title={t('product.verified')} style={{ color: '#1e88e5' }}> ✔</small>}
-          </h1>
-          <p className='lead'>{farmer.name}{profile && profile.location ? ` · ${profile.location}` : ''}</p>
           <p><Stars rating={rating} /></p>
           {farmer.verified && <p style={{ color: '#1e88e5' }}>✔ {t('product.verified')}</p>}
           <div className='order-actions'>

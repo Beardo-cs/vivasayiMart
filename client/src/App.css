@@ -1065,3 +1065,41 @@ a { text-underline-offset: 3px; }
 @media (min-width: 901px) { .container { margin-top: calc(5.5rem + env(safe-area-inset-top)); } }
 .toast-stack { top: calc(4rem + env(safe-area-inset-top)); }
 @media (max-width: 700px) { .landing-art { padding-top: calc(3.6rem + env(safe-area-inset-top)); } }
+
+/* =====================================================================
+   ONE PAGE HEADER + ONE ENTRANCE ANIMATION (every screen matches)
+   ===================================================================== */
+@keyframes vm-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.page-header {
+  text-align: center;
+  color: #fff;
+  padding: 1.35rem 1rem;
+  margin-bottom: 1.25rem;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #2d5016 0%, #5f9a2c 55%, #8bc34a 100%);
+  box-shadow: var(--shadow-md);
+}
+.page-title {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.45rem, 5vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap;
+}
+.page-icon { font-size: 1.15em; line-height: 1; }
+.page-subtitle { margin: 0.3rem 0 0; font-size: 1rem; font-weight: 600; color: rgba(255, 255, 255, 0.95); }
+@media (min-width: 901px) { .page-header { padding: 1.9rem 1.5rem; } }
+
+/* every page and card enters the same way: a quick 0.25s fade, no slow slide-ups */
+.page-header, .legal, .order-card, .post-form, .product-card, .modern-container, .no-profile-card, .empty-state {
+  animation: vm-enter 0.25s ease-out both;
+}
+.product-card:hover, .action-card:hover { animation: none; }
+.form-section, .posts-header, .dashboard-header, .profile-header { animation: none; }
+
+/* banners with and without a subtitle share one minimum height, so pages don't jump around */
+.page-header { min-height: 5.6rem; display: flex; flex-direction: column; justify-content: center; }
+@media (min-width: 901px) { .page-header { min-height: 6.6rem; } }

@@ -6,6 +6,7 @@ import {connect } from 'react-redux';
 import {addPost} from '../../actions/post';
 import api from '../../utils/api';
 import { useTranslation } from 'react-i18next';
+import PageHeader from '../layout/PageHeader';
 
 const CATEGORIES = ['Vegetables', 'Fruits', 'Grains', 'Dairy', 'Poultry', 'Other'];
 const UNITS = ['kg', 'litre', 'dozen', 'piece'];
@@ -209,10 +210,9 @@ const PostFrom =({ addPost, auth }) => {
     const stepLabels = [t('postForm.step1'), t('postForm.step2'), t('postForm.step3')];
 
     return (
+        <>
+        <PageHeader icon="📸" title={t('postForm.title')} />
         <div className='post-form'>
-            <div className='bg-primary p'>
-                <h3>{t('postForm.title')}</h3>
-            </div>
 
             <ol className='wizard-steps' aria-label={t('postForm.stepsLabel')}>
                 {stepLabels.map((label, i) => (
@@ -350,6 +350,7 @@ const PostFrom =({ addPost, auth }) => {
                 </div>
             </form>
         </div>
+        </>
     );
 }
 

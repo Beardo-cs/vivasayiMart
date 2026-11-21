@@ -2,6 +2,7 @@
 import React, { Fragment } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import PageHeader from '../layout/PageHeader';
 import '../posts/Posts.css';
 
 const OrderPlaced = () => {
@@ -18,11 +19,7 @@ const OrderPlaced = () => {
 
   return (
     <Fragment>
-      <div style={{ textAlign: 'center', margin: '1rem 0' }}>
-        <div style={{ fontSize: '3.5rem' }}>✅</div>
-        <h1 className='large text-primary'>{t('orderPlaced.title')}</h1>
-        <p className='lead'>{t('orderPlaced.subtitle', { count: farmers.length, names: farmers.join(', ') })}</p>
-      </div>
+      <PageHeader icon="✅" title={t('orderPlaced.title')} subtitle={t('orderPlaced.subtitle', { count: farmers.length, names: farmers.join(', ') })} />
 
       <div className='order-card'>
         <h3>{t('orderPlaced.summary')}</h3>

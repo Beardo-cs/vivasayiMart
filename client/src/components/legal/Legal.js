@@ -4,6 +4,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import PageHeader from '../layout/PageHeader';
 
 const CONTACT = process.env.REACT_APP_CONTACT_EMAIL; // optional: shown at the bottom when set
 
@@ -13,9 +14,9 @@ const Legal = ({ type }) => {
   const other = type === 'privacy' ? 'terms' : 'privacy';
 
   return (
+    <>
+    <PageHeader icon={type === 'privacy' ? '🔒' : '📄'} title={t(`legal.${type}.title`)} subtitle={t('legal.updated', { date: t('legal.date') })} />
     <article className="legal">
-      <h1 className="large text-primary">{t(`legal.${type}.title`)}</h1>
-      <p className="updated">{t('legal.updated', { date: t('legal.date') })}</p>
       <p className="notice">{t('legal.summary.' + type)}</p>
 
       {Array.isArray(sections) && sections.map((s, i) => (
@@ -37,6 +38,7 @@ const Legal = ({ type }) => {
         <Link to={`/${other}`}>{t(`legal.${other}.title`)} →</Link>
       </p>
     </article>
+    </>
   );
 };
 
