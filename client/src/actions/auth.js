@@ -9,9 +9,12 @@ import {
     LOGIN_FAIL,
     LOGOUT,
     LOGOUT_START,
-    CLEAR_PROFILE
+    CLEAR_PROFILE,
+    AUTH_NETWORK_ERROR
 } from './types';
 import setAuthToken from '../utils/setAuthToken';
+import { clearApiCache } from '../utils/offline';
+import i18n from '../i18n';
 
 // Load user
 export const loadUser = () => async dispatch => {
@@ -26,9 +29,9 @@ export const loadUser = () => async dispatch => {
          payload: res.data
      });
 } catch (err) {
-    dispatch({
-        type: AUTH_ERROR
-    });
+    // Only a server "no" (bad/expired token) logs the user out. Being offline must not.
+    const status = err.response?.status;
+    dispatch({ type: status === 401 || status === 404 ? AUTH_ERROR : AUTH_NETWORK_ERROR });
  }
 };
 
@@ -45,6 +48,7 @@ export const register = ({ name, email, password, userType }) => async dispatch 
     try {
         const res = await api.post ('/api/users', body, config);
 
+        await clearApiCache();
         dispatch ({
             type: REGISTER_SUCCESS,
             payload: res.data
@@ -64,7 +68,7 @@ export const register = ({ name, email, password, userType }) => async dispatch 
             errors.forEach(error => dispatch (setAlert(error.msg, 'danger')));
         } else {
             // Handle network errors or server not responding
-            dispatch(setAlert('Server error. Please try again later.', 'danger'));
+            dispatch(setAlert(i18n.t('alerts.serverError'), 'danger'));
         }
         dispatch({
             type: REGISTER_FAIL
@@ -86,6 +90,7 @@ export const login = ( email, password ) => async dispatch => {
         //as we r authenticating..using path api/auth
         const res = await api.post ('/api/auth', body, config);
 
+        await clearApiCache();
         dispatch ({
             type: LOGIN_SUCCESS,
             payload: res.data
@@ -105,7 +110,7 @@ export const login = ( email, password ) => async dispatch => {
             errors.forEach(error => dispatch (setAlert(error.msg, 'danger')));
         } else {
             // Handle network errors or server not responding
-            dispatch(setAlert('Server error. Please try again later.', 'danger'));
+            dispatch(setAlert(i18n.t('alerts.serverError'), 'danger'));
         }
         dispatch({
             type: LOGIN_FAIL
@@ -115,6 +120,7 @@ export const login = ( email, password ) => async dispatch => {
 
 // Logout / Clear Profile
 export const logout = () => dispatch => {
+    clearApiCache();
     // Dispatch logout start to show loader
     dispatch ({ type: LOGOUT_START });
 

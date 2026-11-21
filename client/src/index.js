@@ -4,6 +4,8 @@ import React from 'react';
 // DOM-Document Object Modal, is a program interface for web documents
 import ReactDOM from 'react-dom/client';
 
+import './i18n';
+import { registerServiceWorker } from './utils/offline';
 import App from './App';
 
 // React 18: Use createRoot instead of ReactDOM.render
@@ -14,3 +16,5 @@ root.render(
   </React.StrictMode>
 );
 
+
+registerServiceWorker();

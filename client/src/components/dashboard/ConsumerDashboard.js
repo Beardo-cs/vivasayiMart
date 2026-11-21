@@ -2,93 +2,86 @@ import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import Loader from '../layout/Loader';
 import './Dashboard.css';
 
-const ConsumerDashboard = ({
-    auth: { user, loading }
-}) => {
+const CATEGORIES = [
+    ['Vegetables', '🥬'], ['Fruits', '🍎'], ['Grains', '🌾'],
+    ['Dairy', '🥛'], ['Poultry', '🐔'], ['Other', '🌱']
+];
+
+const ConsumerDashboard = ({ auth: { user, loading } }) => {
+    const { t } = useTranslation();
+
     return loading ? (
-        <Loader message="Loading your consumer dashboard..." fullPage={true} />
+        <Loader message={t('dashboard.loadingConsumer')} fullPage={true} />
     ) : (
         <Fragment>
             <div className="dashboard-header consumer-header">
                 <div className="header-content">
-                    <h1 className="dashboard-title">🛒 Consumer Dashboard</h1>
-                    <p className="dashboard-subtitle">Welcome back, {user && user.name}!</p>
+                    <h1 className="dashboard-title">🛒 {t('dashboard.consumerTitle')}</h1>
+                    <p className="dashboard-subtitle">{t('dashboard.welcome', { name: user && user.name })}</p>
                 </div>
             </div>
 
             <div className="dashboard-actions-modern">
                 <Link to="/posts" className="action-card consumer-card primary">
                     <div className="card-icon">🛍️</div>
-                    <h3>Browse Products</h3>
-                    <p>Fresh from local farms</p>
+                    <h3>{t('nav.browse')}</h3>
+                    <p>{t('dashboard.browseDesc')}</p>
+                </Link>
+                <Link to="/orders" className="action-card consumer-card">
+                    <div className="card-icon">🧾</div>
+                    <h3>{t('nav.orders')}</h3>
+                    <p>{t('dashboard.myOrdersDesc')}</p>
                 </Link>
                 <Link to="/farmers" className="action-card consumer-card">
                     <div className="card-icon">👨‍🌾</div>
-                    <h3>Find Farmers</h3>
-                    <p>Connect with local farmers</p>
+                    <h3>{t('nav.farmers')}</h3>
+                    <p>{t('dashboard.findFarmersDesc')}</p>
                 </Link>
                 <Link to="/market-price" className="action-card consumer-card">
                     <div className="card-icon">📊</div>
-                    <h3>Market Prices</h3>
-                    <p>Check current rates</p>
+                    <h3>{t('nav.marketPrice')}</h3>
+                    <p>{t('dashboard.marketDesc')}</p>
                 </Link>
-                <Link to="/consumer-profile" className="action-card consumer-card">
+                <Link to="/create-consumer-profile" className="action-card consumer-card">
                     <div className="card-icon">👤</div>
-                    <h3>My Profile</h3>
-                    <p>Manage preferences</p>
+                    <h3>{t('dashboard.myProfile')}</h3>
+                    <p>{t('dashboard.myProfileDesc')}</p>
                 </Link>
             </div>
 
             <div className="categories-section">
-                <h2 className="section-title">🌾 Featured Categories</h2>
+                <h2 className="section-title">🌾 {t('dashboard.featuredCategories')}</h2>
                 <div className="categories-grid">
-                    <Link to="/posts?category=Vegetables" className="category-card">
-                        <div className="category-icon">🥬</div>
-                        <h3>Vegetables</h3>
-                    </Link>
-                    <Link to="/posts?category=Fruits" className="category-card">
-                        <div className="category-icon">🍎</div>
-                        <h3>Fruits</h3>
-                    </Link>
-                    <Link to="/posts?category=Grains" className="category-card">
-                        <div className="category-icon">🌾</div>
-                        <h3>Grains</h3>
-                    </Link>
-                    <Link to="/posts?category=Dairy" className="category-card">
-                        <div className="category-icon">🥛</div>
-                        <h3>Dairy</h3>
-                    </Link>
-                    <Link to="/posts?category=Poultry" className="category-card">
-                        <div className="category-icon">🐔</div>
-                        <h3>Poultry</h3>
-                    </Link>
-                    <Link to="/posts?category=Other" className="category-card">
-                        <div className="category-icon">🌱</div>
-                        <h3>Other</h3>
-                    </Link>
+                    {CATEGORIES.map(([name, icon]) => (
+                        <Link key={name} to={`/posts?category=${name}`} className="category-card">
+                            <div className="category-icon">{icon}</div>
+                            <h3>{t(`categories.${name}`)}</h3>
+                        </Link>
+                    ))}
                 </div>
             </div>
 
             <div className="benefits-section">
-                <h2 className="section-title">✨ Why Buy Direct from Farmers?</h2>
+                <h2 className="section-title">✨ {t('dashboard.whyDirect')}</h2>
                 <div className="benefits-grid">
                     <div className="benefit-card">
                         <div className="benefit-icon">🌱</div>
-                        <h3>Fresh & Organic</h3>
-                        <p>Get farm-fresh produce directly from local farmers</p>
+                        <h3>{t('dashboard.benefit1Title')}</h3>
+                        <p>{t('dashboard.benefit1Text')}</p>
                     </div>
                     <div className="benefit-card">
                         <div className="benefit-icon">💰</div>
-                        <h3>Fair Prices</h3>
-                        <p>No middlemen - better prices for you and farmers</p>
+                        <h3>{t('dashboard.benefit2Title')}</h3>
+                        <p>{t('dashboard.benefit2Text')}</p>
                     </div>
                     <div className="benefit-card">
                         <div className="benefit-icon">🤝</div>
-                        <h3>Support Local</h3>
-                        <p>Help local farmers and strengthen your community</p>
+                        <h3>{t('dashboard.benefit3Title')}</h3>
+                        <p>{t('dashboard.benefit3Text')}</p>
                     </div>
                 </div>
             </div>
@@ -96,13 +89,6 @@ const ConsumerDashboard = ({
     );
 };
 
-ConsumerDashboard.propTypes = {
-    auth: PropTypes.object.isRequired
-};
-
-const mapStateToProps = state => ({
-    auth: state.auth
-});
-
+ConsumerDashboard.propTypes = { auth: PropTypes.object.isRequired };
+const mapStateToProps = state => ({ auth: state.auth });
 export default connect(mapStateToProps)(ConsumerDashboard);
-

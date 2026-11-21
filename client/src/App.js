@@ -4,6 +4,7 @@ import Navbar from './components/layout/Navbar';
 import Landing from './components/layout/Landing';
 import Routes from './components/routing/Routes';
 import Loader from './components/layout/Loader';
+import OfflineBanner from './components/layout/OfflineBanner';
 
 
 //Redux, getting provider from react-redux
@@ -42,6 +43,7 @@ const AppContent = () => {
     return (
         <Router>
             <Fragment>
+                <OfflineBanner />
                 <Navbar />
                 <RouterRoutes>
                     <Route exact path='/' element={<Landing />} />

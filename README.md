@@ -703,3 +703,18 @@ For issues, questions, or suggestions:
 
 </div>
 
+
+## ⚙️ Optional environment variables
+
+| Variable | Purpose |
+|---|---|
+| `ADMIN_EMAILS` | Comma-separated emails that get the **Admin** page (report moderation, farmer verification). Example: `owner@example.com,mod@example.com` |
+| `RESEND_API_KEY` | API key from [resend.com](https://resend.com) used to send password-reset and email-verification emails. If unset, the email text (with the link) is printed in the server console instead. |
+| `EMAIL_FROM` | Sender, e.g. `VivasayiMart <no-reply@yourdomain.com>` (the domain must be verified in Resend) |
+| `APP_URL` | Public URL of the site, used in email links, e.g. `https://vivasayimart.vercel.app` (defaults to `http://localhost:3000`) |
+
+## 🧪 Tests
+
+```bash
+npm test   # runs the API tests against an in-memory MongoDB (first run downloads a mongod binary)
+```

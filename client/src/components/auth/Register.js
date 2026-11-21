@@ -7,9 +7,11 @@ import { setAlert } from '../../actions/alert';
 import { register } from '../../actions/auth';
 import PropTypes from 'prop-types';
 import Loader from '../layout/Loader';
+import { useTranslation } from 'react-i18next';
 
 // instead of using props.setAlert we changed props to setAlert
 const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
+  const { t } = useTranslation();
   const  [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -29,7 +31,7 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
     e.preventDefault();
     if(password !== password2) {
 // this msg willbe passed to action
-      setAlert('Passwords do not match', 'danger');
+      setAlert(t('auth.passwordsMismatch'), 'danger');
     } else {
 //console.log("SUCESS");
       register ({ name, email, password, userType});
@@ -38,7 +40,7 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
 
   // Show loader while registering
   if(loading && !user) {
-    return <Loader message="Creating your account..." fullPage={true} />
+    return <Loader message={t('register.creating')} fullPage={true} />
   }
 
   if (isAuthenticated && user) {
@@ -51,11 +53,11 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
   }
    return (
      <Fragment>
-   <h1 className="large text-primary">Sign Up</h1>
-      <p className="lead"><i className="fas fa-user"></i> Create Your Account</p>
+   <h1 className="large text-primary">{t('register.title')}</h1>
+      <p className="lead"><i className="fas fa-user"></i> {t('register.subtitle')}</p>
       <form className="form" onSubmit ={e => onSubmit(e)}>
         <div className="form-group">
-          <label className="form-label"><strong>I am a:</strong></label>
+          <label className="form-label"><strong>{t('register.iAm')}</strong></label>
           <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
             <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
               <input
@@ -66,7 +68,7 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
                 onChange={e => onChange(e)}
                 style={{ marginRight: '8px' }}
               />
-              <span>🌾 Farmer</span>
+              <span>🌾 {t('register.farmer')}</span>
             </label>
             <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
               <input
@@ -77,14 +79,14 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
                 onChange={e => onChange(e)}
                 style={{ marginRight: '8px' }}
               />
-              <span>🛒 Consumer</span>
+              <span>🛒 {t('register.consumer')}</span>
             </label>
           </div>
         </div>
         <div className="form-group">
           <input
           type="text"
-          placeholder="Name"
+          placeholder={t('register.name')}
           name="name"
           value={name}
   // onChange function
@@ -95,7 +97,7 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
         <div className="form-group">
         <input 
           type="email" 
-          placeholder="Email Address" 
+          placeholder={t('register.email')} 
           name="email" 
           value={email} 
           onChange= {e=> onChange(e)} 
@@ -108,7 +110,7 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
         <div className="form-group">
           <input
             type="password"
-            placeholder="Password"
+            placeholder={t('register.password')}
             name="password"
             value={password} 
             onChange= {e=> onChange(e)} 
@@ -118,17 +120,17 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
         <div className="form-group">
           <input
             type="password" 
-            placeholder="Confirm Password"
+            placeholder={t('register.confirm')}
             name="password2"
             value={password2} 
           onChange= {e=> onChange(e)}
            // minLength="6"
           />
         </div>
-        <input type="submit" className="btn btn-primary" value="Register" />
+        <input type="submit" className="btn btn-primary" value={t('nav.register')} />
       </form>
       <p className="my-1">
-        Already have an account? <Link to="/login">Sign In</Link>
+        {t('register.haveAccount')} <Link to="/login">{t('register.signIn')}</Link>
       </p>
    </Fragment>
    ); 

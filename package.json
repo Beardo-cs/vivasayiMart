@@ -10,7 +10,8 @@
     "client": "npm start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "cd client && npm install && npm run build && cd .. && mkdir -p public && cp -r client/build/* public/",
-    "vercel-build": "cd client && npm install && npm run build"
+    "vercel-build": "cd client && npm install && npm run build",
+    "test": "node --test --test-concurrency=1 tests/*.test.js"
   },
   "dependencies": {
     "@google/genai": "^1.40.0",
@@ -19,6 +20,7 @@
     "config": "^4.2.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.5",
     "express-validator": "^7.3.1",
     "gravatar": "^1.8.2",
     "jsonwebtoken": "^9.0.3",
@@ -27,6 +29,8 @@
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "nodemon": "^3.1.11"
+    "mongodb-memory-server": "^11.3.0",
+    "nodemon": "^3.1.11",
+    "supertest": "^7.3.2"
   }
 }

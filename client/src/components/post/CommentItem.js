@@ -4,16 +4,19 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Moment from 'react-moment';
 import { deleteComment} from '../../actions/post';
+import { useTranslation } from 'react-i18next';
 
 const CommentItem =({
     postId,
     comment: {_id, text, name, avatar, user, date },
     auth,
     deleteComment
-}) => (
+}) => {
+  const { t } = useTranslation();
+  return (
     <div className="post bg-white p-1 my-1">
     <div>
-      <Link to={`/profile/${user}`}>
+      <Link to={`/farmer/${user}`}>
         <img className="round-img" src={avatar} alt="" />
         <h4>{name}</h4>
       </Link>
@@ -21,7 +24,7 @@ const CommentItem =({
 
     <div>
       <p className="my-1">{text}</p>
-      <p className="post-date">Posted on {' '}<Moment format='DD/MM/YYYY'>{date}</Moment>
+      <p className="post-date">{t('comments.postedOn')} {' '}<Moment format='DD/MM/YYYY'>{date}</Moment>
       </p>
       {!auth.loading && user ===auth.user._id && (
         <button
@@ -29,15 +32,16 @@ const CommentItem =({
         type='button'
         className='btn btn-danger'
         >
-        <i className='fas fa-times' /> Delete
+        <i className='fas fa-times' /> {t('product.delete')}
         </button>
       ) }
     </div>
   </div>
-)
+  );
+};
 
 CommentItem.propTypes = {
-    postId: PropTypes.number.isRequired,
+    postId: PropTypes.string.isRequired,
     comment: PropTypes.object.isRequired,
     auth: PropTypes.object.isRequired,
     deleteComment: PropTypes.func.isRequired

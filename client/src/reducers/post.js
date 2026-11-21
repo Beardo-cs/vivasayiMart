@@ -6,12 +6,14 @@ import {
     ADD_POST,
     GET_POST,
     ADD_COMMENT,
-    REMOVE_COMMENT
+    REMOVE_COMMENT,
+    UPDATE_POST
 } from '../actions/types';
 
 const initialState = {
     posts: [],
     post: null,
+    pagination: { page: 1, pages: 1, total: 0 },
     loading: true,
     error: {}
 }
@@ -23,7 +25,19 @@ export default function postReducer(state = initialState, action) {
         case GET_POSTS:
             return {
                 ...state,
-                posts:payload,
+                posts: payload.posts || [],
+                pagination: {
+                    page: payload.page || 1,
+                    pages: payload.pages || 1,
+                    total: payload.total || 0
+                },
+                loading: false
+            };
+        case UPDATE_POST:
+            return {
+                ...state,
+                posts: state.posts.map(post => post._id === payload._id ? payload : post),
+                post: state.post && state.post._id === payload._id ? payload : state.post,
                 loading: false
             };
         case GET_POST:

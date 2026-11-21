@@ -32,9 +32,30 @@ const PostSchema =  new Schema ( {
     productImage: {
         type: String
     },
+    // Quantity originally listed (kept as `weight` for backward compatibility)
     weight: {
         type: Number,
         required: true
+    },
+    // Unit of measure for weight/price
+    unit: {
+        type: String,
+        enum: ['kg', 'litre', 'dozen', 'piece'],
+        default: 'kg'
+    },
+    // Optional cheaper prices for larger quantities, e.g. [{ minQuantity: 50, price: 18 }]
+    bulkPricing: {
+        type: [{
+            _id: false,
+            minQuantity: { type: Number, required: true, min: 0 },
+            price: { type: Number, required: true, min: 0 }
+        }],
+        default: []
+    },
+    // Stock remaining; reduced when the farmer confirms an order
+    quantityAvailable: {
+        type: Number,
+        min: 0
     },
     price: {
         type: Number,
@@ -58,6 +79,11 @@ const PostSchema =  new Schema ( {
     available: {
         type: Boolean,
         default: true
+    },
+    // Hidden by an admin after a report; not shown in listings and cannot be ordered
+    hidden: {
+        type: Boolean,
+        default: false
     },
     likes: [
         {

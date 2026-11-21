@@ -17,7 +17,27 @@ if (process.env.geminiApiKey) {
   }
 }
 
-console.log('Gemini API Key loaded:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NOT FOUND');
+console.log('Gemini API Key:', apiKey ? 'loaded' : 'NOT FOUND');
+
+// Small in-memory cache (per server instance) so repeated lookups don't spend Gemini quota
+const crypto = require('crypto');
+const cache = new Map();
+const MAX_ENTRIES = 500;
+const cacheGet = key => {
+  const hit = cache.get(key);
+  if (!hit) return null;
+  if (hit.expires < Date.now()) { cache.delete(key); return null; }
+  return hit.value;
+};
+const cacheSet = (key, value, ttlMs) => {
+  if (cache.size >= MAX_ENTRIES) cache.delete(cache.keys().next().value); // drop oldest
+  cache.set(key, { value, expires: Date.now() + ttlMs });
+};
+const HOUR = 60 * 60 * 1000;
+
+// Model names can be overridden without a code change when Google retires one
+const TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-3.8-flash';
+const VISION_MODEL = process.env.GEMINI_VISION_MODEL || 'gemini-3-flash-preview';
 
 // Initialize Gemini AI with API key
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
@@ -37,6 +57,10 @@ async function analyzeProductImage(imageBase64, mimeType = 'image/jpeg') {
       };
     }
 
+    const imageKey = 'img:' + crypto.createHash('sha256').update(imageBase64).digest('hex');
+    const cachedImage = cacheGet(imageKey);
+    if (cachedImage) return { success: true, data: cachedImage, cached: true };
+
     console.log('Starting Gemini AI analysis...');
     console.log('Image size:', imageBase64.length, 'bytes');
     console.log('MIME type:', mimeType);
@@ -53,11 +77,11 @@ Please provide the following information in JSON format:
 
 Only respond with valid JSON. If you cannot identify the product, set productName to "Unknown".`;
 
-    console.log('Calling Gemini API with gemini-2.5-flash-image model...');
+    console.log('Calling Gemini API with', VISION_MODEL);
 
     // Use the new SDK format
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: VISION_MODEL,
       contents: [
         {
           role: 'user',
@@ -82,6 +106,9 @@ Only respond with valid JSON. If you cannot identify the product, set productNam
     if (jsonMatch) {
       const productInfo = JSON.parse(jsonMatch[0]);
       console.log('Parsed product info:', productInfo);
+      if (productInfo.productName && productInfo.productName !== 'Unknown') {
+        cacheSet(imageKey, productInfo, 24 * HOUR);
+      }
       return {
         success: true,
         data: productInfo
@@ -108,12 +135,13 @@ Only respond with valid JSON. If you cannot identify the product, set productNam
 }
 
 /**
- * Get price suggestion based on product and location
+ * Get price suggestion based on product, location and unit of sale
  * @param {string} productName - Name of the product
  * @param {string} location - Location/address
- * @returns {Object} - Price suggestion
+ * @param {string} unit - kg | litre | dozen | piece
+ * @returns {Object} - { suggestedPrice, unit, priceRange, reasoning, ... } (price is per ONE unit)
  */
-async function getPriceSuggestion(productName, location) {
+async function getPriceSuggestion(productName, location, unit = 'kg') {
   try {
     if (!ai) {
       return {
@@ -122,14 +150,21 @@ async function getPriceSuggestion(productName, location) {
       };
     }
 
-    const prompt = `You are an agricultural market expert in India. Based on the following information, suggest a fair market price:
+    const product = String(productName).slice(0, 80);
+    const place = String(location).slice(0, 120);
+    const priceKey = `price:${product.toLowerCase()}|${place.toLowerCase().trim()}|${unit}`;
+    const cachedPrice = cacheGet(priceKey);
+    if (cachedPrice) return { success: true, data: cachedPrice, cached: true };
 
-Product: ${productName}
-Location: ${location}
+    const prompt = `You are an agricultural market expert in India. Based on the following information, suggest a fair market price for ONE ${unit}:
+
+Product: ${product}
+Location: ${place}
+Unit of sale: ${unit}
 
 Please provide price suggestion in JSON format:
 {
-  "suggestedPricePerKg": <number>,
+  "suggestedPrice": <number, price in INR per one ${unit}>,
   "priceRange": {
     "min": <number>,
     "max": <number>
@@ -144,7 +179,7 @@ Consider current market trends, location, and seasonal factors. Only respond wit
 
     // Use the new SDK format with gemini-2.0-flash for text generation
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: TEXT_MODEL,
       contents: [
         {
           role: 'user',
@@ -160,6 +195,15 @@ Consider current market trends, location, and seasonal factors. Only respond wit
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const priceInfo = JSON.parse(jsonMatch[0]);
+      // tolerate the older field name; always return suggestedPrice (+ suggestedPricePerKg for kg)
+      const price = Number(priceInfo.suggestedPrice ?? priceInfo.suggestedPricePerKg);
+      if (!(price > 0)) {
+        return { success: false, error: 'AI did not return a usable price' };
+      }
+      priceInfo.suggestedPrice = price;
+      priceInfo.unit = unit;
+      if (unit === 'kg') priceInfo.suggestedPricePerKg = price;
+      cacheSet(priceKey, priceInfo, 6 * HOUR);
       return {
         success: true,
         data: priceInfo

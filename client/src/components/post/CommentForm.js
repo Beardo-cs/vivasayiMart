@@ -2,13 +2,15 @@ import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import {addComment } from '../../actions/post';
+import { useTranslation } from 'react-i18next';
 
 const CommentForm = ({ postId, addComment}) => {
+    const { t } = useTranslation();
     const [text, setText]= useState('');
   return (
     <div className='post-form'>
     <div className='bg-primary p'>
-    <h3>Leave a Comment</h3>
+    <h3>{t('comments.leave')}</h3>
     </div>
     <form className='form my-1'
         onSubmit={e => {
@@ -21,12 +23,12 @@ const CommentForm = ({ postId, addComment}) => {
         name='text'
         cols='30'
         rows='5'
-        placeholder='Create a comment'
+        placeholder={t('comments.placeholder')}
         value={text}
         onChange={e => setText(e.target.value)}
         required
     />
-    <input type='submit' class='btn btn-dark my-1' value='Submit' />
+    <input type='submit' className='btn btn-dark my-1' value={t('postForm.submit')} />
 </form>
 </div>
   )

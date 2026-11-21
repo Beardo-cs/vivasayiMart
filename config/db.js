@@ -31,6 +31,18 @@ const connectDB = async () => {
     });
 
     console.log('MongoDB Connected...');
+
+    // Backfill stock for listings created before stock tracking existed
+    try {
+      const Post = require('../models/Post');
+      await Post.updateMany(
+        { quantityAvailable: { $exists: false } },
+        [{ $set: { quantityAvailable: '$weight' } }],
+        { updatePipeline: true }
+      );
+    } catch (e) {
+      console.error('Stock backfill skipped:', e.message);
+    }
   } catch (err) {
     console.error('MongoDB Connection Error:', err.message);
     // Don't exit process in serverless environment

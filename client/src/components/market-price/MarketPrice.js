@@ -1,9 +1,11 @@
 import React, { useState, useRef, Fragment } from 'react';
 import { DATA_GOV_API_KEY } from '../../config';
 import Loader from '../layout/Loader';
+import { useTranslation } from 'react-i18next';
 import '../dashboard/Dashboard.css';
 
 const MarketPrice = () => {
+  const { t } = useTranslation();
   // Cache for API responses to prevent redundant calls
   const cacheRef = useRef({
     districts: {},
@@ -535,7 +537,7 @@ const MarketPrice = () => {
       const data = await res.json();
       setResponse(data);
     } catch (err) {
-      setError(err.message || 'An error occurred while fetching data');
+      setError(err.message || t('market.error'));
     } finally {
       setLoading(false);
     }
@@ -543,29 +545,29 @@ const MarketPrice = () => {
 
   // Show loader while fetching market price data
   if (loading) {
-    return <Loader message="Fetching market price data..." fullPage={false} />;
+    return <Loader message={t('market.fetching')} fullPage={false} />;
   }
 
   return (
     <div className="container">
       <div className="dashboard-header farmer-header">
         <div className="header-content">
-          <h1 className="dashboard-title">📊 Market Price</h1>
-          <p className="dashboard-subtitle">Check current market prices from data.gov.in</p>
+          <h1 className="dashboard-title">📊 {t('nav.marketPrice')}</h1>
+          <p className="dashboard-subtitle">{t('market.subtitle')}</p>
         </div>
       </div>
 
       <form className="form" onSubmit={onSubmit}>
         <div className="form-group">
           <div className="form-group">
-            <label htmlFor="state">State</label>
+            <label htmlFor="state">{t('market.state')}</label>
             <select
               name="state"
               id="state"
               value={formData.state}
               onChange={onChange}
             >
-              <option value="">Select State</option>
+              <option value="">{t('market.selectState')}</option>
               {filterOptions.states.map((state, index) => (
                 <option key={index} value={state}>
                   {state}
@@ -575,7 +577,7 @@ const MarketPrice = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="district">District</label>
+            <label htmlFor="district">{t('market.district')}</label>
             <select
               name="district"
               id="district"
@@ -583,10 +585,10 @@ const MarketPrice = () => {
               onChange={onChange}
               disabled={!formData.state}
             >
-              <option value="">Select District</option>
+              <option value="">{t('market.selectDistrict')}</option>
               {loadingFilters.districts ? (
                 <Fragment>
-                  <option value="">Loading...</option>
+                  <option value="">{t('loading')}</option>
                 </Fragment>
               ) : (
                 filterOptions.districts.map((district, index) => (
@@ -599,7 +601,7 @@ const MarketPrice = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="market">Market</label>
+            <label htmlFor="market">{t('market.market')}</label>
             <select
               name="market"
               id="market"
@@ -607,10 +609,10 @@ const MarketPrice = () => {
               onChange={onChange}
               disabled={!formData.district}
             >
-              <option value="">Select Market</option>
+              <option value="">{t('market.selectMarket')}</option>
               {loadingFilters.markets ? (
                 <Fragment>
-                  <option value="">Loading...</option>
+                  <option value="">{t('loading')}</option>
                 </Fragment>
               ) : (
                 filterOptions.markets.map((market, index) => (
@@ -623,7 +625,7 @@ const MarketPrice = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="commodity">Commodity</label>
+            <label htmlFor="commodity">{t('market.commodity')}</label>
             <select
               name="commodity"
               id="commodity"
@@ -631,10 +633,10 @@ const MarketPrice = () => {
               onChange={onChange}
               disabled={!formData.market}
             >
-              <option value="">Select Commodity</option>
+              <option value="">{t('market.selectCommodity')}</option>
               {loadingFilters.commodities ? (
                 <Fragment>
-                  <option value="">Loading...</option>
+                  <option value="">{t('loading')}</option>
                 </Fragment>
               ) : (
                 filterOptions.commodities.map((commodity, index) => (
@@ -647,7 +649,7 @@ const MarketPrice = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="variety">Variety</label>
+            <label htmlFor="variety">{t('market.variety')}</label>
             <select
               name="variety"
               id="variety"
@@ -655,10 +657,10 @@ const MarketPrice = () => {
               onChange={onChange}
               disabled={!formData.commodity}
             >
-              <option value="">Select Variety</option>
+              <option value="">{t('market.selectVariety')}</option>
               {loadingFilters.varieties ? (
                 <Fragment>
-                  <option value="">Loading...</option>
+                  <option value="">{t('loading')}</option>
                 </Fragment>
               ) : (
                 filterOptions.varieties.map((variety, index) => (
@@ -671,7 +673,7 @@ const MarketPrice = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="grade">Grade</label>
+            <label htmlFor="grade">{t('market.grade')}</label>
             <select
               name="grade"
               id="grade"
@@ -679,10 +681,10 @@ const MarketPrice = () => {
               onChange={onChange}
               disabled={!formData.commodity}
             >
-              <option value="">Select Grade</option>
+              <option value="">{t('market.selectGrade')}</option>
               {loadingFilters.grades ? (
                 <Fragment>
-                  <option value="">Loading...</option>
+                  <option value="">{t('loading')}</option>
                 </Fragment>
               ) : (
                 filterOptions.grades.map((grade, index) => (
@@ -699,7 +701,7 @@ const MarketPrice = () => {
         <input
           type="submit"
           className="btn btn-primary"
-          value={loading ? 'Loading...' : 'Fetch Market Price Data'}
+          value={loading ? t('loading') : t('market.fetch')}
           disabled={loading}
         />
       </form>
@@ -712,7 +714,7 @@ const MarketPrice = () => {
 
       {response && (
         <div style={{ marginTop: '2rem' }}>
-          <h2 className="text-primary">Market Price Data</h2>
+          <h2 className="text-primary">{t('market.dataTitle')}</h2>
           {response.records && response.records.length > 0 ? (
             <table
               style={{
@@ -723,16 +725,16 @@ const MarketPrice = () => {
             >
               <thead>
                 <tr style={{ backgroundColor: '#f4f4f4', borderBottom: '2px solid #007bff' }}>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>State</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>District</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>Market</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>Commodity</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>Variety</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>Grade</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>Arrival Date</th>
-                  <th style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>Min Price</th>
-                  <th style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>Max Price</th>
-                  <th style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>Modal Price</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>{t('market.th.state')}</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>{t('market.th.district')}</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>{t('market.th.market')}</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>{t('market.th.commodity')}</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>{t('market.th.variety')}</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>{t('market.th.grade')}</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>{t('market.th.arrival')}</th>
+                  <th style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>{t('market.th.minPrice')}</th>
+                  <th style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold', borderRight: '1px solid #ddd' }}>{t('market.th.maxPrice')}</th>
+                  <th style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>{t('market.th.modalPrice')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -753,7 +755,7 @@ const MarketPrice = () => {
               </tbody>
             </table>
           ) : (
-            <p>No records found</p>
+            <p>{t('market.none')}</p>
           )}
         </div>
       )}

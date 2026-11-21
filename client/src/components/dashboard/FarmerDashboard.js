@@ -1,83 +1,97 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import Loader from '../layout/Loader';
+import api from '../../utils/api';
+import { getCurrentProfile } from '../../actions/profile';
 import './Dashboard.css';
 
-const FarmerDashboard = ({
-    auth: { user },
-    profile: { profile, loading }
-}) => {
+const FarmerDashboard = ({ auth: { user }, profile: { profile, loading }, getCurrentProfile }) => {
+    const { t } = useTranslation();
+    const [stats, setStats] = useState(null);
+
+    useEffect(() => { getCurrentProfile('farmer'); }, [getCurrentProfile]);
+    useEffect(() => {
+        api.get('/api/orders/stats').then(res => setStats(res.data)).catch(() => {});
+    }, []);
+    const n = key => (stats ? stats[key] : 0);
+
     return loading && profile === null ? (
-        <Loader message="Loading your farmer dashboard..." fullPage={true} />
+        <Loader message={t('dashboard.loadingFarmer')} fullPage={true} />
     ) : (
         <Fragment>
             <div className="dashboard-header farmer-header">
                 <div className="header-content">
-                    <h1 className="dashboard-title">🌾 Farmer Dashboard</h1>
-                    <p className="dashboard-subtitle">Welcome back, {user && user.name}!</p>
+                    <h1 className="dashboard-title">🌾 {t('dashboard.farmerTitle')}</h1>
+                    <p className="dashboard-subtitle">{t('dashboard.welcome', { name: user && user.name })}</p>
                 </div>
             </div>
 
             {profile !== null ? (
                 <Fragment>
                     <div className="dashboard-actions-modern">
-                        <Link to="/posts" className="action-card farmer-card">
+                        <Link to="/posts?mine=1" className="action-card farmer-card">
                             <div className="card-icon">📦</div>
-                            <h3>My Products</h3>
-                            <p>View and manage your listings</p>
+                            <h3>{t('dashboard.productsCard')}</h3>
+                            <p>{t('dashboard.productsDesc')}</p>
                         </Link>
-                        <Link to="/add-post" className="action-card farmer-card primary">
-                            <div className="card-icon">➕</div>
-                            <h3>Add Product</h3>
-                            <p>List a new product</p>
+                        <Link to="/orders" className="action-card farmer-card primary">
+                            <div className="card-icon">📥</div>
+                            <h3>{t('nav.orders')}</h3>
+                            <p>{t('dashboard.ordersDesc')}</p>
+                        </Link>
+                        <Link to={`/farmer/${user && user._id}`} className="action-card farmer-card">
+                            <div className="card-icon">🔗</div>
+                            <h3>{t('dashboard.myPage')}</h3>
+                            <p>{t('dashboard.myPageDesc')}</p>
                         </Link>
                         <Link to="/market-price" className="action-card farmer-card">
                             <div className="card-icon">📊</div>
-                            <h3>Market Prices</h3>
-                            <p>Check current rates</p>
+                            <h3>{t('nav.marketPrice')}</h3>
+                            <p>{t('dashboard.marketDesc')}</p>
                         </Link>
-                        <Link to="/edit-profile" className="action-card farmer-card">
+                        <Link to="/create-farmer-profile" className="action-card farmer-card">
                             <div className="card-icon">⚙️</div>
-                            <h3>Edit Profile</h3>
-                            <p>Update farm details</p>
+                            <h3>{t('dashboard.editProfile')}</h3>
+                            <p>{t('dashboard.editProfileDesc')}</p>
                         </Link>
                     </div>
 
                     <div className="stats-section">
-                        <h2 className="section-title">📈 Quick Stats</h2>
+                        <h2 className="section-title">📈 {t('dashboard.stats')}</h2>
                         <div className="stats-grid">
                             <div className="stat-card farmer-stat">
                                 <div className="stat-icon">📦</div>
                                 <div className="stat-content">
-                                    <h3>Total Products</h3>
-                                    <p className="stat-number">0</p>
-                                    <small>Products listed</small>
+                                    <h3>{t('dashboard.totalProducts')}</h3>
+                                    <p className="stat-number">{n('totalProducts')}</p>
+                                    <small>{t('dashboard.totalProductsSub')}</small>
                                 </div>
                             </div>
                             <div className="stat-card farmer-stat">
                                 <div className="stat-icon">✅</div>
                                 <div className="stat-content">
-                                    <h3>Active Listings</h3>
-                                    <p className="stat-number">0</p>
-                                    <small>Currently available</small>
+                                    <h3>{t('dashboard.activeListings')}</h3>
+                                    <p className="stat-number">{n('activeListings')}</p>
+                                    <small>{t('dashboard.activeListingsSub')}</small>
                                 </div>
                             </div>
                             <div className="stat-card farmer-stat">
-                                <div className="stat-icon">👁️</div>
+                                <div className="stat-icon">📥</div>
                                 <div className="stat-content">
-                                    <h3>Profile Views</h3>
-                                    <p className="stat-number">0</p>
-                                    <small>This month</small>
+                                    <h3>{t('dashboard.pendingOrders')}</h3>
+                                    <p className="stat-number">{n('pendingOrders')}</p>
+                                    <small>{t('dashboard.pendingOrdersSub', { count: n('confirmedOrders') })}</small>
                                 </div>
                             </div>
                             <div className="stat-card farmer-stat">
                                 <div className="stat-icon">💰</div>
                                 <div className="stat-content">
-                                    <h3>Total Value</h3>
-                                    <p className="stat-number">₹0</p>
-                                    <small>Listed products</small>
+                                    <h3>{t('dashboard.salesCompleted')}</h3>
+                                    <p className="stat-number">₹{Number(n('revenue')).toFixed(2)}</p>
+                                    <small>{t('dashboard.salesCompletedSub', { count: n('completedOrders') })}</small>
                                 </div>
                             </div>
                         </div>
@@ -86,11 +100,13 @@ const FarmerDashboard = ({
             ) : (
                 <div className="no-profile-card">
                     <div className="no-profile-icon">🌾</div>
-                    <h2>Create Your Farmer Profile</h2>
-                    <p>You haven't set up your farmer profile yet. Create one to start listing your products and connect with consumers.</p>
+                    <h2>{t('dashboard.noProfileTitle')}</h2>
+                    <p>{t('dashboard.noProfileText')}</p>
                     <Link to="/create-farmer-profile" className="btn-modern btn-primary-modern">
-                        <i className="fas fa-plus"></i> Create Farmer Profile
+                        <i className="fas fa-plus"></i> {t('dashboard.createProfile')}
                     </Link>
+                    {' '}
+                    <Link to="/posts?mine=1" className="btn-modern btn-secondary-modern">{t('dashboard.productsCard')}</Link>
                 </div>
             )}
         </Fragment>
@@ -99,13 +115,9 @@ const FarmerDashboard = ({
 
 FarmerDashboard.propTypes = {
     auth: PropTypes.object.isRequired,
-    profile: PropTypes.object.isRequired
+    profile: PropTypes.object.isRequired,
+    getCurrentProfile: PropTypes.func.isRequired
 };
 
-const mapStateToProps = state => ({
-    auth: state.auth,
-    profile: state.profile
-});
-
-export default connect(mapStateToProps)(FarmerDashboard);
-
+const mapStateToProps = state => ({ auth: state.auth, profile: state.profile });
+export default connect(mapStateToProps, { getCurrentProfile })(FarmerDashboard);

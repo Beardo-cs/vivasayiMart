@@ -6,6 +6,11 @@ const { check, validationResult } = require('express-validator');
 
 const FarmerProfile = require('../../models/FarmerProfile');
 const User = require('../../models/User');
+const Post = require('../../models/Post');
+const Review = require('../../models/Review');
+const mongoose = require('mongoose');
+
+const isObjectId = id => /^[0-9a-fA-F]{24}$/.test(id);
 
 // @route     GET api/farmer-profile/me
 // @desc      Get current farmer's profile
@@ -37,7 +42,8 @@ router.post(
             check('farmName', 'Farm name is required').not().isEmpty(),
             check('location', 'Location is required').not().isEmpty(),
             check('mobileNumber', 'Mobile number is required').not().isEmpty(),
-            check('farmingSpecializations', 'At least one farming specialization is required').isArray({ min: 1 })
+            check('farmingSpecializations', 'At least one farming specialization is required').isArray({ min: 1 }),
+            check('yearsOfExperience', 'Years of experience must be a number').optional({ values: 'falsy' }).isFloat({ min: 0, max: 100 })
         ]
     ],
     async (req, res) => {
@@ -110,8 +116,54 @@ router.post(
 // @access    Public
 router.get('/', async (req, res) => {
     try {
-        const profiles = await FarmerProfile.find().populate('user', ['name', 'avatar']);
-        res.json(profiles);
+        const profiles = await FarmerProfile.find().sort({ date: -1 }).populate('user', ['name', 'avatar', 'farmerVerified']);
+        const ids = profiles.map(p => p.user && p.user._id).filter(Boolean);
+        const ratings = ids.length ? await Review.aggregate([
+            { $match: { farmer: { $in: ids } } },
+            { $group: { _id: '$farmer', average: { $avg: '$rating' }, count: { $sum: 1 } } }
+        ]) : [];
+        const byFarmer = {};
+        ratings.forEach(r => { byFarmer[r._id.toString()] = { average: Math.round(r.average * 10) / 10, count: r.count }; });
+
+        res.json(profiles
+            .filter(p => p.user)
+            .map(p => ({ ...p.toObject(), rating: byFarmer[p.user._id.toString()] || { average: 0, count: 0 } })));
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route     GET api/farmer-profile/:user_id/public
+// @desc      Everything for the shareable farmer page: profile (may be null), rating,
+//            and current in-stock listings. Contact number is NOT included.
+// @access    Public
+router.get('/:user_id/public', async (req, res) => {
+    try {
+        if (!isObjectId(req.params.user_id)) return res.status(404).json({ msg: 'Farmer not found' });
+        const user = await User.findOne({ _id: req.params.user_id, userType: 'farmer' }).select('name avatar farmerVerified');
+        if (!user) return res.status(404).json({ msg: 'Farmer not found' });
+
+        const [profile, products, summary] = await Promise.all([
+            FarmerProfile.findOne({ user: user._id }).select('-mobileNumber -social.whatsapp'),
+            Post.find({ user: user._id, hidden: { $ne: true }, available: true, quantityAvailable: { $gt: 0 } })
+                .select('-comments -likes -mobileNumber')
+                .sort({ date: -1 })
+                .limit(24),
+            Review.aggregate([
+                { $match: { farmer: new mongoose.Types.ObjectId(req.params.user_id) } },
+                { $group: { _id: null, average: { $avg: '$rating' }, count: { $sum: 1 } } }
+            ])
+        ]);
+
+        res.json({
+            farmer: { _id: user._id, name: user.name, avatar: user.avatar, verified: !!user.farmerVerified },
+            profile,
+            products,
+            rating: summary[0]
+                ? { average: Math.round(summary[0].average * 10) / 10, count: summary[0].count }
+                : { average: 0, count: 0 }
+        });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -123,7 +175,7 @@ router.get('/', async (req, res) => {
 // @access    Public
 router.get('/:user_id', async (req, res) => {
     try {
-        const profile = await FarmerProfile.findOne({ user: req.params.user_id }).populate('user', ['name', 'avatar', 'email']);
+        const profile = await FarmerProfile.findOne({ user: req.params.user_id }).select('-mobileNumber').populate('user', ['name', 'avatar']);
 
         if (!profile) {
             return res.status(400).json({ msg: 'Profile not found' });

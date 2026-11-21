@@ -2,26 +2,28 @@ import React from 'react'
 import { Link, Navigate } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 const Landing = ({isAuthenticated}) => {
+  const { t } = useTranslation();
   // as we dont want to see the landing page when we click the devconnector in dashboard page
   if (isAuthenticated) {
-    return <Navigate to='/dashboard'/>;
+    return <Navigate to='/dashboard' replace />;
   }
     return (
         <section className="landing">
           <div className="dark-overlay">
             <div className="landing-inner">
-             <h1 className="x-large">Vivasayi Mart</h1>
+             <h1 className="x-large">{t('landing.title')}</h1>
               <p className="lead">
-                Create an account to connect Farmers around the world, Connect here to Buy and Sell.
+                {t('landing.tagline')}
               </p>
             <div className="buttons">
               <Link to="/register" className="btn btn-primary">
-                Sign Up
+                {t('login.signUp')}
               </Link>
               <Link to="/login" className="btn btn-light">
-                Login
+                {t('nav.login')}
               </Link>
             </div>
           </div>

@@ -5,9 +5,11 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { login } from '../../actions/auth';
 import Loader from '../layout/Loader';
+import { useTranslation } from 'react-i18next';
 
 //isAuthenticated is a props here
 const Login = ({ login, isAuthenticated, user, loading }) => {
+  const { t } = useTranslation();
   const  [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -27,7 +29,7 @@ const { email, password } = formData;
 
   // Show loader while authenticating
   if(loading && !user) {
-    return <Loader message="Signing you in..." fullPage={true} />
+    return <Loader message={t('login.signingIn')} fullPage={true} />
   }
 
   // Redirected if logged in based on user type
@@ -41,14 +43,14 @@ const { email, password } = formData;
   }
    return (
      <Fragment>
-      <h1 className="large text-primary">Sign in</h1>
-      <p className="lead"><i className="fas fa-user"></i> Sign Into Your Account</p>
+      <h1 className="large text-primary">{t('login.title')}</h1>
+      <p className="lead"><i className="fas fa-user"></i> {t('login.subtitle')}</p>
 
       <form className="form" onSubmit ={e => onSubmit(e)}>
         <div className="form-group">
         <input 
           type="email" 
-          placeholder="Email Address" 
+          placeholder={t('register.email')} 
           name="email" 
           value={email} 
           onChange= {e=> onChange(e)} 
@@ -58,17 +60,18 @@ const { email, password } = formData;
         <div className="form-group">
           <input
             type="password"
-            placeholder="Password"
+            placeholder={t('register.password')}
             name="password"
             value={password} 
             onChange= {e=> onChange(e)} 
             minLength="6"
           />
           </div>
-        <input type="submit" className="btn btn-primary" value="Login" />
+        <input type="submit" className="btn btn-primary" value={t('nav.login')} />
       </form>
+      <p className="my-1"><Link to="/forgot-password">{t('auth.forgotLink')}</Link></p>
       <p className="my-1">
-      Don't have an account? <Link to="/register">Sign Up</Link>
+      {t('login.noAccount')} <Link to="/register">{t('login.signUp')}</Link>
     </p>
  </Fragment>
 )};

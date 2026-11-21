@@ -1,5 +1,6 @@
 import api from '../utils/api';
 import {setAlert} from './alert';
+import i18n from '../i18n';
 import {
     DELETE_POST,
     GET_POSTS,
@@ -8,13 +9,19 @@ import {
     ADD_POST,
     GET_POST,
     ADD_COMMENT,
-    REMOVE_COMMENT
+    REMOVE_COMMENT,
+    UPDATE_POST
 } from './types';
 
-//Get posts
-export const getPosts = () => async dispatch => {
+//Get posts (optional filters: q, category, location, minPrice, maxPrice, inStock, sort, page, limit)
+export const getPosts = (filters = {}) => async dispatch => {
     try {
-        const res = await api.get('/api/posts');
+        const params = {};
+        Object.keys(filters).forEach(key => {
+            const v = filters[key];
+            if (v !== '' && v !== null && v !== undefined && v !== false) params[key] = v;
+        });
+        const res = await api.get('/api/posts', { params });
 
         dispatch ({
             type: GET_POSTS,
@@ -73,7 +80,7 @@ export const deletePost = id => async dispatch => {
             payload: id
         });
 
-        dispatch(setAlert('Post Removed', 'success'));
+        dispatch(setAlert(i18n.t('alerts.postRemoved'), 'success'));
     } catch (err) {
         dispatch ({
             type: POST_ERROR,
@@ -97,8 +104,12 @@ export const addPost = formData => async dispatch => {
             payload: res.data
         });
 
-        dispatch(setAlert('Post Created', 'success'));
+        dispatch(setAlert(i18n.t('alerts.postCreated'), 'success'));
     } catch (err) {
+        const errors = err.response?.data?.errors;
+        if (errors) {
+            errors.forEach(error => dispatch(setAlert(error.msg, 'danger')));
+        }
         dispatch ({
             type: POST_ERROR,
             payload: {msg: err.response?.statusText || err.message, status: err.response?.status }
@@ -140,7 +151,7 @@ export const addComment = (postId, formData) => async dispatch => {
             payload: res.data
         });
 
-        dispatch(setAlert('Comment Added', 'success'));
+        dispatch(setAlert(i18n.t('alerts.commentAdded'), 'success'));
     } catch (err) {
         dispatch ({
             type: POST_ERROR,
@@ -160,7 +171,7 @@ export const deleteComment = (postId, commentId ) => async dispatch => {
             payload: commentId
         });
 
-        dispatch(setAlert('Comment Deleted', 'success'));
+        dispatch(setAlert(i18n.t('alerts.commentDeleted'), 'success'));
     } catch (err) {
         dispatch ({
             type: POST_ERROR,
@@ -170,3 +181,30 @@ export const deleteComment = (postId, commentId ) => async dispatch => {
 };
 
 
+
+//Update post (edit listing / toggle availability)
+export const updatePost = (id, formData) => async dispatch => {
+    try {
+        const res = await api.put(`/api/posts/${id}`, formData);
+
+        dispatch ({
+            type: UPDATE_POST,
+            payload: res.data
+        });
+
+        dispatch(setAlert(i18n.t('alerts.productUpdated'), 'success'));
+        return true;
+    } catch (err) {
+        const errors = err.response?.data?.errors;
+        if (errors) {
+            errors.forEach(error => dispatch(setAlert(error.msg, 'danger')));
+        } else if (err.response?.data?.msg) {
+            dispatch(setAlert(err.response.data.msg, 'danger'));
+        }
+        dispatch ({
+            type: POST_ERROR,
+            payload: {msg: err.response?.statusText || err.message, status: err.response?.status }
+        });
+        return false;
+    }
+};

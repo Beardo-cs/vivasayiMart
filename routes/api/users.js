@@ -2,6 +2,8 @@
 const express = require('express');
 //using express to get a 'Router' object
 const router = express.Router();
+const crypto = require('crypto');
+const { sendVerificationEmail } = require('../../services/email');
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
 const jwt = require ('jsonwebtoken');
@@ -96,8 +98,20 @@ async (req, res) => {
     // used to create a hash password 
     user.password = await bcrypt.hash(password, salt);  
 
+    // email verification (informational; does not block login)
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    user.emailVerified = false;
+    user.verifyTokenHash = crypto.createHash('sha256').update(verifyToken).digest('hex');
+    user.verifyTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
     // saving the password to database
     await user.save();   
+
+    try {
+        await sendVerificationEmail(user, verifyToken);
+    } catch (mailErr) {
+        console.error('Verification email failed:', mailErr.message); // sign-up still succeeds
+    }
 
     // payload is the object. As we need user id for jwt.. getting userid
     const payload = {    

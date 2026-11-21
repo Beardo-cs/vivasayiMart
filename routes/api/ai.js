@@ -46,13 +46,14 @@ router.post('/analyze-product', auth, async (req, res) => {
 router.post('/suggest-price', auth, async (req, res) => {
   try {
     const { productName, location } = req.body;
+    const unit = ['kg', 'litre', 'dozen', 'piece'].includes(req.body.unit) ? req.body.unit : 'kg';
 
     if (!productName || !location) {
       return res.status(400).json({ msg: 'Product name and location are required' });
     }
 
-    // Get price suggestion from Gemini AI
-    const result = await getPriceSuggestion(productName, location);
+    // Get price suggestion from Gemini AI (cached)
+    const result = await getPriceSuggestion(productName, location, unit);
 
     if (!result.success) {
       return res.status(500).json({ msg: result.error });

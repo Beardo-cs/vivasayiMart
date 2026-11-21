@@ -7,8 +7,10 @@ import Spinner from '../layout/Spinner';
 import CommentForm from '../post/CommentForm';
 import CommentItem from '../post/CommentItem';
 import {getPost} from '../../actions/post';
+import { useTranslation } from 'react-i18next';
 
 const Post = ({getPost, post: {post, loading} }) => {
+  const { t } = useTranslation();
   const { id } = useParams();
 
   useEffect (() => {
@@ -20,13 +22,13 @@ const Post = ({getPost, post: {post, loading} }) => {
   ): (
     <Fragment>
     <Link to ='/posts' className='btn'>
-      Back to  Posts
+      {t('post.back')}
     </Link>
 
     {/* Product Details Section */}
     <div className="post bg-white p-1 my-1">
       <div>
-        <Link to={`/profile/${post.user}`}>
+        <Link to={`/farmer/${post.user}`}>
           <img className="round-img" src={post.avatar} alt="" />
           <h4>{post.name}</h4>
         </Link>
@@ -46,21 +48,21 @@ const Post = ({getPost, post: {post, loading} }) => {
           )}
 
           <div className="product-info my-1">
-            <p><strong>👤 Farmer:</strong> {post.farmerName}</p>
-            <p><strong>📱 Contact:</strong> {post.mobileNumber}</p>
-            <p><strong>⚖️ Weight:</strong> {post.weight} kg</p>
-            <p><strong>💰 Price:</strong> ₹{post.price} per kg</p>
-            <p className="lead"><strong>💵 Total Amount: ₹{post.totalAmount.toFixed(2)}</strong></p>
-            <p><strong>📍 Location:</strong> {post.address}</p>
+            <p><strong>👤 {t('orders.farmer')}:</strong> {post.farmerName}</p>
+            <p><strong>📱 {t('product.contact')}:</strong> {post.mobileNumber}</p>
+            <p><strong>⚖️ {t('product.inStock')}:</strong> {post.quantityAvailable ?? post.weight} {t(`units.${post.unit || 'kg'}`)}</p>
+            <p><strong>💰 {t('post.price')}:</strong> ₹{post.price} / {t(`units.${post.unit || 'kg'}`)}</p>
+            <p className="lead"><strong>💵 {t('product.stockValue')}: ₹{((post.quantityAvailable ?? post.weight) * post.price).toFixed(2)}</strong></p>
+            <p><strong>📍 {t('post.location')}:</strong> {post.address}</p>
           </div>
 
           <p className="my-1">
-            <strong>Description:</strong> {post.text}
+            <strong>{t('post.description')}:</strong> {post.text}
           </p>
         </div>
 
         <p className="post-date">
-          Posted on <Moment format='DD/MM/YYYY'>{post.date}</Moment>
+          {t('comments.postedOn')} <Moment format='DD/MM/YYYY'>{post.date}</Moment>
         </p>
       </div>
     </div>

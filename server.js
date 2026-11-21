@@ -6,6 +6,9 @@ const path = require ('path');
 // declaring a variable app to access our app.
 const app= express();
 
+// Needed behind Vercel/other proxies so rate limiting sees the real client IP
+app.set('trust proxy', 1);
+
 // Connect Database
 connectDB();
 
@@ -36,17 +39,40 @@ app.use(cors({
 }));
 //application level Middleware. req.body is populated when we use middleware called body parser such as express.json() or urlencoded()
 // it allows us to get data from user.js (req.body)
-app.use(express.json({ extended: false }));
+// Product photos are sent as base64 inside JSON, so the 100kb default is far too small.
+// (Client also downsizes photos before upload; Vercel itself caps request bodies at ~4.5MB.)
+app.use(express.json({ extended: false, limit: '8mb' }));
 
 // app.get('/', (req, res) => res.send('API Running'));
 
 // Define Routes
+// Rate limits: brute-force protection on auth, cost protection on AI (paid Gemini quota)
+const rateLimit = require('express-rate-limit');
+const limiter = (windowMinutes, max, msg) => rateLimit({
+    windowMs: windowMinutes * 60 * 1000,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { msg }
+});
+// POST only: GET /api/auth runs on every page load to restore the session
+app.post('/api/auth', limiter(15, 30, 'Too many login attempts, please try again later'));
+app.post('/api/users', limiter(60, 20, 'Too many sign-up attempts, please try again later'));
+app.post('/api/auth/forgot', limiter(60, 5, 'Too many reset requests, please try again later'));
+app.post('/api/auth/reset', limiter(60, 10, 'Too many attempts, please try again later'));
+app.post('/api/auth/resend-verification', limiter(60, 5, 'Too many requests, please try again later'));
+app.use('/api/ai', limiter(60, 60, 'AI request limit reached, please try again later'));
+
 app.use('/api/users', require('./routes/api/users'));
 app.use('/api/auth', require('./routes/api/auth'));
-app.use('/api/profile', require('./routes/api/profile'));
 app.use('/api/farmer-profile', require('./routes/api/farmerProfile'));
 app.use('/api/consumer-profile', require('./routes/api/consumerProfile'));
 app.use('/api/posts', require('./routes/api/posts'));
+app.use('/api/orders', require('./routes/api/orders'));
+app.use('/api/reviews', require('./routes/api/reviews'));
+app.use('/api/favorites', require('./routes/api/favorites'));
+app.use('/api/reports', require('./routes/api/reports'));
+app.use('/api/admin', require('./routes/api/admin'));
 app.use('/api/ai', require('./routes/api/ai'));
 
 // Serve static assets in production

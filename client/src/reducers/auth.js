@@ -7,7 +7,8 @@ import {
     LOGIN_FAIL,
     LOGOUT,
     LOGOUT_START,
-    ACCOUNT_DELETED
+    ACCOUNT_DELETED,
+    AUTH_NETWORK_ERROR
 } from '../actions/types';
 
 const initialState = {
@@ -44,6 +45,9 @@ function authReducer(state = initialState, action) {
                 ...state,
                 loading: true
             };
+        case AUTH_NETWORK_ERROR:
+            // offline / server unreachable: keep the saved token, just stop the loading state
+            return { ...state, loading: false };
         case REGISTER_FAIL:
         case AUTH_ERROR:
         case LOGIN_FAIL:
