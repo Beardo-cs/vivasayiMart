@@ -11,6 +11,25 @@ const Review = require('../../models/Review');
 const { normalizeTiers } = require('../../utils/pricing');
 const Favorite = require('../../models/Favorite');
 
+// Phone numbers are shared only after an order is confirmed (see routes/api/orders.js),
+// so listings never expose them to anyone except the farmer who owns the listing.
+const hideContact = (post, viewerId) => {
+    const obj = typeof post.toObject === 'function' ? post.toObject() : { ...post };
+    if (!obj.user || obj.user.toString() !== viewerId) delete obj.mobileNumber;
+    return obj;
+};
+
+// Photos saved before client-side resizing can be several MB; a page of them would exceed
+// Vercel's ~4.5MB response limit. Leave oversized ones out of list responses (the card still works).
+const MAX_LIST_IMAGE_CHARS = 400000;
+const lightenImage = obj => {
+    if (obj.productImage && obj.productImage.length > MAX_LIST_IMAGE_CHARS) {
+        obj.productImage = '';
+        obj.imageOmitted = true;
+    }
+    return obj;
+};
+
 const CATEGORIES = ['Vegetables', 'Fruits', 'Grains', 'Dairy', 'Poultry', 'Other'];
 const UNITS = ['kg', 'litre', 'dozen', 'piece'];
 const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -176,13 +195,29 @@ router.get('/', auth, async(req, res) => {
         const verifiedSet = new Set(verifiedFarmers.map(u => u.id));
 
         const result = posts.map(p => ({
-            ...p.toObject(),
+            ...lightenImage(hideContact(p, req.user.id)),
             farmerVerified: !!(p.user && verifiedSet.has(p.user.toString())),
             isFavorite: favoriteIds.has(p.id),
             farmerRating: (p.user && ratingByFarmer[p.user.toString()]) || { average: 0, count: 0 }
         }));
 
         res.json({ posts: result, page, limit, total, pages: Math.ceil(total / limit) });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route     GET api/posts/featured
+// @desc      A few recent in-stock listings for the public landing page (no images, no phone numbers)
+// @access    Public
+router.get('/featured', async (req, res) => {
+    try {
+        const posts = await Post.find({ hidden: { $ne: true }, available: true, quantityAvailable: { $gt: 0 } })
+            .select('productName category price unit quantityAvailable address farmerName bulkPricing date')
+            .sort({ date: -1 })
+            .limit(6);
+        res.json(posts);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -205,7 +240,7 @@ router.get('/:id', auth, async(req, res) => {
             if (!isAdminUser(me)) return res.status(404).json({ msg: 'Post not found'});
         }
 
-        res.json(post);
+        res.json(hideContact(post, req.user.id));
 
     } catch (err) {
         console.error(err.message);

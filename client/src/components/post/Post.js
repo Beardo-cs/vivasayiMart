@@ -49,7 +49,7 @@ const Post = ({getPost, post: {post, loading} }) => {
 
           <div className="product-info my-1">
             <p><strong>👤 {t('orders.farmer')}:</strong> {post.farmerName}</p>
-            <p><strong>📱 {t('product.contact')}:</strong> {post.mobileNumber}</p>
+            {post.mobileNumber ? <p><strong>📱 {t('product.contact')}:</strong> {post.mobileNumber}</p> : <p className="order-meta">🔒 {t('product.contactLater')}</p>}
             <p><strong>⚖️ {t('product.inStock')}:</strong> {post.quantityAvailable ?? post.weight} {t(`units.${post.unit || 'kg'}`)}</p>
             <p><strong>💰 {t('post.price')}:</strong> ₹{post.price} / {t(`units.${post.unit || 'kg'}`)}</p>
             <p className="lead"><strong>💵 {t('product.stockValue')}: ₹{((post.quantityAvailable ?? post.weight) * post.price).toFixed(2)}</strong></p>

@@ -111,6 +111,8 @@ self.addEventListener('fetch', event => {
     return event.respondWith(staleWhileRevalidate(request));
   }
 
-  // icon font CSS/files from the CDN used by the app
-  if (url.hostname.endsWith('fontawesome.com')) event.respondWith(staleWhileRevalidate(request));
+  // icon fonts and text fonts from the CDNs used by the app
+  if (['fontawesome.com', 'fonts.googleapis.com', 'fonts.gstatic.com'].some(h => url.hostname.endsWith(h))) {
+    event.respondWith(staleWhileRevalidate(request));
+  }
 });

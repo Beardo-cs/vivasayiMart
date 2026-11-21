@@ -34,6 +34,8 @@ const UserSchema = new mongoose.Schema( {
     isAdmin: {
         type: Boolean
     },
+    // When the user accepted the Terms and Privacy Policy at sign-up
+    acceptedTermsAt: { type: Date },
     // Email verification (no default so existing accounts are not flagged as unverified)
     emailVerified: { type: Boolean },
     verifyTokenHash: { type: String, select: false },

@@ -49,7 +49,9 @@ router.post(
         //checking the length of the password
             .isLength({ min: 6}),
         check('userType', 'User type is required (farmer or consumer)')
-            .isIn(['farmer', 'consumer'])
+            .isIn(['farmer', 'consumer']),
+        check('acceptedTerms', 'Please accept the Terms and Privacy Policy')
+            .custom(v => v === true || v === 'true')
 ],
 async (req, res) => {      
     // set errors. It extracts the validation error from req and makes them available in a errors obj.
@@ -82,6 +84,7 @@ async (req, res) => {
 
     //which is created above and set tat to new User
     user = new User({
+        acceptedTermsAt: new Date(),
         name,
         email,
         avatar,

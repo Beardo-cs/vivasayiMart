@@ -12,7 +12,11 @@ import Post from '../post/Post';
 import Home from './Home';
 import Farmers from '../farmers/Farmers';
 import FarmerPage from '../farmers/FarmerPage';
+import PostForm from '../posts/PostForm';
+import Legal from '../legal/Legal';
+import ChooseRole from '../auth/ChooseRole';
 import Orders from '../orders/Orders';
+import OrderPlaced from '../orders/OrderPlaced';
 import Cart from '../cart/Cart';
 import Admin from '../admin/Admin';
 import ForgotPassword from '../auth/ForgotPassword';
@@ -37,6 +41,8 @@ const Routes = () => {
                     <Route path='/forgot-password' element={<ForgotPassword />} />
                     <Route path='/reset-password/:token' element={<ResetPassword />} />
                     <Route path='/verify-email/:token' element={<VerifyEmail />} />
+                    <Route path='/privacy' element={<Legal type='privacy' />} />
+                    <Route path='/terms' element={<Legal type='terms' />} />
                     <Route path='/farmers' element={<Farmers />} />
                     <Route path='/farmer/:id' element={<FarmerPage />} />
                     {/* old links */}
@@ -50,13 +56,16 @@ const Routes = () => {
                     {/* Consumer Routes */}
                     <Route path='/consumer-dashboard' element={<PrivateRoute><ConsumerDashboard /></PrivateRoute>} />
                     <Route path='/create-consumer-profile' element={<PrivateRoute><CreateConsumerProfile /></PrivateRoute>} />
+                    <Route path='/choose-role' element={<PrivateRoute><ChooseRole /></PrivateRoute>} />
                     <Route path='/dashboard' element={<PrivateRoute><Home /></PrivateRoute>} />
 
                     {/* Common Routes */}
                     <Route path='/posts' element={<PrivateRoute><Posts /></PrivateRoute>} />
                     <Route path='/posts/:id' element={<PrivateRoute><Post /></PrivateRoute>} />
+                    <Route path='/add-product' element={<PrivateRoute><PostForm /></PrivateRoute>} />
                     <Route path='/cart' element={<PrivateRoute><Cart /></PrivateRoute>} />
                     <Route path='/admin' element={<PrivateRoute><Admin /></PrivateRoute>} />
+                    <Route path='/order-placed' element={<PrivateRoute><OrderPlaced /></PrivateRoute>} />
                     <Route path='/orders' element={<PrivateRoute><Orders /></PrivateRoute>} />
                     <Route path='/market-price' element={<MarketPrice />} />
                     <Route path='*' element={<NotFound />} />

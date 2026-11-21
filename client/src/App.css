@@ -397,7 +397,7 @@ button {
 .landing {
   position: relative;
   background: url('./img/VivasayiMartLanding.png') no-repeat center/cover;
-  height: 135vh;
+  min-height: 85vh;
 }
 
 .landing-inner {
@@ -638,3 +638,375 @@ button {
     padding: 0.3rem 0.4rem;
   }
 }
+
+/* ---- Bottom tab bar (phones) ---- */
+.bottom-nav { display: none; }
+
+@media (max-width: 700px) {
+  /* the tab bar replaces the main top links; logo, language, admin and logout stay on top */
+  .navbar .nav-main { display: none; }
+  .container { padding-bottom: 5.5rem; }
+
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 900;
+    background: #fff;
+    border-top: 1px solid #dfe9d2;
+    box-shadow: 0 -2px 10px rgba(45, 80, 22, 0.12);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bottom-tab {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 0.5rem 0.1rem 0.4rem;
+    color: #5a6b4a;
+    font-size: 0.68rem;
+    text-decoration: none;
+    min-height: 3.2rem;
+  }
+  .bottom-tab i { font-size: 1.25rem; }
+  .bottom-tab.active { color: #2d5016; font-weight: 700; }
+  .bottom-tab.active i { color: #2d5016; }
+  .bottom-tab.highlight i { color: #7cb342; font-size: 1.7rem; }
+  .bottom-badge {
+    position: absolute;
+    top: 2px; left: 55%;
+    background: #e53935; color: #fff;
+    border-radius: 10px; padding: 0 5px;
+    font-size: 0.65rem; line-height: 1.1rem;
+  }
+}
+
+/* ---- Landing: language switch, role buttons, how it works, featured ---- */
+.landing-lang { position: absolute; top: 1rem; right: 1rem; z-index: 2; display: flex; gap: 0.25rem; }
+.landing-lang button {
+  background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.5);
+  padding: 0.35rem 0.8rem; border-radius: 16px; cursor: pointer; font-size: 0.95rem;
+}
+.landing-lang button.active { background: #fff; color: #2d5016; font-weight: 700; }
+.landing-roles { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem; }
+.landing-roles .btn { font-size: 1.1rem; padding: 0.9rem 1.6rem; }
+.landing-more { padding: 2.5rem 1rem 3rem; max-width: 1000px; margin: 0 auto; }
+.landing-more h2 { text-align: center; margin: 1.5rem 0 1rem; }
+.landing-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.landing-step { background: #f4f9ee; border-radius: 14px; padding: 1.25rem; text-align: center; }
+.landing-step .num {
+  width: 2.4rem; height: 2.4rem; margin: 0 auto 0.5rem; border-radius: 50%;
+  background: #2d5016; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700;
+}
+.landing-featured { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+.landing-product {
+  display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+  background: #fff; border: 1px solid #e0ebd2; border-radius: 14px; padding: 1rem; text-decoration: none; color: inherit;
+}
+.landing-product .icon { font-size: 2.2rem; }
+.landing-product:hover { box-shadow: 0 4px 14px rgba(45,80,22,0.15); }
+
+/* =====================================================================
+   FRIENDLY LAYER  (loads last: softer shapes, bigger touch targets,
+   readable text, consistent controls). Safe to tweak the variables.
+   ===================================================================== */
+:root {
+  --radius: 16px;
+  --radius-sm: 12px;
+  --touch: 46px;                 /* minimum comfortable tap size */
+  --focus: 0 0 0 3px rgba(124, 179, 66, 0.45);
+  --font: 'Nunito', 'Noto Sans Tamil', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --surface: #ffffff;
+  --surface-soft: #f4f9ee;
+  --text-muted: #5a6b4a;
+}
+
+html { font-size: 106.25%; -webkit-text-size-adjust: 100%; }   /* 17px base: easier to read outdoors */
+
+body {
+  font-family: var(--font);
+  line-height: 1.65;
+  background: linear-gradient(180deg, #f4f9ee 0%, #fbfdf8 220px) fixed;
+  -webkit-font-smoothing: antialiased;
+}
+:lang(ta) body, html[lang='ta'] body { line-height: 1.8; }       /* Tamil script needs a little more air */
+
+h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.01em; }
+a { text-underline-offset: 3px; }
+:focus-visible { outline: none; box-shadow: var(--focus); border-radius: 6px; }
+
+/* ---- Buttons ---- */
+.btn, button.btn, .btn-modern {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: var(--touch);
+  padding: 0.55rem 1.4rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:hover { opacity: 1; filter: brightness(1.06); }
+.btn:active { transform: translateY(1px); box-shadow: none; }
+.btn[disabled], .btn:disabled { opacity: 0.55; cursor: not-allowed; filter: none; }
+.btn-primary { background: linear-gradient(180deg, #3a6a1c, var(--primary-color)); }
+.btn-light { background: #fff; color: var(--primary-color); border: 2px solid var(--border-color); }
+.btn-dark { background: var(--dark-color); }
+.btn-danger { background: #c62828; }
+.btn-comment, .btn-delete { min-height: 40px; border-radius: var(--radius-sm); }
+
+/* ---- Form fields: every input type, not just text ---- */
+.form input[type='text'], .form input[type='email'], .form input[type='password'],
+.form input[type='date'], .form input[type='number'], .form input[type='tel'],
+.form input[type='url'], .form input[type='search'],
+.form select, .form textarea,
+.posts-filters input[type='text'], .posts-filters input[type='search'],
+.posts-filters input[type='number'], .posts-filters select,
+.modern-input, .modern-textarea {
+  display: block;
+  width: 100%;
+  min-height: var(--touch);
+  padding: 0.6rem 0.9rem;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: #fff;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.form textarea, .modern-textarea { min-height: 6rem; line-height: 1.5; }
+.form input:focus, .form select:focus, .form textarea:focus,
+.posts-filters input:focus, .posts-filters select:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: var(--focus);
+}
+.form input::placeholder, .form textarea::placeholder { color: #8a9a7a; }
+.form input[type='checkbox'], .form input[type='radio'], .posts-filters input[type='checkbox'] {
+  width: 1.3rem; height: 1.3rem; min-height: 0; accent-color: var(--primary-color);
+}
+.form .form-text { color: var(--text-muted); font-size: 0.9rem; }
+.form .form-group { margin: 1rem 0; }
+.form input[type='submit'] { min-height: var(--touch); border-radius: var(--radius-sm); font-weight: 700; padding: 0.55rem 1.6rem; cursor: pointer; }
+
+/* ---- Cards ---- */
+.product-card, .order-card, .landing-step, .landing-product, .skeleton-card, .stat-card, .action-card, .no-profile-card,
+.profile.bg-light, .post-form {
+  border-radius: var(--radius) !important;
+}
+.order-card, .post-form, .profile.bg-light {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+.product-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+@media (hover: hover) { .product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); } }
+.edit-panel { border-radius: 0 0 var(--radius) var(--radius); }
+.post-form .bg-primary { border-radius: var(--radius) var(--radius) 0 0; padding: 1rem 1.25rem; }
+.post-form .bg-primary h3 { margin: 0; }
+
+/* ---- Notices: toasts and status banners that never hide behind the top bar ---- */
+.toast-stack {
+  position: fixed;
+  top: 5.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(94vw, 480px);
+  z-index: 1200;
+  display: grid;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+.toast-stack .alert {
+  pointer-events: auto;
+  margin: 0;
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  opacity: 1;
+  box-shadow: var(--shadow-lg);
+  animation: toast-in 0.2s ease-out;
+}
+.toast-stack .alert-success::before { content: '✓  '; }
+.toast-stack .alert-danger::before { content: '⚠  '; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+.status-banner {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: var(--banner-bottom, 0);
+  z-index: 950;
+  padding: 0.55rem 1rem;
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+.status-banner.offline { background: #fff3cd; color: #664d03; border-top: 1px solid #f0d98a; z-index: 960; }
+.status-banner.verify { background: #e8f3dc; color: var(--primary-color); border-top: 1px solid var(--border-color); }
+
+/* ---- Top bar: calmer, bigger targets ---- */
+.navbar { padding: 0.7rem 1.5rem; }
+.navbar a { min-height: 42px; border-radius: var(--radius-sm); }
+.navbar a:hover { background: rgba(255, 255, 255, 0.14); }
+.order-badge { background: #ff7043; }
+
+/* ---- Page headings and spacing ---- */
+.container { margin-top: 5.5rem; }
+.large { font-size: clamp(1.8rem, 5vw, 2.6rem); }
+.lead { font-size: clamp(1.05rem, 2.6vw, 1.3rem); color: var(--text-secondary); }
+.posts-count { color: var(--text-muted); }
+.empty-state { background: var(--surface); border: 2px dashed var(--border-color); border-radius: var(--radius); margin: 1rem 0; }
+
+/* ---- Legal pages and footer ---- */
+.site-footer { text-align: center; padding: 1.5rem 1rem 2rem; color: var(--text-muted); font-size: 0.9rem; }
+.site-footer a { color: var(--primary-color); font-weight: 700; margin: 0 0.5rem; }
+.legal { max-width: 760px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-sm); }
+.legal h2 { margin-top: 1.4rem; font-size: 1.15rem; color: var(--primary-color); }
+.legal p, .legal li { margin-top: 0.4rem; }
+.legal ul { list-style: disc; padding-left: 1.3rem; }
+.legal .updated { color: var(--text-muted); font-size: 0.9rem; }
+.legal .notice { background: var(--surface-soft); border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin: 1rem 0; font-size: 0.92rem; }
+.consent { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.95rem; }
+.consent input { margin-top: 0.25rem; flex: 0 0 auto; }
+
+/* ---- Crash screen ---- */
+.crash { text-align: center; max-width: 520px; margin: 6rem auto; padding: 2rem 1.25rem; }
+.crash .icon { font-size: 3.5rem; }
+
+@media (max-width: 700px) {
+  html { font-size: 106.25%; }
+  .container { padding: 0 1rem; margin-top: 7rem; }
+  .navbar { padding: 0.6rem 1rem; }
+  .navbar h1 { margin-bottom: 0.4rem; }
+  .toast-stack { top: 6.4rem; }
+  :root { --banner-bottom: 4.2rem; }               /* sit above the bottom tab bar */
+  .btn { width: auto; }
+  .wizard-actions .btn, .order-actions .btn { flex: 1 1 auto; }
+  .legal { padding: 1.1rem; border-radius: var(--radius-sm); }
+  .site-footer { padding-bottom: 5.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* =====================================================================
+   FRIENDLY LAYER, PART 2: layout polish found by checking real phone
+   screenshots (top bar, headers, dashboard cards, product cards).
+   Brand colours only (the old blue/purple/cyan accents are replaced).
+   ===================================================================== */
+
+/* landing: text on the photo must be readable */
+.landing .lead, .landing-inner p { color: #fff; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6); }
+.landing .x-large { font-size: clamp(2.3rem, 9vw, 4rem); text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5); }
+.landing-inner { padding: 6rem 0 2rem; }
+.landing-roles .btn { min-height: 52px; }
+
+/* page headers: smaller, calmer */
+.dashboard-header { padding: 2.2rem 1.25rem; border-radius: var(--radius); margin-bottom: 1.25rem; box-shadow: var(--shadow-md); animation: none; }
+.dashboard-title { font-size: clamp(1.6rem, 6vw, 2.5rem); text-shadow: none; margin-bottom: 0.3rem; }
+.dashboard-subtitle { font-size: 1.05rem; font-weight: 600; text-shadow: none; letter-spacing: 0; }
+.posts-header { padding: 1.6rem 1rem; border-radius: var(--radius); margin-bottom: 1.25rem; box-shadow: var(--shadow-md); }
+.posts-title { font-size: clamp(1.5rem, 6vw, 2.3rem); text-shadow: none; margin-bottom: 0.25rem; }
+.posts-subtitle { font-size: 1rem; }
+.section-title { font-size: 1.35rem; margin-bottom: 1rem; padding-left: 1rem; }
+.section-title::before { background: var(--secondary-color); box-shadow: none; width: 4px; }
+
+/* dashboard cards: compact, on-brand, easy to tap */
+.dashboard-actions-modern { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.9rem; margin-bottom: 1.5rem; animation: none; }
+.action-card { padding: 1.1rem 0.8rem; border-radius: var(--radius); min-height: 130px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid var(--border-color); box-shadow: var(--shadow-sm); }
+.card-icon { font-size: 2.2rem; margin-bottom: 0.4rem; }
+.action-card h3 { font-size: 1.02rem; margin-bottom: 0.15rem; color: inherit; }
+.action-card p { font-size: 0.82rem; line-height: 1.35; }
+.action-card.primary, .consumer-card.primary, .farmer-card.primary { background: linear-gradient(135deg, #2d5016 0%, #5f9a2c 100%); border-color: transparent; color: #fff; }
+.action-card.primary h3, .action-card.primary p { color: #fff; }
+.stats-section, .categories-section, .benefits-section { margin-bottom: 1.5rem; animation: none; }
+.stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.9rem; }
+.stat-card { padding: 1rem; gap: 0.8rem; border-radius: var(--radius); border: 2px solid var(--border-color); box-shadow: var(--shadow-sm); }
+.stat-card::before { background: var(--secondary-color); }
+.stat-icon { font-size: 1.8rem; }
+.stat-card h3 { font-size: 0.85rem; }
+.stat-number { font-size: 1.5rem; }
+.categories-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.75rem; }
+.category-card { padding: 1rem 0.5rem; border-radius: var(--radius); border: 2px solid var(--border-color); box-shadow: var(--shadow-sm); }
+.category-icon { font-size: 2rem; }
+.category-card h3 { font-size: 0.9rem; margin-top: 0.2rem; }
+.benefits-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.benefit-card { padding: 1.25rem; border-radius: var(--radius); border-color: var(--border-color); }
+.benefit-card::before { background: var(--secondary-color); }
+.benefit-icon { font-size: 2rem; }
+.benefit-card h3 { font-size: 1.1rem; }
+.benefit-card p { font-size: 0.92rem; }
+
+/* product cards: shorter, photo first */
+.posts-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 1rem; }
+.product-card { border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
+.product-card-header { padding: 0.65rem 1rem; border-bottom: 1px solid var(--border-color); }
+.farmer-avatar { width: 38px; height: 38px; border-width: 2px; }
+.farmer-name { font-size: 1rem; }
+.product-image-container { height: 190px; }
+.product-card-body { padding: 0.9rem 1rem; }
+.product-name { font-size: 1.2rem; line-height: 1.3; }
+.product-card-footer { padding: 0.7rem 1rem; gap: 0.5rem; flex-wrap: wrap; }
+.product-info-grid { gap: 0.6rem; }
+.info-item { padding: 0.55rem 0.7rem; }
+
+/* phones: one-row top bar, bottom tab bar does the navigating */
+@media (max-width: 700px) {
+  .navbar { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; text-align: left; padding: 0.5rem 0.9rem; }
+  .navbar h1 { margin: 0; }
+  .navbar h1 a { font-size: 1.1rem; gap: 0.35rem; }
+  .navbar h1 i { font-size: 1.25rem; }
+  .navbar ul { justify-content: flex-end; gap: 0.1rem; }
+  .navbar a { padding: 0.45rem 0.6rem; font-size: 0.92rem; min-height: 40px; }
+  .navbar .nav-secondary { display: none; }
+  .navbar .keep-label .hide-sm { display: inline; }
+  .container { margin-top: 4.4rem; padding: 0 0.9rem; }
+  .toast-stack { top: 4rem; }
+  .dashboard-header { padding: 1.6rem 1rem; }
+  .posts-header { padding: 1.2rem 1rem; }
+  .posts-subtitle { display: none; }
+  .landing-inner { padding-top: 5rem; }
+  .product-image-container { height: 170px; }
+  .posts-filters { padding: 0.75rem; }
+}
+
+/* product card: two info boxes side by side, actions in a compact row with Order first */
+.product-info-grid { grid-template-columns: 1fr 1fr; }
+.info-item { display: flex; align-items: center; gap: 0.5rem; border-radius: var(--radius-sm); }
+.info-item .info-icon { font-size: 1.3rem; }
+.info-item small { font-size: 0.75rem; color: var(--text-muted); }
+.info-item p { font-size: 1.05rem; font-weight: 800; margin: 0; }
+.product-card-footer { flex-direction: row; flex-wrap: wrap; padding: 0.7rem; gap: 0.5rem; background: var(--surface-soft); }
+.product-card-footer .btn-comment, .product-card-footer .btn-delete { flex: 1 1 auto; padding: 0.5rem 0.8rem; font-size: 0.92rem; min-height: 44px; border-radius: var(--radius-sm); }
+.product-card-footer .order-cta { order: -1; flex: 1 1 100%; font-size: 1.05rem; min-height: 48px; }
+.product-card-footer .icon-only { flex: 0 0 auto; }
+@media (max-width: 768px) { .product-info-grid { grid-template-columns: 1fr 1fr; } .product-card-footer { flex-direction: row; } }
+.btn-comment:disabled, .btn-comment[disabled] { background: #c9d4bf; color: #fff; cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* nested pages (e.g. Market Price) must not double the page margins */
+.container .container { margin-top: 0; padding: 0; margin-bottom: 0; }
+/* the add-product card: use the whole phone width */
+.post-form { padding: 0; overflow: hidden; margin-bottom: 1.5rem; }
+.post-form .bg-primary { border-radius: 0; margin-bottom: 0; }
+.post-form .bg-primary h3 { font-size: 1.25rem; }
+.post-form > .form, .post-form form.form { padding: 0 1rem 1rem; }
+.post-form .form-section { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: none; }
+
+/* small phones + Tamil (longer words): keep the whole top bar visible */
+@media (max-width: 430px) {
+  .navbar { padding: 0.45rem 0.6rem; }
+  .navbar h1 a { font-size: 1rem; }
+  .navbar ul { gap: 0; min-width: 0; }
+  .navbar a { padding: 0.45rem 0.45rem; font-size: 0.85rem; gap: 0.3rem; }
+}
+.bottom-tab span { text-align: center; line-height: 1.15; }
+@media (max-width: 700px) { .landing-inner { padding-top: 6.5rem; } }

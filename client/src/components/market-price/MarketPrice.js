@@ -1,8 +1,10 @@
 import React, { useState, useRef, Fragment } from 'react';
-import { DATA_GOV_API_KEY } from '../../config';
 import Loader from '../layout/Loader';
 import { useTranslation } from 'react-i18next';
 import '../dashboard/Dashboard.css';
+
+// Prices come through our own server, which holds the data.gov.in key
+const MARKET_API = `${process.env.NODE_ENV === 'production' ? '' : (process.env.REACT_APP_API_URL || 'http://localhost:4000')}/api/market-price`;
 
 const MarketPrice = () => {
   const { t } = useTranslation();
@@ -208,7 +210,7 @@ const MarketPrice = () => {
 
     setLoadingFilters(prev => ({ ...prev, districts: true }));
     try {
-      const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${DATA_GOV_API_KEY}&format=json&limit=1000&offset=0&filters[state.keyword]=${encodeURIComponent(stateName)}`;
+      const url = `${MARKET_API}?format=json&limit=1000&offset=0&filters[state.keyword]=${encodeURIComponent(stateName)}`;
       
       const res = await fetch(url, {
         method: 'GET',
@@ -265,7 +267,7 @@ const MarketPrice = () => {
 
     setLoadingFilters(prev => ({ ...prev, markets: true }));
     try {
-      let url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${DATA_GOV_API_KEY}&format=json&limit=1000&offset=0&filters[state.keyword]=${encodeURIComponent(stateName)}`;
+      let url = `${MARKET_API}?format=json&limit=1000&offset=0&filters[state.keyword]=${encodeURIComponent(stateName)}`;
       if (districtName) {
         url += `&filters[district]=${encodeURIComponent(districtName)}`;
       }
@@ -325,7 +327,7 @@ const MarketPrice = () => {
 
     setLoadingFilters(prev => ({ ...prev, commodities: true }));
     try {
-      let url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${DATA_GOV_API_KEY}&format=json&limit=1000&offset=0&filters[state.keyword]=${encodeURIComponent(stateName)}`;
+      let url = `${MARKET_API}?format=json&limit=1000&offset=0&filters[state.keyword]=${encodeURIComponent(stateName)}`;
       if (districtName) {
         url += `&filters[district]=${encodeURIComponent(districtName)}`;
       }
@@ -391,7 +393,7 @@ const MarketPrice = () => {
 
     setLoadingFilters(prev => ({ ...prev, varieties: true }));
     try {
-      let url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${DATA_GOV_API_KEY}&format=json&limit=1000&offset=0&filters[state.keyword]=${encodeURIComponent(stateName)}&filters[district]=${encodeURIComponent(districtName)}&filters[market]=${encodeURIComponent(marketName)}&filters[commodity]=${encodeURIComponent(commodityName)}`;
+      let url = `${MARKET_API}?format=json&limit=1000&offset=0&filters[state.keyword]=${encodeURIComponent(stateName)}&filters[district]=${encodeURIComponent(districtName)}&filters[market]=${encodeURIComponent(marketName)}&filters[commodity]=${encodeURIComponent(commodityName)}`;
       
       const res = await fetch(url, {
         method: 'GET',
@@ -448,7 +450,7 @@ const MarketPrice = () => {
 
     setLoadingFilters(prev => ({ ...prev, grades: true }));
     try {
-      let url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${DATA_GOV_API_KEY}&format=json&limit=1000&offset=0&filters[state.keyword]=${encodeURIComponent(stateName)}&filters[district]=${encodeURIComponent(districtName)}&filters[market]=${encodeURIComponent(marketName)}&filters[commodity]=${encodeURIComponent(commodityName)}`;
+      let url = `${MARKET_API}?format=json&limit=1000&offset=0&filters[state.keyword]=${encodeURIComponent(stateName)}&filters[district]=${encodeURIComponent(districtName)}&filters[market]=${encodeURIComponent(marketName)}&filters[commodity]=${encodeURIComponent(commodityName)}`;
       if (varietyName) {
         url += `&filters[variety]=${encodeURIComponent(varietyName)}`;
       }
@@ -508,7 +510,7 @@ const MarketPrice = () => {
     try {
       // Build the base API URL with the API key and other required query parameters
       // Filter sequence: state.keyword -> district -> market -> commodity -> variety -> grade
-      let url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${DATA_GOV_API_KEY}&format=json&limit=1000&offset=0`;
+      let url = `${MARKET_API}?format=json&limit=1000&offset=0`;
 
       // Add filter parameters in the proper sequence
       if (formData.state) {
@@ -535,6 +537,7 @@ const MarketPrice = () => {
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.msg || t('market.error'));
       setResponse(data);
     } catch (err) {
       setError(err.message || t('market.error'));

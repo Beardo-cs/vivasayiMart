@@ -12,6 +12,17 @@ const User = require('../../models/User');
 const Review = require('../../models/Review');
 const ConsumerProfile = require('../../models/ConsumerProfile');
 
+// Each side's phone number is revealed only once the farmer has confirmed the order.
+const CONTACT_VISIBLE = ['confirmed', 'completed'];
+const maskContacts = order => {
+    const obj = typeof order.toObject === 'function' ? order.toObject() : { ...order };
+    if (!CONTACT_VISIBLE.includes(obj.status)) {
+        delete obj.buyerMobile;
+        delete obj.farmerMobile;
+    }
+    return obj;
+};
+
 const isObjectId = id => /^[0-9a-fA-F]{24}$/.test(id);
 
 // Deduct stock atomically; returns the updated post or null if not enough stock
@@ -138,7 +149,7 @@ router.post('/', [
         if (result.msg) return res.status(result.status).json({ msg: result.msg });
 
         await result.order.save();
-        res.json(result.order);
+        res.json(maskContacts(result.order));
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -187,7 +198,7 @@ router.post('/checkout', [
         }
 
         await Order.insertMany(orders);
-        res.json(orders);
+        res.json(orders.map(maskContacts));
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -203,7 +214,7 @@ router.get('/mine', auth, async (req, res) => {
         const reviews = await Review.find({ order: { $in: orders.map(o => o._id) } });
         const byOrder = {};
         reviews.forEach(r => { byOrder[r.order.toString()] = r; });
-        res.json(orders.map(o => ({ ...o.toObject(), review: byOrder[o.id] || null })));
+        res.json(orders.map(o => ({ ...maskContacts(o), review: byOrder[o.id] || null })));
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -216,7 +227,7 @@ router.get('/mine', auth, async (req, res) => {
 router.get('/received', auth, async (req, res) => {
     try {
         const orders = await Order.find({ farmer: req.user.id }).sort({ date: -1 });
-        res.json(orders);
+        res.json(orders.map(maskContacts));
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -333,7 +344,7 @@ router.put('/:id/status', [
         if (role === 'farmer') order.buyerSeen = false;
         order.updatedAt = Date.now();
         await order.save();
-        res.json(order);
+        res.json(maskContacts(order));
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

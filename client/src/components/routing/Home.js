@@ -7,6 +7,7 @@ import Loader from '../layout/Loader';
 
 const Home = ({ auth: { user, loading } }) => {
     if (loading || !user) return <Loader message="..." fullPage={false} />;
+    if (!user.userType) return <Navigate to='/choose-role' replace />;
     return <Navigate to={user.userType === 'consumer' ? '/consumer-dashboard' : '/farmer-dashboard'} replace />;
 };
 

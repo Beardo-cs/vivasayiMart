@@ -23,13 +23,12 @@ const Cart = ({ items, setAlert, removeFromCart, setCartQuantity, clearCart }) =
     e.preventDefault();
     setSending(true);
     try {
-      await api.post('/api/orders/checkout', {
+      const res = await api.post('/api/orders/checkout', {
         items: items.map(i => ({ postId: i.postId, quantity: i.quantity })),
         ...form
       });
       clearCart();
-      setAlert(t('cart.success'), 'success');
-      navigate('/orders');
+      navigate('/order-placed', { state: { orders: res.data } });
     } catch (err) {
       const errors = err.response?.data?.errors;
       if (errors) errors.forEach(er => setAlert(er.msg, 'danger'));

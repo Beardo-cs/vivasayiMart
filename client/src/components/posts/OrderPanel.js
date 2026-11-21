@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 import { setAlert } from '../../actions/alert';
@@ -11,11 +11,11 @@ import { unitPriceFor } from '../../utils/pricing';
 
 const OrderPanel = ({ post, stock, setAlert, addToCart, onClose }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const unit = post.unit || 'kg';
   const unitLabel = t(`units.${unit}`);
   const [form, setForm] = useState({ quantity: '', deliveryMethod: 'pickup', deliveryAddress: '', note: '' });
   const [placing, setPlacing] = useState(false);
-  const [placed, setPlaced] = useState(false);
 
   const onChange = e => setForm({ ...form, [e.target.name]: e.target.value });
   const qty = parseFloat(form.quantity);
@@ -51,14 +51,14 @@ const OrderPanel = ({ post, stock, setAlert, addToCart, onClose }) => {
     if (!validQty()) return;
     setPlacing(true);
     try {
-      await api.post('/api/orders', {
+      const res = await api.post('/api/orders', {
         postId: post._id,
         quantity: qty,
         deliveryMethod: form.deliveryMethod,
         deliveryAddress: form.deliveryAddress,
         note: form.note
       });
-      setPlaced(true);
+      navigate('/order-placed', { state: { orders: [res.data] } });
     } catch (err) {
       const errors = err.response?.data?.errors;
       if (errors) errors.forEach(er => setAlert(er.msg, 'danger'));
@@ -67,16 +67,6 @@ const OrderPanel = ({ post, stock, setAlert, addToCart, onClose }) => {
       setPlacing(false);
     }
   };
-
-  if (placed) {
-    return (
-      <div className='edit-panel'>
-        <p className='text-success'>{t('orderPanel.sent')}</p>
-        <Link to='/orders' className='btn btn-primary'>{t('orderPanel.viewOrders')}</Link>{' '}
-        <button type='button' className='btn btn-light' onClick={onClose}>{t('orderPanel.close')}</button>
-      </div>
-    );
-  }
 
   return (
     <form className='form edit-panel' onSubmit={onSubmit}>

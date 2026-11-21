@@ -29,15 +29,44 @@ const FarmerDashboard = ({ auth: { user }, profile: { profile, loading }, getCur
                 </div>
             </div>
 
+            {(() => {
+                const steps = [
+                    { done: profile !== null, label: t('dashboard.todoProfile'), to: '/create-farmer-profile' },
+                    { done: !!stats && stats.totalProducts > 0, label: t('dashboard.todoProduct'), to: '/add-product' },
+                    { done: !(user && user.emailVerified === false), label: t('dashboard.todoEmail'), to: null }
+                ];
+                const left = steps.filter(s => !s.done).length;
+                // wait for stats so the checklist doesn't flash a wrong state
+                if (left === 0 || stats === null) return null;
+                return (
+                    <div className="order-card" style={{ margin: '1rem 0' }}>
+                        <h3>🚀 {t('dashboard.getStarted')} <small>({steps.length - left}/{steps.length})</small></h3>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            {steps.map(s => (
+                                <li key={s.label} style={{ padding: '0.3rem 0' }}>
+                                    {s.done ? '✅' : '⬜'}{' '}
+                                    {s.done || !s.to ? <span style={s.done ? { textDecoration: 'line-through', color: '#7a8a6a' } : {}}>{s.label}</span> : <Link to={s.to}>{s.label}</Link>}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                );
+            })()}
+
             {profile !== null ? (
                 <Fragment>
                     <div className="dashboard-actions-modern">
+                        <Link to="/add-product" className="action-card farmer-card primary">
+                            <div className="card-icon">📸</div>
+                            <h3>{t('posts.addProduct')}</h3>
+                            <p>{t('dashboard.addDesc')}</p>
+                        </Link>
                         <Link to="/posts?mine=1" className="action-card farmer-card">
                             <div className="card-icon">📦</div>
-                            <h3>{t('dashboard.productsCard')}</h3>
+                            <h3>{t('nav.myProducts')}</h3>
                             <p>{t('dashboard.productsDesc')}</p>
                         </Link>
-                        <Link to="/orders" className="action-card farmer-card primary">
+                        <Link to="/orders" className="action-card farmer-card">
                             <div className="card-icon">📥</div>
                             <h3>{t('nav.orders')}</h3>
                             <p>{t('dashboard.ordersDesc')}</p>

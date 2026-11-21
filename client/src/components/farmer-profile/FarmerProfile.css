@@ -102,8 +102,8 @@
     padding: 3rem;
     box-shadow:
         0 24px 72px rgba(0, 0, 0, 0.08),
-        0 0 0 1px rgba(102, 126, 234, 0.08) inset;
-    border: 1px solid rgba(102, 126, 234, 0.1);
+        0 0 0 1px rgba(45, 80, 22, 0.08) inset;
+    border: 1px solid rgba(45, 80, 22, 0.1);
     animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
     position: relative;
 }
@@ -116,7 +116,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, transparent 50%);
+    background: linear-gradient(135deg, rgba(45, 80, 22, 0.02) 0%, transparent 50%);
     border-radius: 32px;
     pointer-events: none;
     z-index: 0;
@@ -137,7 +137,7 @@
 .form-section {
     margin-bottom: 3rem;
     padding-bottom: 2.5rem;
-    border-bottom: 1px solid rgba(102, 126, 234, 0.08);
+    border-bottom: 1px solid rgba(45, 80, 22, 0.08);
     position: relative;
     z-index: 1;
 }
@@ -149,9 +149,9 @@
     left: 0;
     width: 80px;
     height: 3px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
+    background: linear-gradient(90deg, #2d5016, #7cb342);
     border-radius: 3px;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(45, 80, 22, 0.3);
 }
 
 .form-section:last-of-type {
@@ -164,7 +164,7 @@
 }
 
 .section-title {
-    color: #667eea;
+    color: #2d5016;
     font-size: 1.7rem;
     margin-bottom: 2rem;
     font-weight: 700;
@@ -184,9 +184,9 @@
     transform: translateY(-50%);
     width: 5px;
     height: 75%;
-    background: linear-gradient(180deg, #667eea, #764ba2);
+    background: linear-gradient(180deg, #2d5016, #7cb342);
     border-radius: 3px;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(45, 80, 22, 0.3);
 }
 
 /* Form Grid */
@@ -216,7 +216,7 @@
 }
 
 .form-group-modern:focus-within label {
-    color: #667eea;
+    color: #2d5016;
 }
 
 .form-group-modern small {
@@ -258,11 +258,11 @@
 .modern-textarea:focus,
 .modern-select:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #2d5016;
     background: #ffffff;
     box-shadow:
-        0 0 0 3px rgba(102, 126, 234, 0.1),
-        0 4px 16px rgba(102, 126, 234, 0.15);
+        0 0 0 3px rgba(45, 80, 22, 0.1),
+        0 4px 16px rgba(45, 80, 22, 0.15);
     transform: translateY(-1px);
 }
 
@@ -270,7 +270,7 @@
 .modern-input:focus-visible,
 .modern-textarea:focus-visible,
 .modern-select:focus-visible {
-    outline: 2px solid #667eea;
+    outline: 2px solid #2d5016;
     outline-offset: 2px;
 }
 
@@ -338,43 +338,43 @@
 
 /* Focus visible for accessibility */
 .btn-modern:focus-visible {
-    outline: 3px solid #667eea;
+    outline: 3px solid #2d5016;
     outline-offset: 3px;
 }
 
 .btn-primary-modern {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2d5016 0%, #7cb342 100%);
     color: white;
     box-shadow:
-        0 4px 16px rgba(102, 126, 234, 0.3),
+        0 4px 16px rgba(45, 80, 22, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
 .btn-primary-modern:hover {
     transform: translateY(-2px);
     box-shadow:
-        0 8px 24px rgba(102, 126, 234, 0.4),
+        0 8px 24px rgba(45, 80, 22, 0.4),
         0 0 0 1px rgba(255, 255, 255, 0.2) inset;
 }
 
 .btn-primary-modern:active {
     transform: translateY(0);
     box-shadow:
-        0 2px 8px rgba(102, 126, 234, 0.3),
+        0 2px 8px rgba(45, 80, 22, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
 .btn-secondary-modern {
     background: white;
-    color: #667eea;
-    border: 2px solid #667eea;
+    color: #2d5016;
+    border: 2px solid #2d5016;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .btn-secondary-modern:hover {
     background: #f7fafc;
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 4px 16px rgba(45, 80, 22, 0.15);
 }
 
 .btn-secondary-modern:active {

@@ -5,6 +5,8 @@ import Landing from './components/layout/Landing';
 import Routes from './components/routing/Routes';
 import Loader from './components/layout/Loader';
 import OfflineBanner from './components/layout/OfflineBanner';
+import BottomNav from './components/layout/BottomNav';
+import Footer from './components/layout/Footer';
 
 
 //Redux, getting provider from react-redux
@@ -49,6 +51,8 @@ const AppContent = () => {
                     <Route exact path='/' element={<Landing />} />
                     <Route path='/*' element={<Routes />} />
                 </RouterRoutes>
+                <Footer />
+                <BottomNav />
             </Fragment>
         </Router>
     );

@@ -26,6 +26,7 @@ const PostItem = ({
   const stock = post.quantityAvailable ?? weight;
   const soldOut = !available || stock <= 0;
   const [panel, setPanel] = useState(null); // 'edit' | 'order' | 'report' | null
+  const [showDetails, setShowDetails] = useState(false);
   const [favorite, setFavorite] = useState(!!post.isFavorite);
   const rating = post.farmerRating;
 
@@ -49,7 +50,7 @@ const PostItem = ({
           {farmerName || name}
           {post.farmerVerified && <small title={t('product.verified')} style={{marginLeft: 6, color: '#1e88e5'}}>✔</small>}
           {rating && rating.count > 0 && (
-            <small title={`${rating.count} review${rating.count === 1 ? '' : 's'}`} style={{marginLeft: 6, color: '#f9a825'}}>
+            <small title={t('farmerPage.reviews', { count: rating.count })} style={{marginLeft: 6, color: '#f9a825'}}>
               ★ {rating.average} ({rating.count})
             </small>
           )}
@@ -90,10 +91,10 @@ const PostItem = ({
 
     <div className="product-info-grid">
       <div className="info-item">
-        <span className="info-icon">📱</span>
+        <span className="info-icon">💰</span>
         <div>
-          <small>{t('product.contact')}</small>
-          <p>{mobileNumber}</p>
+          <small>{t('product.pricePer', { unit: unitLabel })}</small>
+          <p>₹{price}</p>
         </div>
       </div>
       <div className="info-item">
@@ -103,29 +104,29 @@ const PostItem = ({
           <p>{soldOut ? t('product.soldOut') : `${stock} ${unitLabel}`}</p>
         </div>
       </div>
-      <div className="info-item">
-        <span className="info-icon">💰</span>
-        <div>
-          <small>{t('product.pricePer', { unit: unitLabel })}</small>
-          <p>₹{price}</p>
-        </div>
-      </div>
-      <div className="info-item highlight">
-        <span className="info-icon">💵</span>
-        <div>
-          <small>{t('product.stockValue')}</small>
-          <p className="total-amount">₹{Number(soldOut ? 0 : stock * price).toFixed(2)}</p>
-        </div>
-      </div>
     </div>
 
-    <div className="product-location">
-      <i className="fas fa-map-marker-alt"></i> {address}
-    </div>
+    <button type="button" className="details-toggle" onClick={() => setShowDetails(!showDetails)} aria-expanded={showDetails}>
+      {showDetails ? `▲ ${t('product.hideDetails')}` : `▼ ${t('product.showDetails')}`}
+    </button>
 
-    {text && (
-      <div className="product-description">
-        <p>{text}</p>
+    {showDetails && (
+      <div className="product-details-panel">
+        <div className="product-location">
+          <i className="fas fa-map-marker-alt"></i> {address}
+        </div>
+        {text && (
+          <div className="product-description">
+            <p>{text}</p>
+          </div>
+        )}
+        {isOwner && (
+          <Fragment>
+            <p className="order-meta">📱 {t('product.contact')}: {mobileNumber}</p>
+            <p className="order-meta">💵 {t('product.stockValue')}: ₹{Number(soldOut ? 0 : stock * price).toFixed(2)}</p>
+          </Fragment>
+        )}
+        {!isOwner && <p className="order-meta">🔒 {t('product.contactLater')}</p>}
       </div>
     )}
   </div>
@@ -149,11 +150,11 @@ const PostItem = ({
             type="button"
             className="btn-comment"
             disabled={soldOut && stock <= 0}
-            title={soldOut && stock <= 0 ? 'Add stock via Edit to re-open' : ''}>
+            title={soldOut && stock <= 0 ? t('product.restockHint') : ''}>
             {soldOut ? t('product.markAvailable') : t('product.markSoldOut')}
           </button>
           <button
-            onClick={() => deletePost(_id)}
+            onClick={() => { if (window.confirm(t('product.confirmDelete', { name: productName }))) deletePost(_id); }}
             type="button"
             className="btn-delete">
             <i className="fas fa-trash"></i> {t('product.delete')}
@@ -162,13 +163,13 @@ const PostItem = ({
       )}
 
       {isConsumer && !isOwner && (
-        <button onClick={toggleFavorite} type="button" className="btn-comment" title={favorite ? 'Remove from saved' : 'Save for later'}>
+        <button onClick={toggleFavorite} type="button" className="btn-comment" title={favorite ? t('product.unsave') : t('product.saveLater')}>
           {favorite ? `❤️ ${t('product.saved')}` : `🤍 ${t('product.save')}`}
         </button>
       )}
 
       {!isOwner && !auth.loading && auth.user && (
-        <button onClick={() => setPanel(panel === 'report' ? null : 'report')} type="button" className="btn-comment" title={t('product.report')}>
+        <button onClick={() => setPanel(panel === 'report' ? null : 'report')} type="button" className="btn-comment icon-only" title={t('product.report')} aria-label={t('product.report')}>
           <i className="fas fa-flag"></i>
         </button>
       )}
@@ -177,7 +178,7 @@ const PostItem = ({
         <button
           onClick={() => setPanel(panel === 'order' ? null : 'order')}
           type="button"
-          className="btn-comment"
+          className="btn-comment order-cta"
           disabled={soldOut}>
           <i className="fas fa-shopping-basket"></i> {soldOut ? t('product.unavailable') : t('product.order')}
         </button>

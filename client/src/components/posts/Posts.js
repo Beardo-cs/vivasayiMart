@@ -2,12 +2,11 @@
 import React, {Fragment, useEffect, useState, useCallback} from 'react'
 import PropTypes from 'prop-types';
 import {connect } from 'react-redux';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import Loader from '../layout/Loader';
+import { SkeletonCards } from '../layout/Skeleton';
 import { getPosts } from '../../actions/post';
 import PostItem from './PostItem';
-import PostForm from './PostForm';
 import PostFilters from './PostFilters';
 import './Posts.css';
 
@@ -52,7 +51,7 @@ const Posts = ({ getPosts, auth, post: {posts, loading, pagination }}) => {
   const isFarmer = auth.user && auth.user.userType === 'farmer';
 
   return loading ? (
-    <Loader message="Loading products..." fullPage={false} />
+    <SkeletonCards />
   ) : (
     <Fragment>
       <div className="posts-header">
@@ -62,7 +61,11 @@ const Posts = ({ getPosts, auth, post: {posts, loading, pagination }}) => {
         </p>
       </div>
 
-      {isFarmer && <PostForm />}
+      {isFarmer && (
+        <p style={{ textAlign: 'center' }}>
+          <Link to='/add-product' className='btn btn-primary'>➕ {t('posts.addProduct')}</Link>
+        </p>
+      )}
 
       <PostFilters filters={filters} onChange={onFiltersChange} />
       <p className="posts-count">{t('posts.found', { count: pagination.total })}</p>
@@ -76,7 +79,8 @@ const Posts = ({ getPosts, auth, post: {posts, loading, pagination }}) => {
           <div className="no-posts">
             <div className="no-posts-icon">📦</div>
             <h3>{t('posts.noneTitle')}</h3>
-            <p>{t('posts.noneHint')}</p>
+            <p>{isFarmer && mine ? t('posts.noneMine') : t('posts.noneHint')}</p>
+            {isFarmer && mine && <Link to='/add-product' className='btn btn-primary'>➕ {t('posts.addProduct')}</Link>}
           </div>
         )}
       </div>

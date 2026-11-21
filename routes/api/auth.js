@@ -102,6 +102,27 @@ async (req, res) => {
 }
 );
 
+// @route     PUT api/auth/role
+// @desc      One-time role choice for old accounts that were created before roles existed.
+//            Never changes an existing role.
+// @access    Private
+router.put('/role', [auth, check('userType', 'Choose farmer or consumer').isIn(['farmer', 'consumer'])], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    try {
+        const user = await User.findOneAndUpdate(
+            { _id: req.user.id, userType: { $nin: ['farmer', 'consumer'] } },
+            { userType: req.body.userType },
+            { new: true }
+        ).select('-password');
+        if (!user) return res.status(400).json({ errors: [{ msg: 'Your role is already set' }] });
+        res.json({ ...user.toObject(), isAdmin: isAdminUser(user) });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 // @route     POST api/auth/forgot
 // @desc      Email a password reset link. Always answers the same, so it can't be used
 //            to find out which emails are registered.

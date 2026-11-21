@@ -9,34 +9,23 @@ const app= express();
 // Needed behind Vercel/other proxies so rate limiting sees the real client IP
 app.set('trust proxy', 1);
 
+// Optional error tracking: set SENTRY_DSN in Vercel to enable (no effect otherwise)
+let Sentry = null;
+if (process.env.SENTRY_DSN) {
+    try {
+        Sentry = require('@sentry/node');
+        Sentry.init({ dsn: process.env.SENTRY_DSN, tracesSampleRate: 0 });
+    } catch (err) {
+        console.error('Sentry could not start:', err.message);
+    }
+}
+
 // Connect Database
 connectDB();
 
 
-const allowedOrigins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://192.168.1.74:3000",
-    "https://vivasayimart.vercel.app"
-];
-
-// Enable CORS for all routes with proper preflight handling
-app.use(cors({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps, curl, Postman)
-        if (!origin) return callback(null, true);
-
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
-    exposedHeaders: ['x-auth-token']
-}));
+// CORS: same-site requests are always allowed; see middleware/cors.js to allow others
+app.use(require('./middleware/cors'));
 //application level Middleware. req.body is populated when we use middleware called body parser such as express.json() or urlencoded()
 // it allows us to get data from user.js (req.body)
 // Product photos are sent as base64 inside JSON, so the 100kb default is far too small.
@@ -62,6 +51,8 @@ app.post('/api/auth/forgot', limiter(60, 5, 'Too many reset requests, please try
 app.post('/api/auth/reset', limiter(60, 10, 'Too many attempts, please try again later'));
 app.post('/api/auth/resend-verification', limiter(60, 5, 'Too many requests, please try again later'));
 app.use('/api/ai', limiter(60, 60, 'AI request limit reached, please try again later'));
+app.use('/api/market-price', limiter(60, 240, 'Too many market price requests, please try again later'));
+app.post('/api/client-error', limiter(60, 30, 'Too many reports'));
 
 app.use('/api/users', require('./routes/api/users'));
 app.use('/api/auth', require('./routes/api/auth'));
@@ -74,6 +65,16 @@ app.use('/api/favorites', require('./routes/api/favorites'));
 app.use('/api/reports', require('./routes/api/reports'));
 app.use('/api/admin', require('./routes/api/admin'));
 app.use('/api/ai', require('./routes/api/ai'));
+app.use('/api/market-price', require('./routes/api/marketPrice'));
+app.use('/api', require('./routes/api/monitoring'));
+
+// Last-resort handler for errors thrown inside routes: log it, don't leak details to the browser
+app.use('/api', (err, req, res, next) => { // eslint-disable-line no-unused-vars
+    console.error('[server-error]', req.method, req.originalUrl, err && err.stack ? err.stack : err);
+    if (Sentry) Sentry.captureException(err);
+    if (res.headersSent) return next(err);
+    res.status(err.status || 500).json({ msg: 'Server error' });
+});
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {

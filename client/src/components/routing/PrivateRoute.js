@@ -1,6 +1,6 @@
 //when we loged out the account and go back to the page we can see the previous datas, but this should not happen. To avoid this we have create a private route
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
@@ -8,8 +8,9 @@ import { connect } from 'react-redux';
 const PrivateRoute = ( { children,
     auth: { isAuthenticated, loading}
 }) => {
+    const location = useLocation();
     if (!isAuthenticated && !loading) {
-        return <Navigate to='/login' />;
+        return <Navigate to='/login' replace state={{ from: location }} />;
     }
 
     return children;

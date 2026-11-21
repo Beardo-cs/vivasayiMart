@@ -244,3 +244,71 @@
     font-size: 0.7rem;
     font-weight: 700;
 }
+
+/* Add-product wizard */
+.wizard-steps {
+    display: flex;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0.75rem 1rem;
+    margin: 0;
+    background: #f4f9ee;
+    flex-wrap: wrap;
+}
+.wizard-steps li { color: #7a8a6a; font-size: 0.9rem; display: flex; align-items: center; gap: 0.35rem; }
+.wizard-steps li span {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    background: #dfe9d2; color: #2d5016; font-weight: 700;
+}
+.wizard-steps li.active { color: #2d5016; font-weight: 700; }
+.wizard-steps li.active span { background: #2d5016; color: #fff; }
+.wizard-steps li.done span { background: #7cb342; color: #fff; }
+.wizard-actions { display: flex; gap: 0.5rem; justify-content: space-between; margin-top: 1rem; }
+
+/* Filters: one search row + collapsible extras on phones */
+.posts-filters .filters-bar { display: contents; }
+.posts-filters .filters-extra { display: contents; }
+.posts-filters .filters-toggle { display: none; margin: 0; }
+@media (max-width: 700px) {
+  .posts-filters { grid-template-columns: 1fr; }
+  .posts-filters .filters-bar { display: flex; gap: 0.5rem; }
+  .posts-filters .filters-bar input { flex: 1; min-width: 0; }
+  .posts-filters .filters-toggle { display: inline-block; white-space: nowrap; }
+  .posts-filters .filters-extra { display: none; }
+  .posts-filters .filters-extra.open { display: grid; gap: 0.75rem; grid-template-columns: 1fr 1fr; }
+  .posts-filters .filters-extra > * { min-width: 0; }
+}
+
+/* Loading placeholders */
+.skeleton-card {
+    background: #fff;
+    border: 1px solid #e0ebd2;
+    border-radius: 14px;
+    padding: 1rem;
+    display: grid;
+    gap: 0.6rem;
+}
+.skeleton-block {
+    border-radius: 8px;
+    background: linear-gradient(90deg, #eef3e6 25%, #f7faf2 50%, #eef3e6 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.2s infinite linear;
+}
+@keyframes skeleton-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton-block { animation: none; } }
+
+/* Order progress */
+.order-progress { display: flex; align-items: center; gap: 0.25rem; margin: 0.5rem 0 0.75rem; font-size: 0.8rem; flex-wrap: wrap; }
+.order-progress .step { display: flex; align-items: center; gap: 0.3rem; color: #8a9a7a; }
+.order-progress .dot { width: 1.3rem; height: 1.3rem; border-radius: 50%; background: #dfe9d2; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
+.order-progress .step.done { color: #2d5016; }
+.order-progress .step.done .dot { background: #7cb342; }
+.order-progress .step.current { color: #2d5016; font-weight: 700; }
+.order-progress .step.current .dot { background: #2d5016; }
+.order-progress .bar { flex: 0 0 1.5rem; height: 2px; background: #dfe9d2; }
+.order-progress .bar.done { background: #7cb342; }
+.order-group-title { margin: 1.5rem 0 0.5rem; color: #2d5016; display: flex; align-items: center; gap: 0.5rem; }
+.order-group-title .count { background: #2d5016; color: #fff; border-radius: 10px; padding: 0 8px; font-size: 0.8rem; }
+.empty-state { text-align: center; padding: 2rem 1rem; }
+.empty-state .icon { font-size: 3rem; }

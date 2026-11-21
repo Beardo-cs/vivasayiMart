@@ -1,6 +1,6 @@
 import React, {Fragment, useState} from 'react';
 // as we are using function, importing useState
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { login } from '../../actions/auth';
@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 //isAuthenticated is a props here
 const Login = ({ login, isAuthenticated, user, loading }) => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const from = location.state && location.state.from;
   const  [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -34,6 +36,9 @@ const { email, password } = formData;
 
   // Redirected if logged in based on user type
   if(isAuthenticated && user) {
+    if (from && from.pathname && !['/login', '/register'].includes(from.pathname)) {
+      return <Navigate to={`${from.pathname}${from.search || ''}`} replace />
+    }
     if (user.userType === 'farmer') {
       return <Navigate to="/farmer-dashboard" />
     } else if (user.userType === 'consumer') {
@@ -71,7 +76,7 @@ const { email, password } = formData;
       </form>
       <p className="my-1"><Link to="/forgot-password">{t('auth.forgotLink')}</Link></p>
       <p className="my-1">
-      {t('login.noAccount')} <Link to="/register">{t('login.signUp')}</Link>
+      {t('login.noAccount')} <Link to="/register" state={location.state}>{t('login.signUp')}</Link>
     </p>
  </Fragment>
 )};

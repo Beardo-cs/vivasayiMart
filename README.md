@@ -711,6 +711,10 @@ For issues, questions, or suggestions:
 | `ADMIN_EMAILS` | Comma-separated emails that get the **Admin** page (report moderation, farmer verification). Example: `owner@example.com,mod@example.com` |
 | `RESEND_API_KEY` | API key from [resend.com](https://resend.com) used to send password-reset and email-verification emails. If unset, the email text (with the link) is printed in the server console instead. |
 | `EMAIL_FROM` | Sender, e.g. `VivasayiMart <no-reply@yourdomain.com>` (the domain must be verified in Resend) |
+| `DATA_GOV_API_KEY` | Key for the market-price page (data.gov.in). Held on the server and never sent to browsers. |
+| `SENTRY_DSN` | Optional: turns on Sentry error tracking for the server. |
+| `CORS_ORIGINS` | Optional: extra website addresses (comma separated) allowed to call the API. The site's own address always works. |
+| `REACT_APP_CONTACT_EMAIL` | Optional (set at build time): contact email shown at the bottom of the Privacy and Terms pages. |
 | `APP_URL` | Public URL of the site, used in email links, e.g. `https://vivasayimart.vercel.app` (defaults to `http://localhost:3000`) |
 
 ## 🧪 Tests
@@ -718,3 +722,12 @@ For issues, questions, or suggestions:
 ```bash
 npm test   # runs the API tests against an in-memory MongoDB (first run downloads a mongod binary)
 ```
+
+## 🩺 Checks and monitoring
+
+```bash
+node scripts/data-check.js     # read-only report on listings, photos and accounts
+```
+
+- `GET /api/health` returns 200 when the app and database are up. Point an uptime monitor (UptimeRobot, Better Stack) at it.
+- Browser crashes and server errors are written to the Vercel function logs (look for `[client-error]` and `[server-error]`).

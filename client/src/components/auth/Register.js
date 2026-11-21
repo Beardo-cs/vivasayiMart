@@ -2,7 +2,7 @@
 import React, {Fragment, useState} from 'react';
 // connect used to connect the alert with components
 import { connect } from 'react-redux';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { setAlert } from '../../actions/alert';
 import { register } from '../../actions/auth';
 import PropTypes from 'prop-types';
@@ -12,12 +12,16 @@ import { useTranslation } from 'react-i18next';
 // instead of using props.setAlert we changed props to setAlert
 const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
   const { t } = useTranslation();
+  const location = useLocation();
+  const [accepted, setAccepted] = useState(false);
+  const [searchParams] = useSearchParams();
+  const from = location.state && location.state.from;
   const  [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     password2: '',
-    userType: 'farmer'
+    userType: searchParams.get('role') === 'consumer' ? 'consumer' : 'farmer'
   });
 
   const { name, email, password, password2, userType } = formData;
@@ -34,7 +38,7 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
       setAlert(t('auth.passwordsMismatch'), 'danger');
     } else {
 //console.log("SUCESS");
-      register ({ name, email, password, userType});
+      register ({ name, email, password, userType, acceptedTerms: true });
     }
   };
 
@@ -47,6 +51,9 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
     if (user.userType === 'farmer') {
       return <Navigate to="/farmer-dashboard" />
     } else if (user.userType === 'consumer') {
+      if (from && from.pathname && !['/login', '/register'].includes(from.pathname)) {
+        return <Navigate to={`${from.pathname}${from.search || ''}`} replace />
+      }
       return <Navigate to="/consumer-dashboard" />
     }
     return <Navigate to="/dashboard" />
@@ -104,7 +111,7 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
           //required 
         />
           <small className="form-text">
-          This site uses Gravatar so if you want a profile image, use a Gravatar email
+          {t('register.gravatar')}
           </small>
         </div>
         <div className="form-group">
@@ -127,10 +134,18 @@ const Register = ({ setAlert, register, isAuthenticated, user, loading  }) => {
            // minLength="6"
           />
         </div>
+        <div className="form-group">
+          <label className="consent">
+            <input type="checkbox" required checked={accepted} onChange={e => setAccepted(e.target.checked)} />
+            <span>
+              {t('register.agree')} <Link to="/terms" target="_blank">{t('footer.terms')}</Link> {t('register.and')} <Link to="/privacy" target="_blank">{t('footer.privacy')}</Link>
+            </span>
+          </label>
+        </div>
         <input type="submit" className="btn btn-primary" value={t('nav.register')} />
       </form>
       <p className="my-1">
-        {t('register.haveAccount')} <Link to="/login">{t('register.signIn')}</Link>
+        {t('register.haveAccount')} <Link to="/login" state={location.state}>{t('register.signIn')}</Link>
       </p>
    </Fragment>
    ); 

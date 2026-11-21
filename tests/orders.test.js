@@ -52,6 +52,9 @@ before(async () => {
     app.use('/api/reports', require('../routes/api/reports'));
     app.use('/api/admin', require('../routes/api/admin'));
     app.use('/api/auth', require('../routes/api/auth'));
+    app.use('/api/market-price', require('../routes/api/marketPrice'));
+    app.use('/api/users', require('../routes/api/users'));
+    app.use('/api', require('../routes/api/monitoring'));
     app.use('/api/farmer-profile', require('../routes/api/farmerProfile'));
 });
 
@@ -466,4 +469,158 @@ test('farmer profile: save + validation, consumer cannot', async () => {
     assert.equal(me.body.yearsOfExperience, 7);
     assert.equal((await save(farmer, { ...base, farmName: 'Renamed' })).status, 200); // upsert, not duplicate
     assert.equal((await request(app).get('/api/farmer-profile')).body.length, 1);
+});
+
+test('privacy: phone numbers appear only for the owner, and on orders only after confirmation', async () => {
+    const post = await makePost({ mobileNumber: '9000000001' });
+    const asBuyer = await request(app).get('/api/posts').set(as(buyer));
+    assert.equal(asBuyer.body.posts[0].mobileNumber, undefined);
+    assert.equal((await request(app).get(`/api/posts/${post.id}`).set(as(buyer))).body.mobileNumber, undefined);
+    assert.equal((await request(app).get('/api/posts').set(as(farmer))).body.posts[0].mobileNumber, '9000000001');
+
+    const placed = await placeOrder(buyer, post.id, 1);
+    assert.equal(placed.body.farmerMobile, undefined);                       // not even for the buyer yet
+    let mine = await request(app).get('/api/orders/mine').set(as(buyer));
+    assert.equal(mine.body[0].farmerMobile, undefined);
+    let received = await request(app).get('/api/orders/received').set(as(farmer));
+    assert.equal(received.body[0].buyerMobile, undefined);
+
+    await setStatus(farmer, placed.body._id, 'confirmed');
+    mine = await request(app).get('/api/orders/mine').set(as(buyer));
+    assert.equal(mine.body[0].farmerMobile, '9000000001');                   // revealed after confirmation
+    await setStatus(buyer, placed.body._id, 'cancelled');
+    mine = await request(app).get('/api/orders/mine').set(as(buyer));
+    assert.equal(mine.body[0].farmerMobile, undefined);                      // hidden again once cancelled
+});
+
+test('featured listings: public, light, no phone numbers or images', async () => {
+    await makePost({ productName: 'Tomato' });
+    await makePost({ productName: 'Hidden', hidden: true });
+    await makePost({ productName: 'SoldOut', quantityAvailable: 0, available: false });
+    const res = await request(app).get('/api/posts/featured'); // no login
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.body.map(p => p.productName), ['Tomato']);
+    const text = JSON.stringify(res.body);
+    assert.equal(text.includes('mobileNumber'), false);
+    assert.equal(text.includes('productImage'), false);
+});
+
+test('CORS: the site\'s own address always works; strangers are blocked quietly', async () => {
+    const corsApp = express();
+    corsApp.use(require('../middleware/cors'));
+    corsApp.get('/ping', (req, res) => res.json({ ok: true }));
+    const call = origin => request(corsApp).get('/ping').set('Host', 'shop.example.com').set(origin ? { Origin: origin } : {});
+
+    assert.equal((await call('https://shop.example.com')).headers['access-control-allow-origin'], 'https://shop.example.com'); // same site (custom domain)
+    assert.equal((await call('https://vivasayimart.vercel.app')).headers['access-control-allow-origin'], 'https://vivasayimart.vercel.app');
+    const stranger = await call('https://evil.example.org');
+    assert.equal(stranger.status, 200);                                  // not a 500
+    assert.equal(stranger.headers['access-control-allow-origin'], undefined);
+    process.env.CORS_ORIGINS = 'https://partner.example.org';
+    assert.equal((await call('https://partner.example.org')).headers['access-control-allow-origin'], 'https://partner.example.org');
+    delete process.env.CORS_ORIGINS;
+    assert.equal((await call(null)).status, 200);
+});
+
+test('list responses leave out oversized legacy photos but keep normal ones', async () => {
+    await makePost({ productName: 'Big', productImage: 'x'.repeat(500000) });
+    await makePost({ productName: 'Small', productImage: 'data:image/jpeg;base64,abc' });
+    const res = await request(app).get('/api/posts').set(as(buyer));
+    const big = res.body.posts.find(p => p.productName === 'Big');
+    const small = res.body.posts.find(p => p.productName === 'Small');
+    assert.equal(big.productImage, '');
+    assert.equal(big.imageOmitted, true);
+    assert.equal(small.productImage, 'data:image/jpeg;base64,abc');
+});
+
+test('market price proxy: key stays on the server, filters are whitelisted, answers are cached', async () => {
+    const mp = require('../routes/api/marketPrice');
+    mp._cache.clear();
+    const realFetch = global.fetch;
+    const upstreamUrls = [];
+    global.fetch = async url => {
+        upstreamUrls.push(String(url));
+        return { ok: true, status: 200, json: async () => ({ records: [{ state: 'Tamil Nadu', modal_price: '2500' }] }) };
+    };
+    try {
+        delete process.env.DATA_GOV_API_KEY;
+        const none = await request(app).get('/api/market-price');
+        assert.equal(none.status, 503);                          // not configured: clear error, no upstream call
+        assert.equal(upstreamUrls.length, 0);
+
+        process.env.DATA_GOV_API_KEY = 'super-secret-key';
+        const res = await request(app).get('/api/market-price')
+            .query({ 'filters[state.keyword]': 'Tamil Nadu', 'filters[district]': 'Salem', 'filters[evil]': 'x', limit: '99999' });
+        assert.equal(res.status, 200);
+        assert.equal(res.body.records[0].modal_price, '2500');
+        assert.equal(JSON.stringify(res.body).includes('super-secret-key'), false);   // never sent to the browser
+        assert.equal(JSON.stringify(res.headers).includes('super-secret-key'), false);
+
+        const sent = new URL(upstreamUrls[0]);
+        assert.equal(sent.hostname, 'api.data.gov.in');
+        assert.equal(sent.searchParams.get('api-key'), 'super-secret-key');
+        assert.equal(sent.searchParams.get('filters[state.keyword]'), 'Tamil Nadu');
+        assert.equal(sent.searchParams.get('filters[district]'), 'Salem');
+        assert.equal(sent.searchParams.get('filters[evil]'), null);                    // unknown filter dropped
+        assert.equal(sent.searchParams.get('limit'), '1000');                          // clamped
+
+        await request(app).get('/api/market-price').query({ 'filters[state.keyword]': 'Tamil Nadu', 'filters[district]': 'Salem', 'filters[evil]': 'y', limit: '5' });
+        assert.equal(upstreamUrls.length, 2);                                          // different limit: new call
+        await request(app).get('/api/market-price').query({ 'filters[state.keyword]': 'Tamil Nadu', 'filters[district]': 'Salem', limit: '5' });
+        assert.equal(upstreamUrls.length, 2);                                          // same request: served from cache
+
+        global.fetch = async () => { throw new Error('network down'); };
+        mp._cache.clear();
+        const down = await request(app).get('/api/market-price');
+        assert.equal(down.status, 502);
+        assert.equal(JSON.stringify(down.body).includes('network down'), false);       // no internals leaked
+    } finally {
+        global.fetch = realFetch;
+        delete process.env.DATA_GOV_API_KEY;
+    }
+});
+
+test('sign-up needs consent to the Terms and Privacy Policy, and records when', async () => {
+    const body = { name: 'New Person', email: 'newperson@test.com', password: 'secret123', userType: 'consumer' };
+    assert.equal((await request(app).post('/api/users').send(body)).status, 400);
+    assert.equal((await request(app).post('/api/users').send({ ...body, acceptedTerms: false })).status, 400);
+    const ok = await request(app).post('/api/users').send({ ...body, acceptedTerms: true });
+    assert.equal(ok.status, 200);
+    assert.ok(ok.body.token);
+    const saved = await User.findOne({ email: 'newperson@test.com' });
+    assert.ok(saved.acceptedTermsAt instanceof Date);
+});
+
+test('monitoring: health reports the database, client crash reports are accepted and clipped', async () => {
+    const health = await request(app).get('/api/health');
+    assert.equal(health.status, 200);
+    assert.equal(health.body.db, 'up');
+
+    const logged = [];
+    const realError = console.error;
+    console.error = (...args) => logged.push(args.join(' '));
+    try {
+        const res = await request(app).post('/api/client-error').send({ message: 'x'.repeat(5000), stack: 'y'.repeat(5000), url: '/orders', kind: 'render' });
+        assert.equal(res.status, 204);
+        assert.equal((await request(app).post('/api/client-error')).status, 204); // empty body is fine
+    } finally {
+        console.error = realError;
+    }
+    assert.ok(logged[0].includes('[client-error]'));
+    assert.ok(logged[0].length < 2500);                                             // clipped, can't flood the logs
+});
+
+test('old accounts without a role can choose one exactly once', async () => {
+    const legacy = await User.collection.insertOne({ name: 'Old Timer', email: 'old@test.com', password: 'x', date: new Date() });
+    const asLegacy = { id: legacy.insertedId.toString() };
+    const choose = userType => request(app).put('/api/auth/role').set(as(asLegacy)).send({ userType });
+
+    assert.equal((await choose('admin')).status, 400);                    // only farmer / consumer
+    const ok = await choose('farmer');
+    assert.equal(ok.status, 200);
+    assert.equal(ok.body.userType, 'farmer');
+    assert.equal(ok.body.password, undefined);
+    assert.equal((await choose('consumer')).status, 400);                 // cannot switch afterwards
+    assert.equal((await request(app).put('/api/auth/role').set(as(buyer)).send({ userType: 'farmer' })).status, 400); // existing users unchanged
+    assert.equal((await User.findById(buyer.id)).userType, 'consumer');
 });

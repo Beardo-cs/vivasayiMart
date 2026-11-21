@@ -1,5 +1,6 @@
 // this file is to create the post box for agricultural products
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {connect } from 'react-redux';
 import {addPost} from '../../actions/post';
@@ -15,8 +16,11 @@ const matchCategory = value => {
     return CATEGORIES.find(c => c !== 'Other' && c.toLowerCase().replace(/s$/, '') === v);
 };
 
-const PostFrom =({ addPost}) => {
+const PostFrom =({ addPost, auth }) => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
+    const [step, setStep] = useState(1); // 1 photo & product, 2 price & stock, 3 details
+    const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         text: '',
         farmerName: '',
@@ -35,6 +39,24 @@ const PostFrom =({ addPost}) => {
     const [analyzing, setAnalyzing] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
+
+    // Pre-fill seller details from the farmer's profile so they type them only once
+    useEffect(() => {
+        let cancelled = false;
+        api.get('/api/farmer-profile/me').then(res => {
+            if (cancelled) return;
+            const p = res.data;
+            setFormData(prev => ({
+                ...prev,
+                farmerName: prev.farmerName || (auth.user && auth.user.name) || '',
+                mobileNumber: prev.mobileNumber || p.mobileNumber || '',
+                address: prev.address || p.location || ''
+            }));
+        }).catch(() => {
+            if (!cancelled && auth.user) setFormData(prev => ({ ...prev, farmerName: prev.farmerName || auth.user.name }));
+        });
+        return () => { cancelled = true; };
+    }, [auth.user]);
 
     const { text, farmerName, productName, mobileNumber, productImage, weight, price, address, category, unit, bulkMin, bulkPrice } = formData;
 
@@ -68,6 +90,8 @@ const PostFrom =({ addPost}) => {
             } catch (e) {
                 base64 = await fileToBase64(file); // fall back to the original file
             }
+            // keep the photo on the listing even if the AI can't name the product
+            setFormData(prev => ({ ...prev, productImage: base64 }));
             const base64Data = base64.split(',')[1]; // Remove data:image/jpeg;base64, prefix
 
             // Call AI analysis API
@@ -154,13 +178,18 @@ const PostFrom =({ addPost}) => {
         }
     };
 
-    const onSubmit = e => {
+    const onSubmit = async e => {
         e.preventDefault();
 
-        // Calculate total amount
-        const totalAmount = parseFloat(weight) * parseFloat(price);
+        // steps 1 and 2: the browser has already checked this step's required fields
+        if (step < 3) {
+            setStep(step + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
 
-        addPost({
+        setSubmitting(true);
+        const ok = await addPost({
             text,
             farmerName,
             productName,
@@ -168,245 +197,166 @@ const PostFrom =({ addPost}) => {
             productImage,
             weight: parseFloat(weight),
             price: parseFloat(price),
-            totalAmount,
             address,
             category,
             unit,
             bulkPricing: bulkMin && bulkPrice ? [{ minQuantity: parseFloat(bulkMin), price: parseFloat(bulkPrice) }] : []
         });
-
-        // Reset form
-        setFormData({
-            text: '',
-            farmerName: '',
-            productName: '',
-            mobileNumber: '',
-            productImage: '',
-            weight: '',
-            price: '',
-            address: '',
-            category: 'Other',
-            unit: 'kg',
-            bulkMin: '',
-            bulkPrice: ''
-        });
-        setImagePreview(null);
-        setAiSuggestion(null);
+        setSubmitting(false);
+        if (ok) navigate('/posts?mine=1');
     };
+
+    const stepLabels = [t('postForm.step1'), t('postForm.step2'), t('postForm.step3')];
 
     return (
         <div className='post-form'>
             <div className='bg-primary p'>
                 <h3>{t('postForm.title')}</h3>
             </div>
+
+            <ol className='wizard-steps' aria-label={t('postForm.stepsLabel')}>
+                {stepLabels.map((label, i) => (
+                    <li key={label} className={i + 1 === step ? 'active' : i + 1 < step ? 'done' : ''} aria-current={i + 1 === step ? 'step' : undefined}>
+                        <span>{i + 1 < step ? '✓' : i + 1}</span> {label}
+                    </li>
+                ))}
+            </ol>
+
             <form className='form my-1' onSubmit={onSubmit}>
-                {/* Seller Details Section */}
-                <div className='form-section'>
-                    <h4 className='text-primary'>{t('postForm.seller')}</h4>
+                {step === 1 && (
+                    <div className='form-section'>
+                        <div className='form-group'>
+                            <label htmlFor='imageUpload' className='btn btn-primary' style={{cursor: 'pointer'}}>
+                                📸 {t('postForm.upload')}
+                            </label>
+                            <input id='imageUpload' type='file' accept='image/*' capture='environment' onChange={onImageChange} style={{display: 'none'}} />
+                            <small className='form-text'>{t('postForm.uploadHint')}</small>
+                        </div>
 
-                    <div className='form-group'>
-                        <input
-                            type='text'
-                            placeholder={t('postForm.farmerName')}
-                            name='farmerName'
-                            value={formData.farmerName || ''}
-                            onChange={onChange}
-                            required
-                        />
-                    </div>
+                        {imagePreview && (
+                            <div className='form-group'>
+                                <img src={imagePreview} alt={t('postForm.preview')} style={{maxWidth: '100%', maxHeight: '260px', borderRadius: '5px'}} />
+                            </div>
+                        )}
 
-                    <div className='form-group'>
-                        <input
-                            type='text'
-                            placeholder={t('postForm.mobile')}
-                            name='mobileNumber'
-                            value={mobileNumber}
-                            onChange={onChange}
-                            required
-                        />
+                        {analyzing && <div className='form-group'><p className='text-primary'>🤖 {t('postForm.analyzing')}</p></div>}
+
+                        {aiSuggestion && aiSuggestion.productName && (
+                            <div className='form-group' style={{backgroundColor: '#f4f4f4', padding: '1rem', borderRadius: '5px'}}>
+                                <h5 className='text-primary'>🤖 {t('postForm.aiResults')}</h5>
+                                <p><strong>{t('postForm.productLabel')}:</strong> {aiSuggestion.productName}</p>
+                                <p><strong>{t('postForm.categoryLabel')}:</strong> {aiSuggestion.category}</p>
+                                <p><strong>{t('postForm.quality')}:</strong> {aiSuggestion.quality}</p>
+                                <p><strong>{t('postForm.confidence')}:</strong> {aiSuggestion.confidence}%</p>
+                            </div>
+                        )}
+
+                        <div className='form-group'>
+                            <input type='text' placeholder={t('postForm.productName')} name='productName' value={productName} onChange={onChange} required />
+                            {aiSuggestion && aiSuggestion.productName && <small className='form-text text-success'>✓ {t('postForm.autoFilled')}</small>}
+                        </div>
+
+                        <div className='form-group'>
+                            <select name='category' value={category} onChange={onChange}>
+                                {CATEGORIES.map(c => <option key={c} value={c}>{t(`categories.${c}`)}</option>)}
+                            </select>
+                            <small className='form-text'>{t('postForm.categoryHint')} {aiSuggestion && t('postForm.aiCategory')}</small>
+                        </div>
+
+                        <div className='form-group'>
+                            <input type='text' placeholder={t('postForm.imageUrl')} name='productImage' value={productImage.startsWith('data:') ? '' : productImage} onChange={onChange} />
+                            <small className='form-text'>{t('postForm.imageUrlHint')}</small>
+                        </div>
                     </div>
+                )}
+
+                {step === 2 && (
+                    <div className='form-section'>
+                        <div className='form-group'>
+                            <select name='unit' value={unit} onChange={onChange}>
+                                {UNITS.map(u => <option key={u} value={u}>{t(`units.${u}`)}</option>)}
+                            </select>
+                            <small className='form-text'>{t('postForm.unitHint')}</small>
+                        </div>
+
+                        <div className='form-group'>
+                            <input type='number' min='0' step='any' placeholder={t('postForm.quantity', { unit: t(`units.${unit}`) })} name='weight' value={weight} onChange={onChange} required />
+                        </div>
+
+                        <div className='form-group'>
+                            <input type='number' min='0' step='any' placeholder={t('postForm.price', { unit: t(`units.${unit}`) })} name='price' value={price} onChange={onChange} required />
+                        </div>
+
+                        <div className='form-group'>
+                            <button type='button' className='btn btn-light' disabled={!productName || !address}
+                                onClick={() => getPriceSuggestion(productName, address, unit)}>
+                                🤖 {t('postForm.suggestPrice')}
+                            </button>
+                            {!address && <small className='form-text'>{t('postForm.suggestNeeds')}</small>}
+                        </div>
+
+                        {aiSuggestion && aiSuggestion.priceInfo && (
+                            <div className='form-group' style={{backgroundColor: '#f4f4f4', padding: '1rem', borderRadius: '5px'}}>
+                                <p><strong>{t('postForm.suggestedPrice')}:</strong> ₹{aiSuggestion.priceInfo.suggestedPrice}/{t(`units.${aiSuggestion.priceInfo.unit || 'kg'}`)}</p>
+                                <p><strong>{t('postForm.priceRange')}:</strong> ₹{aiSuggestion.priceInfo.priceRange.min} - ₹{aiSuggestion.priceInfo.priceRange.max}/{t(`units.${aiSuggestion.priceInfo.unit || 'kg'}`)}</p>
+                                <small>{aiSuggestion.priceInfo.reasoning}</small>
+                            </div>
+                        )}
+
+                        <div className='form-group'>
+                            <small className='form-text'>{t('postForm.bulkTitle')}</small>
+                            <div style={{display: 'flex', gap: '0.5rem'}}>
+                                <input type='number' min='0' step='any' name='bulkMin' value={bulkMin} onChange={onChange} placeholder={t('postForm.bulkMin', { unit: t(`units.${unit}`) })} />
+                                <input type='number' min='0' step='any' name='bulkPrice' value={bulkPrice} onChange={onChange} placeholder={t('postForm.bulkPrice')} />
+                            </div>
+                            <small className='form-text'>{t('postForm.bulkHint')}</small>
+                        </div>
+
+                        {weight && price && (
+                            <div className='form-group'>
+                                <p className='lead'><strong>{t('postForm.totalAmount')}: ₹{(parseFloat(weight) * parseFloat(price)).toFixed(2)}</strong></p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {step === 3 && (
+                    <div className='form-section'>
+                        <div className='form-group'>
+                            <textarea name='text' cols='30' rows='4' placeholder={t('postForm.description')} value={text} onChange={onChange} required />
+                        </div>
+
+                        <h4 className='text-primary'>{t('postForm.seller')}</h4>
+                        <div className='form-group'>
+                            <input type='text' placeholder={t('postForm.farmerName')} name='farmerName' value={farmerName} onChange={onChange} required />
+                        </div>
+                        <div className='form-group'>
+                            <input type='tel' placeholder={t('postForm.mobile')} name='mobileNumber' value={mobileNumber} onChange={onChange} required />
+                            <small className='form-text'>{t('postForm.mobileHint')}</small>
+                        </div>
+                        <div className='form-group'>
+                            <textarea name='address' cols='30' rows='3' placeholder={t('postForm.address')} value={address} onChange={onChange} required />
+                        </div>
+                    </div>
+                )}
+
+                <div className='wizard-actions'>
+                    {step > 1 && (
+                        <button type='button' className='btn btn-light' onClick={() => setStep(step - 1)}>← {t('postForm.back')}</button>
+                    )}
+                    <button type='submit' className='btn btn-primary' disabled={submitting || analyzing}>
+                        {step < 3 ? `${t('postForm.next')} →` : (submitting ? '...' : t('postForm.submit'))}
+                    </button>
                 </div>
-
-                <div className='form-group'>
-                        <textarea
-                            name='address'
-                            cols='30'
-                            rows='3'
-                            placeholder={t('postForm.address')}
-                            value={address}
-                            onChange={onChange}
-                            required
-                        />
-                    </div>
-
-                {/* Product Details Section */}
-                <div className='form-section'>
-                    <h4 className='text-primary'>{t('postForm.product')}</h4>
-
-                    {/* AI-Powered Image Upload */}
-                    <div className='form-group'>
-                        <label htmlFor='imageUpload' className='btn btn-primary' style={{cursor: 'pointer'}}>
-                            📸 {t('postForm.upload')}
-                        </label>
-                        <input
-                            id='imageUpload'
-                            type='file'
-                            accept='image/*'
-                            onChange={onImageChange}
-                            style={{display: 'none'}}
-                        />
-                        <small className='form-text'>
-                            {t('postForm.uploadHint')}
-                        </small>
-                    </div>
-
-                    {/* Image Preview */}
-                    {imagePreview && (
-                        <div className='form-group'>
-                            <img
-                                src={imagePreview}
-                                alt={t('postForm.preview')}
-                                style={{maxWidth: '300px', borderRadius: '5px', marginBottom: '1rem'}}
-                            />
-                        </div>
-                    )}
-
-                    {/* AI Analysis Status */}
-                    {analyzing && (
-                        <div className='form-group'>
-                            <p className='text-primary'>🤖 {t('postForm.analyzing')}</p>
-                        </div>
-                    )}
-
-                    {/* AI Suggestions */}
-                    {aiSuggestion && (
-                        <div className='form-group' style={{backgroundColor: '#f4f4f4', padding: '1rem', borderRadius: '5px'}}>
-                            <h5 className='text-primary'>🤖 {t('postForm.aiResults')}</h5>
-                            <p><strong>{t('postForm.productLabel')}:</strong> {aiSuggestion.productName}</p>
-                            <p><strong>{t('postForm.categoryLabel')}:</strong> {aiSuggestion.category}</p>
-                            <p><strong>{t('postForm.quality')}:</strong> {aiSuggestion.quality}</p>
-                            <p><strong>{t('postForm.confidence')}:</strong> {aiSuggestion.confidence}%</p>
-                            {aiSuggestion.priceInfo && (
-                                <>
-                                    <p><strong>{t('postForm.suggestedPrice')}:</strong> ₹{aiSuggestion.priceInfo.suggestedPrice}/{t(`units.${aiSuggestion.priceInfo.unit || 'kg'}`)}</p>
-                                    <p><strong>{t('postForm.priceRange')}:</strong> ₹{aiSuggestion.priceInfo.priceRange.min} - ₹{aiSuggestion.priceInfo.priceRange.max}/{t(`units.${aiSuggestion.priceInfo.unit || 'kg'}`)}</p>
-                                    <small>{aiSuggestion.priceInfo.reasoning}</small>
-                                </>
-                            )}
-                        </div>
-                    )}
-
-                    <div className='form-group'>
-                        <input
-                            type='text'
-                            placeholder={t('postForm.imageUrl')}
-                            name='productImage'
-                            value={productImage}
-                            onChange={onChange}
-                        />
-                        <small className='form-text'>{t('postForm.imageUrlHint')}</small>
-                    </div>
-
-                    <div className='form-group'>
-                        <input
-                            type='text'
-                            placeholder={t('postForm.productName')}
-                            name='productName'
-                            value={productName}
-                            onChange={onChange}
-                            required
-                        />
-                        {aiSuggestion && <small className='form-text text-success'>✓ {t('postForm.autoFilled')}</small>}
-                    </div>
-
-                    <div className='form-group'>
-                        <select name='category' value={category} onChange={onChange}>
-                            {CATEGORIES.map(c => <option key={c} value={c}>{t(`categories.${c}`)}</option>)}
-                        </select>
-                        <small className='form-text'>{t('postForm.categoryHint')} {aiSuggestion && t('postForm.aiCategory')}</small>
-                    </div>
-
-                    <div className='form-group'>
-                        <select name='unit' value={unit} onChange={onChange}>
-                            {UNITS.map(u => <option key={u} value={u}>{t(`units.${u}`)}</option>)}
-                        </select>
-                        <small className='form-text'>{t('postForm.unitHint')}</small>
-                    </div>
-
-                    <div className='form-group'>
-                        <input
-                            type='number'
-                            min='0'
-                            step='any'
-                            placeholder={t('postForm.quantity', { unit: t(`units.${unit}`) })}
-                            name='weight'
-                            value={weight}
-                            onChange={onChange}
-                            required
-                        />
-                    </div>
-
-                    <div className='form-group'>
-                        <input
-                            type='number'
-                            min='0'
-                            step='any'
-                            placeholder={t('postForm.price', { unit: t(`units.${unit}`) })}
-                            name='price'
-                            value={price}
-                            onChange={onChange}
-                            required
-                        />
-                    </div>
-
-                    <div className='form-group'>
-                        <button type='button' className='btn btn-light' disabled={!productName || !address}
-                            onClick={() => getPriceSuggestion(productName, address, unit)}>
-                            🤖 {t('postForm.suggestPrice')}
-                        </button>
-                        {(!productName || !address) && <small className='form-text'>{t('postForm.suggestNeeds')}</small>}
-                    </div>
-
-                    <div className='form-group'>
-                        <small className='form-text'>{t('postForm.bulkTitle')}</small>
-                        <div style={{display: 'flex', gap: '0.5rem'}}>
-                            <input type='number' min='0' step='any' name='bulkMin' value={bulkMin} onChange={onChange}
-                                placeholder={t('postForm.bulkMin', { unit: t(`units.${unit}`) })} />
-                            <input type='number' min='0' step='any' name='bulkPrice' value={bulkPrice} onChange={onChange}
-                                placeholder={t('postForm.bulkPrice')} />
-                        </div>
-                        <small className='form-text'>{t('postForm.bulkHint')}</small>
-                    </div>
-
-                    {weight && price && (
-                        <div className='form-group'>
-                            <p className='lead'>
-                                <strong>{t('postForm.totalAmount')}: ₹{(parseFloat(weight) * parseFloat(price)).toFixed(2)}</strong>
-                            </p>
-                        </div>
-                    )}
-
-                    <div className='form-group'>
-                        <textarea
-                            name='text'
-                            cols='30'
-                            rows='4'
-                            placeholder={t('postForm.description')}
-                            value={text}
-                            onChange={onChange}
-                            required
-                        />
-                    </div>
-                </div>
-
-                <input type='submit' className='btn btn-dark my-1' value={t('postForm.submit')} />
             </form>
         </div>
     );
 }
 
 PostFrom.propTypes = {
-    addPost : PropTypes.func.isRequired
+    addPost : PropTypes.func.isRequired,
+    auth: PropTypes.object.isRequired
 }
 
-export default connect(null, {addPost}) (PostFrom)
+const mapStateToProps = state => ({ auth: state.auth });
+export default connect(mapStateToProps, {addPost}) (PostFrom)

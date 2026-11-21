@@ -19,7 +19,7 @@ const OfflineBanner = () => {
 
   if (!offline) return null;
   return (
-    <div role="status" style={{ background: '#fff3cd', color: '#664d03', textAlign: 'center', padding: '0.4rem', fontSize: '0.9rem' }}>
+    <div role="status" className="status-banner offline">
       📴 {t('offline.banner')}
     </div>
   );

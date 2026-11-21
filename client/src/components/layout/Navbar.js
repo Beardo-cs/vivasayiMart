@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment } from 'react';
 // instead of using a tag for linking file, importing link from react-router-dom
 import { Link} from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -6,27 +6,14 @@ import PropTypes from 'prop-types';
 import { logout } from '../../actions/auth';
 import Loader from './Loader';
 import api from '../../utils/api';
+import useOrderBadge from '../../utils/useOrderBadge';
 import { useTranslation } from 'react-i18next';
 import { setLanguage } from '../../i18n';
 import { setAlert } from '../../actions/alert';
 
 const Navbar = ({  auth: { isAuthenticated, loading, user }, cartCount, logout, setAlert }) => {
   const { t, i18n } = useTranslation();
-  // Number of orders needing attention (new requests for farmers, updates for buyers)
-  const [orderBadge, setOrderBadge] = useState(0);
-  useEffect(() => {
-    if (!isAuthenticated) { setOrderBadge(0); return undefined; }
-    let cancelled = false;
-    const poll = async () => {
-      try {
-        const res = await api.get('/api/orders/badge');
-        if (!cancelled) setOrderBadge(res.data.count);
-      } catch (e) { /* badge is best-effort */ }
-    };
-    poll();
-    const timer = setInterval(poll, 60000);
-    return () => { cancelled = true; clearInterval(timer); };
-  }, [isAuthenticated]);
+  const orderBadge = useOrderBadge(isAuthenticated);
 
   const switchLang = e => {
     e.preventDefault();
@@ -51,26 +38,26 @@ const Navbar = ({  auth: { isAuthenticated, loading, user }, cartCount, logout, 
   // Farmer Links
   const farmerLinks = (
     <ul>
-          <li>
+          <li className="nav-main">
             <Link to="/farmer-dashboard">
             <i className="fas fa-tachometer-alt"></i>{' '}
             <span className="hide-sm">{t('nav.dashboard')}</span>
             </Link>
           </li>
-          <li>
+          <li className="nav-main">
             <Link to="/posts?mine=1">
             <i className="fas fa-box"></i>{' '}
             <span className="hide-sm">{t('nav.myProducts')}</span>
             </Link>
           </li>
-          <li>
+          <li className="nav-main">
             <Link to="/orders">
             <i className="fas fa-receipt"></i>{' '}
             <span className="hide-sm">{t('nav.orders')}</span>
             {orderBadge > 0 && <span className="order-badge">{orderBadge}</span>}
             </Link>
           </li>
-          <li>
+          <li className="nav-main">
             <Link to="/market-price">
             <i className="fas fa-chart-line"></i>{' '}
             <span className="hide-sm">{t('nav.marketPrice')}</span>
@@ -84,7 +71,7 @@ const Navbar = ({  auth: { isAuthenticated, loading, user }, cartCount, logout, 
             </Link>
           </li>
           )}
-          <li>
+          <li className="keep-label">
           <a onClick={logout} href='#!'>
           <i className="fas fa-sign-out-alt"></i>{' '}
           <span className="hide-sm">{t('nav.logout')}</span>
@@ -102,39 +89,39 @@ const Navbar = ({  auth: { isAuthenticated, loading, user }, cartCount, logout, 
   // Consumer Links
   const consumerLinks = (
     <ul>
-          <li>
+          <li className="nav-main">
             <Link to="/consumer-dashboard">
             <i className="fas fa-tachometer-alt"></i>{' '}
             <span className="hide-sm">{t('nav.dashboard')}</span>
             </Link>
           </li>
-          <li>
+          <li className="nav-main">
             <Link to="/posts">
             <i className="fas fa-shopping-basket"></i>{' '}
             <span className="hide-sm">{t('nav.browse')}</span>
             </Link>
           </li>
-          <li>
+          <li className="nav-main">
             <Link to="/farmers">
             <i className="fas fa-users"></i>{' '}
             <span className="hide-sm">{t('nav.farmers')}</span>
             </Link>
           </li>
-          <li>
+          <li className="nav-main">
             <Link to="/cart">
             <i className="fas fa-shopping-cart"></i>{' '}
             <span className="hide-sm">{t('nav.cart')}</span>
             {cartCount > 0 && <span className="order-badge">{cartCount}</span>}
             </Link>
           </li>
-          <li>
+          <li className="nav-main">
             <Link to="/orders">
             <i className="fas fa-receipt"></i>{' '}
             <span className="hide-sm">{t('nav.orders')}</span>
             {orderBadge > 0 && <span className="order-badge">{orderBadge}</span>}
             </Link>
           </li>
-          <li>
+          <li className="nav-main">
             <Link to="/market-price">
             <i className="fas fa-chart-line"></i>{' '}
             <span className="hide-sm">{t('nav.marketPrice')}</span>
@@ -148,7 +135,7 @@ const Navbar = ({  auth: { isAuthenticated, loading, user }, cartCount, logout, 
             </Link>
           </li>
           )}
-          <li>
+          <li className="keep-label">
           <a onClick={logout} href='#!'>
           <i className="fas fa-sign-out-alt"></i>{' '}
           <span className="hide-sm">{t('nav.logout')}</span>
@@ -163,26 +150,45 @@ const Navbar = ({  auth: { isAuthenticated, loading, user }, cartCount, logout, 
         </ul>
   );
 
+  // Old accounts with no role yet: only language + logout until they choose
+  const roleLessLinks = (
+    <ul>
+          <li className="keep-label">
+          <a onClick={logout} href='#!'>
+          <i className="fas fa-sign-out-alt"></i>{' '}
+          <span className="hide-sm">{t('nav.logout')}</span>
+          </a>
+          </li>
+          <li>
+          <a onClick={switchLang} href='#!'>
+          <i className="fas fa-language"></i>{' '}
+          <span>{t('language')}</span>
+          </a>
+          </li>
+    </ul>
+  );
+
   // Determine which auth links to show
   const authLinks = user && user.userType === 'farmer' ? farmerLinks :
                     user && user.userType === 'consumer' ? consumerLinks :
-                    farmerLinks; // Default to farmer links
+                    user ? roleLessLinks :
+                    farmerLinks; // (user still loading)
 
   const guestLinks = (
     <ul>
-          <li><Link to="/farmers">
+          <li className="nav-secondary"><Link to="/farmers">
             <i className="fas fa-users"></i>{' '}
             <span className="hide-sm">{t('nav.farmers')}</span>
           </Link></li>
-          <li><Link to="/market-price">
+          <li className="nav-secondary"><Link to="/market-price">
             <i className="fas fa-chart-line"></i>{' '}
             <span className="hide-sm">{t('nav.marketPrice')}</span>
           </Link></li>
-          <li><Link to="/register">
+          <li className="nav-secondary"><Link to="/register">
             <i className="fas fa-user-plus"></i>{' '}
             <span className="hide-sm">{t('nav.register')}</span>
           </Link></li>
-          <li><Link to="/login">
+          <li className="keep-label"><Link to="/login">
             <i className="fas fa-sign-in-alt"></i>{' '}
             <span className="hide-sm">{t('nav.login')}</span>
           </Link></li>
@@ -201,7 +207,7 @@ const Navbar = ({  auth: { isAuthenticated, loading, user }, cartCount, logout, 
         {!loading && (<Fragment> { isAuthenticated ? authLinks : guestLinks }</Fragment>)}
       </nav>
       {isAuthenticated && user && user.emailVerified === false && (
-        <div className="bg-light" style={{ textAlign: 'center', padding: '0.5rem', fontSize: '0.9rem' }}>
+        <div className="status-banner verify" role="status">
           {t('auth.unverifiedBanner')}{' '}
           <a href="#!" onClick={resendVerification}>{t('auth.resend')}</a>
         </div>

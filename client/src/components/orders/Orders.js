@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Moment from 'react-moment';
 import { useTranslation } from 'react-i18next';
-import Loader from '../layout/Loader';
-import { useNavigate } from 'react-router-dom';
+import { SkeletonRows } from '../layout/Skeleton';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import { addToCart } from '../../actions/cart';
 import { setAlert } from '../../actions/alert';
@@ -16,6 +16,26 @@ const phoneDigits = raw => {
   const d = String(raw || '').replace(/\D/g, '');
   if (d.length === 10) return `91${d}`;
   return d.length >= 11 ? d : '';
+};
+
+// Placed -> Confirmed -> Completed, or a single red tag when it ended early
+const OrderProgress = ({ status }) => {
+  const { t } = useTranslation();
+  if (status === 'rejected' || status === 'cancelled') return null;
+  const steps = ['placed', 'confirmed', 'completed'];
+  const at = steps.indexOf(status);
+  return (
+    <div className='order-progress' aria-label={t(`orders.status.${status}`)}>
+      {steps.map((st, i) => (
+        <React.Fragment key={st}>
+          {i > 0 && <span className={`bar${i <= at ? ' done' : ''}`} />}
+          <span className={`step${i < at ? ' done' : ''}${i === at ? ' current' : ''}`}>
+            <span className='dot'>{i < at ? '✓' : i + 1}</span>{t(`orders.status.${st}`)}
+          </span>
+        </React.Fragment>
+      ))}
+    </div>
+  );
 };
 
 // Star rating form shown to the buyer on completed orders
@@ -69,11 +89,11 @@ const Orders = ({ auth: { user }, setAlert, addToCart }) => {
       setOrders(res.data);
       api.put('/api/orders/seen').catch(() => {}); // clears the buyer's unread badge
     } catch (err) {
-      setAlert('Could not load orders', 'danger');
+      setAlert(t('orders.loadFailed'), 'danger');
     } finally {
       setLoading(false);
     }
-  }, [isFarmer, setAlert]);
+  }, [isFarmer, setAlert, t]);
 
   useEffect(() => { if (user) load(); }, [user, load]);
 
@@ -82,9 +102,9 @@ const Orders = ({ auth: { user }, setAlert, addToCart }) => {
     try {
       const res = await api.put(`/api/orders/${id}/status`, { status });
       setOrders(orders.map(o => (o._id === id ? res.data : o)));
-      setAlert(`Order ${status}`, 'success');
+      setAlert(t('orders.updated', { status: t(`orders.status.${status}`) }), 'success');
     } catch (err) {
-      setAlert(err.response?.data?.msg || 'Could not update order', 'danger');
+      setAlert(err.response?.data?.msg || t('orders.updateFailed'), 'danger');
     } finally {
       setBusyId(null);
     }
@@ -111,30 +131,28 @@ const Orders = ({ auth: { user }, setAlert, addToCart }) => {
     }
   };
 
-  if (loading || !user) return <Loader message={t('orders.loading')} fullPage={false} />;
+  if (loading || !user) return <SkeletonRows />;
 
   const shown = filter === 'all' ? orders : orders.filter(o => o.status === filter);
 
-  return (
-    <Fragment>
-      <h1 className='large text-primary'>{isFarmer ? t('orders.titleFarmer') : t('orders.titleBuyer')}</h1>
-      <div className='posts-filters'>
-        <select value={filter} onChange={e => setFilter(e.target.value)}>
-          <option value='all'>{t('orders.allStatuses')}</option>
-          {['placed', 'confirmed', 'completed', 'rejected', 'cancelled'].map(st => (
-            <option key={st} value={st}>{t(`orders.status.${st}`)}</option>
-          ))}
-        </select>
-      </div>
+  const groupDefs = isFarmer
+    ? [
+        { key: 'new', statuses: ['placed'] },
+        { key: 'progress', statuses: ['confirmed'] },
+        { key: 'past', statuses: ['completed', 'rejected', 'cancelled'] }
+      ]
+    : [
+        { key: 'active', statuses: ['placed', 'confirmed'] },
+        { key: 'past', statuses: ['completed', 'rejected', 'cancelled'] }
+      ];
 
-      {shown.length === 0 && <p className='posts-count'>{t('orders.none')}</p>}
-
-      {shown.map(o => (
+  const renderOrder = o => (
         <div className='order-card' key={o._id}>
           <h3>
             {o.productName} — {o.quantity} {t(`units.${o.unit}`, o.unit)}{' '}
             <span className={`order-status ${o.status}`}>{t(`orders.status.${o.status}`)}</span>
           </h3>
+          <OrderProgress status={o.status} />
           <p className='order-meta'>
             ₹{o.totalAmount.toFixed(2)} (₹{o.pricePerUnit}/{t(`units.${o.unit}`, o.unit)}) · {t('orders.placedOn')} <Moment format='DD MMM YYYY, h:mm A'>{o.date}</Moment>
           </p>
@@ -143,8 +161,11 @@ const Orders = ({ auth: { user }, setAlert, addToCart }) => {
           ) : (
             <p>{t('orders.farmer')}: <strong>{o.farmerName}</strong>{o.farmerMobile && <> · 📱 {o.farmerMobile}</>}</p>
           )}
+          {!['confirmed', 'completed'].includes(o.status) && ['placed'].includes(o.status) && (
+            <p className='order-meta'>🔒 {t('orders.contactAfterConfirm')}</p>
+          )}
           <p>
-            {o.deliveryMethod === 'delivery' ? t('orders.deliverTo', { address: o.deliveryAddress }) : t('orders.pickupNote')}
+            {o.deliveryMethod === 'delivery' ? t('orders.deliverTo', { address: o.deliveryAddress }) : (isFarmer ? t('orders.pickupNote') : t('orders.pickupNoteBuyer'))}
           </p>
           {o.note && <p><em>“{o.note}”</em></p>}
 
@@ -189,14 +210,49 @@ const Orders = ({ auth: { user }, setAlert, addToCart }) => {
             {isFarmer && o.status === 'confirmed' && (
               <button className='btn btn-primary' disabled={busyId === o._id} onClick={() => changeStatus(o._id, 'completed')}>{t('orders.complete')}</button>
             )}
-            {['placed', 'confirmed'].includes(o.status) && (
+            {/* buyers may cancel until completed; farmers reject a new request, and may cancel only once confirmed */}
+            {(isFarmer ? o.status === 'confirmed' : ['placed', 'confirmed'].includes(o.status)) && (
               <button className='btn btn-light' disabled={busyId === o._id} onClick={() => {
                 if (window.confirm(t('orders.confirmCancel'))) changeStatus(o._id, 'cancelled');
               }}>{t('orders.cancelOrder')}</button>
             )}
           </div>
         </div>
-      ))}
+  );
+
+
+  return (
+    <Fragment>
+      <h1 className='large text-primary'>{isFarmer ? t('orders.titleFarmer') : t('orders.titleBuyer')}</h1>
+      <div className='posts-filters'>
+        <select value={filter} onChange={e => setFilter(e.target.value)}>
+          <option value='all'>{t('orders.allStatuses')}</option>
+          {['placed', 'confirmed', 'completed', 'rejected', 'cancelled'].map(st => (
+            <option key={st} value={st}>{t(`orders.status.${st}`)}</option>
+          ))}
+        </select>
+      </div>
+
+      {shown.length === 0 && (
+        <div className='empty-state'>
+          <div className='icon'>🧾</div>
+          <h3>{t('orders.none')}</h3>
+          <p>{isFarmer ? t('orders.noneFarmer') : t('orders.noneBuyer')}</p>
+          <Link to={isFarmer ? '/add-product' : '/posts'} className='btn btn-primary'>
+            {isFarmer ? `➕ ${t('posts.addProduct')}` : t('cart.browse')}
+          </Link>
+        </div>
+      )}
+
+      {groupDefs.map(g => {
+        const list = shown.filter(o => g.statuses.includes(o.status));
+        return list.length === 0 ? null : (
+          <Fragment key={g.key}>
+            <h2 className='order-group-title'>{t(`orders.group.${g.key}`)} <span className='count'>{list.length}</span></h2>
+            {list.map(renderOrder)}
+          </Fragment>
+        );
+      })}
     </Fragment>
   );
 };

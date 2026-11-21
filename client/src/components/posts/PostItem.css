@@ -246,3 +246,14 @@
     margin: 0;
 }
 
+
+/* Compact card: details toggle */
+.details-toggle {
+    background: none;
+    border: none;
+    color: #2d5016;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.4rem 0;
+}
+.product-details-panel { padding-bottom: 0.5rem; }

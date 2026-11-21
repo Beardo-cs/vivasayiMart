@@ -37,7 +37,8 @@
     "priceDesc": "Price: high to low",
     "inStock": "In stock only",
     "savedOnly": "Saved only",
-    "clear": "Clear"
+    "clear": "Clear",
+    "title": "Filters"
   },
   "posts": {
     "title": "🌾 Agricultural Products",
@@ -50,7 +51,9 @@
     "noneHint": "Try changing your filters.",
     "prev": "← Prev",
     "next": "Next →",
-    "page": "Page {{page}} of {{pages}}"
+    "page": "Page {{page}} of {{pages}}",
+    "addProduct": "Add product",
+    "noneMine": "You have not listed any products yet."
   },
   "product": {
     "contact": "Contact",
@@ -71,7 +74,14 @@
     "saved": "Saved",
     "comments": "Comments",
     "report": "Report this listing",
-    "bulkOffer": "{{qty}}+ {{unit}}: ₹{{price}} each"
+    "bulkOffer": "{{qty}}+ {{unit}}: ₹{{price}} each",
+    "confirmDelete": "Delete \"{{name}}\"? This cannot be undone.",
+    "contactLater": "Phone number is shared after the farmer confirms your order.",
+    "hideDetails": "Hide details",
+    "restockHint": "Add stock via Edit to re-open",
+    "saveLater": "Save for later",
+    "showDetails": "Details",
+    "unsave": "Remove from saved"
   },
   "orderPanel": {
     "title": "Order {{name}}",
@@ -124,7 +134,20 @@
     "again": "Order again",
     "againSoldOut": "{{name}} is not available right now.",
     "againReduced": "Only {{max}} available now, so the quantity was reduced.",
-    "againGone": "This product is no longer listed."
+    "againGone": "This product is no longer listed.",
+    "contactAfterConfirm": "Phone numbers are shared once the farmer confirms.",
+    "loadFailed": "Could not load orders",
+    "noneBuyer": "Browse fresh produce and send your first order request.",
+    "noneFarmer": "List your products so buyers can order them.",
+    "updateFailed": "Could not update the order",
+    "updated": "Order marked {{status}}",
+    "group": {
+      "new": "New requests",
+      "progress": "Confirmed - to deliver",
+      "active": "In progress",
+      "past": "Past orders"
+    },
+    "pickupNoteBuyer": "🏬 You will pick it up"
   },
   "cart": {
     "title": "🛒 My Cart",
@@ -173,7 +196,10 @@
     "confirm": "Confirm Password",
     "creating": "Creating your account...",
     "haveAccount": "Already have an account?",
-    "signIn": "Sign In"
+    "signIn": "Sign In",
+    "agree": "I agree to the",
+    "and": "and",
+    "gravatar": "Your profile picture comes from Gravatar, using this email address."
   },
   "login": {
     "title": "Sign in",
@@ -184,7 +210,20 @@
   },
   "landing": {
     "title": "Vivasayi Mart",
-    "tagline": "Create an account to connect with farmers, and buy and sell fresh produce directly."
+    "tagline": "Create an account to connect with farmers, and buy and sell fresh produce directly.",
+    "chooseLanguage": "Choose language",
+    "featuredTitle": "Fresh on VivasayiMart",
+    "haveAccount": "Already have an account?",
+    "howTitle": "How it works",
+    "imBuyer": "I want to buy",
+    "imFarmer": "I am a farmer",
+    "seeAll": "See all products",
+    "step1Title": "Farmers list their produce",
+    "step1Text": "Farmers add a photo, price and stock in a few taps.",
+    "step2Title": "Buyers send an order request",
+    "step2Text": "Pick what you need, choose pickup or delivery, and send the request.",
+    "step3Title": "Confirm and pay directly",
+    "step3Text": "The farmer confirms and shares contact details. You pay the farmer directly, with no middlemen."
   },
   "notFound": {
     "title": "Page Not Found",
@@ -279,7 +318,14 @@
     "bulkPrice": "Price per unit from then on (₹)",
     "bulkHint": "Example: from 50 kg, ₹18 per kg. Must be lower than the normal price.",
     "notImage": "Please upload an image file",
-    "analyzeFailed": "Could not analyze the image. Please enter the product details manually."
+    "analyzeFailed": "Could not analyze the image. Please enter the product details manually.",
+    "back": "Back",
+    "mobileHint": "Buyers see this only after you confirm their order.",
+    "next": "Next",
+    "step1": "Photo & product",
+    "step2": "Price & stock",
+    "step3": "Details",
+    "stepsLabel": "Steps"
   },
   "editPanel": {
     "title": "Edit Listing",
@@ -404,7 +450,15 @@
     "benefit2Title": "Fair Prices",
     "benefit2Text": "No middlemen - better prices for you and farmers",
     "benefit3Title": "Support Local",
-    "benefit3Text": "Help local farmers and strengthen your community"
+    "benefit3Text": "Help local farmers and strengthen your community",
+    "addDesc": "List a new product in 3 easy steps",
+    "completeProfile": "Complete your profile",
+    "completeProfileText": "Add your name, area and mobile number so farmers can reach you once they confirm your order.",
+    "completeProfileCta": "Complete profile",
+    "getStarted": "Get started",
+    "todoEmail": "Verify your email address",
+    "todoProduct": "List your first product",
+    "todoProfile": "Create your farm profile"
   },
   "serverMsgs": {
     "Invalid Credentials": "Invalid email or password",
@@ -449,6 +503,182 @@
     "There is no profile for this farmer": "No profile yet",
     "There is no profile for this consumer": "No profile yet",
     "onlyAvailable": "Only {{stock}} of {{name}} available",
-    "soldOutNamed": "{{name}} is sold out or unavailable"
+    "soldOutNamed": "{{name}} is sold out or unavailable",
+    "Please accept the Terms and Privacy Policy": "Please accept the Terms and Privacy Policy",
+    "Market prices are not configured on the server": "Market prices are not available right now",
+    "Market price service is unavailable right now": "Market price service is unavailable right now",
+    "Server error": "Something went wrong on our side. Please try again.",
+    "Your role is already set": "Your role is already set",
+    "Choose farmer or consumer": "Please choose farmer or buyer"
+  },
+  "bottomNav": {
+    "add": "Add",
+    "home": "Home",
+    "label": "Main navigation",
+    "prices": "Prices",
+    "shop": "Shop"
+  },
+  "orderPlaced": {
+    "continue": "Continue shopping",
+    "next": "What happens next",
+    "step1": "The farmer gets your request and confirms it.",
+    "step2": "Once confirmed, you can see the farmer's phone number here to arrange pickup or delivery.",
+    "step3": "Pay the farmer directly (cash or UPI), then rate your experience.",
+    "subtitle": "We sent your request to {{names}}. They will confirm it soon.",
+    "summary": "Order summary",
+    "title": "Order request sent!"
+  },
+  "footer": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use"
+  },
+  "crash": {
+    "title": "Oops, something went wrong",
+    "text": "We have noted the problem. Please go back to the home page and try again.",
+    "reload": "Go to home page"
+  },
+  "legal": {
+    "updated": "Last updated: {{date}}",
+    "date": "21 November 2026",
+    "contactTitle": "Contact us",
+    "summary": {
+      "privacy": "In short: we collect only what is needed to run the marketplace. Your phone number is shared with the other person only after the farmer confirms an order.",
+      "terms": "In short: VivasayiMart connects farmers and buyers. Orders and payments are agreed directly between them."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "sections": [
+        {
+          "h": "What we collect",
+          "p": [
+            "When you use VivasayiMart we store:"
+          ],
+          "list": [
+            "Your name, email address and password (the password is stored in scrambled form; we cannot read it)",
+            "Your phone number, address or area, and farm details if you are a farmer",
+            "Photos and descriptions of products you list, and prices and stock",
+            "Your orders, reviews, saved items and reports you send",
+            "Technical information such as the type of phone or browser, used to fix problems"
+          ]
+        },
+        {
+          "h": "How we use it",
+          "p": [
+            "To run the marketplace: show listings, process order requests, send you emails (email verification and password reset), keep the site safe, and fix errors."
+          ]
+        },
+        {
+          "h": "Who can see what",
+          "list": [
+            "Public: a farmer's farm page (name, farm name, area, products, ratings and reviews).",
+            "Your phone number: shown only to you on your own listings. Between a buyer and a farmer it is shared only after the farmer confirms the order, and is hidden again if the order is cancelled.",
+            "Administrators can see reports and listings so they can keep the marketplace safe."
+          ]
+        },
+        {
+          "h": "Other services we use",
+          "p": [
+            "We use trusted services to run the site. They receive only what they need:"
+          ],
+          "list": [
+            "Vercel (website hosting) and MongoDB Atlas (database)",
+            "Resend (sending emails)",
+            "Google Gemini (product photos, product names and areas are sent to recognise the product and suggest a price)",
+            "data.gov.in (market prices; no personal data is sent)"
+          ]
+        },
+        {
+          "h": "On your phone or computer",
+          "p": [
+            "We save your login, language choice and cart in your browser, and keep copies of some pages so the app works with a weak connection. These are cleared when you log out."
+          ]
+        },
+        {
+          "h": "Your choices",
+          "p": [
+            "You can edit your profile and delete your listings at any time. To delete your account and personal data, contact us. We may keep basic order records for the other person in the order and for legal reasons."
+          ]
+        },
+        {
+          "h": "Security",
+          "p": [
+            "Passwords are stored scrambled, logins expire after a few days, and connections are encrypted. No online service is perfectly secure, so please keep your password private."
+          ]
+        },
+        {
+          "h": "Changes",
+          "p": [
+            "If we change this policy we will update the date above. Using VivasayiMart after a change means you accept it."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "sections": [
+        {
+          "h": "What VivasayiMart is",
+          "p": [
+            "VivasayiMart is a place where farmers list produce and buyers send order requests. We are not the seller, buyer or delivery service, and we do not handle payments."
+          ]
+        },
+        {
+          "h": "Your account",
+          "p": [
+            "Give correct information, keep your password private, and do not share your account. You are responsible for what happens under your account."
+          ]
+        },
+        {
+          "h": "Listings",
+          "list": [
+            "List only produce you can actually supply, with honest photos, prices and stock.",
+            "Keep stock and availability up to date.",
+            "Do not list illegal, unsafe or misleading items.",
+            "We may hide or remove listings that are reported or break these rules."
+          ]
+        },
+        {
+          "h": "Orders and payment",
+          "p": [
+            "An order request is not final until the farmer confirms it. After confirmation, the buyer and farmer arrange pickup or delivery and the buyer pays the farmer directly (for example cash or UPI). Any disagreement about quality, quantity or payment is between the buyer and the farmer; we can help by hiding listings or accounts that misbehave, but we cannot refund payments."
+          ]
+        },
+        {
+          "h": "Reviews and behaviour",
+          "p": [
+            "Write honest reviews and be respectful. Do not harass others, post spam or try to misuse the service. You can report a listing from its card."
+          ]
+        },
+        {
+          "h": "AI suggestions",
+          "p": [
+            "Product recognition and price suggestions are made by AI and can be wrong. Please check them before you publish a listing."
+          ]
+        },
+        {
+          "h": "Our responsibility",
+          "p": [
+            "We try to keep VivasayiMart working, but it is provided as is, without guarantees. We are not responsible for the quality or safety of produce, for delivery, or for losses between buyers and farmers."
+          ]
+        },
+        {
+          "h": "Ending your account",
+          "p": [
+            "You can stop using VivasayiMart at any time. We may suspend accounts that break these terms."
+          ]
+        },
+        {
+          "h": "Changes",
+          "p": [
+            "We may update these terms and will change the date above. Using VivasayiMart after a change means you accept it."
+          ]
+        }
+      ]
+    }
+  },
+  "chooseRole": {
+    "title": "Welcome back! Who are you?",
+    "text": "Your account was created before farmer and buyer roles existed. Please choose one to continue.",
+    "once": "You can choose only once, so pick carefully."
   }
 }

@@ -1,9 +1,10 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import Loader from '../layout/Loader';
+import { getCurrentProfile } from '../../actions/profile';
 import './Dashboard.css';
 
 const CATEGORIES = [
@@ -11,8 +12,9 @@ const CATEGORIES = [
     ['Dairy', '🥛'], ['Poultry', '🐔'], ['Other', '🌱']
 ];
 
-const ConsumerDashboard = ({ auth: { user, loading } }) => {
+const ConsumerDashboard = ({ auth: { user, loading }, profile, getCurrentProfile }) => {
     const { t } = useTranslation();
+    useEffect(() => { getCurrentProfile('consumer'); }, [getCurrentProfile]);
 
     return loading ? (
         <Loader message={t('dashboard.loadingConsumer')} fullPage={true} />
@@ -24,6 +26,14 @@ const ConsumerDashboard = ({ auth: { user, loading } }) => {
                     <p className="dashboard-subtitle">{t('dashboard.welcome', { name: user && user.name })}</p>
                 </div>
             </div>
+
+            {!profile.loading && !profile.profile && (
+                <div className="order-card" style={{ margin: '1rem 0' }}>
+                    <h3>👤 {t('dashboard.completeProfile')}</h3>
+                    <p>{t('dashboard.completeProfileText')}</p>
+                    <Link to="/create-consumer-profile" className="btn btn-primary">{t('dashboard.completeProfileCta')}</Link>
+                </div>
+            )}
 
             <div className="dashboard-actions-modern">
                 <Link to="/posts" className="action-card consumer-card primary">
@@ -89,6 +99,10 @@ const ConsumerDashboard = ({ auth: { user, loading } }) => {
     );
 };
 
-ConsumerDashboard.propTypes = { auth: PropTypes.object.isRequired };
-const mapStateToProps = state => ({ auth: state.auth });
-export default connect(mapStateToProps)(ConsumerDashboard);
+ConsumerDashboard.propTypes = {
+    auth: PropTypes.object.isRequired,
+    profile: PropTypes.object.isRequired,
+    getCurrentProfile: PropTypes.func.isRequired
+};
+const mapStateToProps = state => ({ auth: state.auth, profile: state.profile });
+export default connect(mapStateToProps, { getCurrentProfile })(ConsumerDashboard);

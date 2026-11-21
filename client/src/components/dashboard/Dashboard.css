@@ -200,15 +200,15 @@
 }
 
 .consumer-card.primary {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #7cb342 0%, #8bc34a 100%);
     box-shadow:
-        0 8px 24px rgba(79, 172, 254, 0.3),
+        0 8px 24px rgba(124, 179, 66, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.15) inset;
 }
 
 .consumer-card.primary:hover {
     box-shadow:
-        0 16px 40px rgba(79, 172, 254, 0.4),
+        0 16px 40px rgba(124, 179, 66, 0.4),
         0 0 0 1px rgba(255, 255, 255, 0.25) inset;
 }
 
@@ -267,9 +267,9 @@
     transform: translateY(-50%);
     width: 5px;
     height: 75%;
-    background: linear-gradient(180deg, #667eea, #764ba2);
+    background: linear-gradient(180deg, #2d5016, #7cb342);
     border-radius: 3px;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(45, 80, 22, 0.3);
 }
 
 .stats-grid {
@@ -302,7 +302,7 @@
     left: 0;
     width: 4px;
     height: 100%;
-    background: linear-gradient(180deg, #667eea, #764ba2);
+    background: linear-gradient(180deg, #2d5016, #7cb342);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -315,8 +315,8 @@
     transform: translateY(-4px);
     box-shadow:
         0 12px 32px rgba(0, 0, 0, 0.12),
-        0 0 0 1px rgba(102, 126, 234, 0.1) inset;
-    border-color: rgba(102, 126, 234, 0.15);
+        0 0 0 1px rgba(45, 80, 22, 0.1) inset;
+    border-color: rgba(45, 80, 22, 0.15);
 }
 
 .stat-icon {
@@ -342,7 +342,7 @@
 .stat-number {
     font-size: 2.2rem;
     font-weight: 800;
-    color: #667eea;
+    color: #2d5016;
     margin: 0.5rem 0;
     line-height: 1;
 }
@@ -388,7 +388,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(79, 172, 254, 0.05) 0%, transparent 100%);
+    background: linear-gradient(135deg, rgba(124, 179, 66, 0.05) 0%, transparent 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -400,9 +400,9 @@
 .category-card:hover {
     transform: translateY(-6px);
     box-shadow:
-        0 12px 32px rgba(79, 172, 254, 0.2),
-        0 0 0 1px rgba(79, 172, 254, 0.1) inset;
-    border-color: rgba(79, 172, 254, 0.2);
+        0 12px 32px rgba(124, 179, 66, 0.2),
+        0 0 0 1px rgba(124, 179, 66, 0.1) inset;
+    border-color: rgba(124, 179, 66, 0.2);
 }
 
 .category-icon {
@@ -444,7 +444,7 @@
     padding: 2.5rem;
     border-radius: 24px;
     text-align: center;
-    border: 2px solid rgba(79, 172, 254, 0.1);
+    border: 2px solid rgba(124, 179, 66, 0.1);
     box-shadow:
         0 4px 16px rgba(0, 0, 0, 0.08),
         0 0 0 1px rgba(0, 0, 0, 0.04) inset;
@@ -461,7 +461,7 @@
     left: 0;
     width: 100%;
     height: 4px;
-    background: linear-gradient(90deg, #4facfe, #00f2fe);
+    background: linear-gradient(90deg, #7cb342, #8bc34a);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -474,15 +474,15 @@
 .benefit-card:hover {
     transform: translateY(-6px);
     box-shadow:
-        0 12px 32px rgba(79, 172, 254, 0.2),
-        0 0 0 1px rgba(79, 172, 254, 0.1) inset;
-    border-color: rgba(79, 172, 254, 0.2);
+        0 12px 32px rgba(124, 179, 66, 0.2),
+        0 0 0 1px rgba(124, 179, 66, 0.1) inset;
+    border-color: rgba(124, 179, 66, 0.2);
 }
 
 .benefit-icon {
     font-size: 3.5rem;
     margin-bottom: 1.2rem;
-    filter: drop-shadow(0 2px 8px rgba(79, 172, 254, 0.2));
+    filter: drop-shadow(0 2px 8px rgba(124, 179, 66, 0.2));
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -491,7 +491,7 @@
 }
 
 .benefit-card h3 {
-    color: #4facfe;
+    color: #7cb342;
     font-size: 1.3rem;
     margin-bottom: 0.8rem;
     font-weight: 700;
@@ -516,7 +516,7 @@
         0 0 0 1px rgba(0, 0, 0, 0.04) inset;
     max-width: 600px;
     margin: 2rem auto;
-    border: 2px solid rgba(102, 126, 234, 0.1);
+    border: 2px solid rgba(45, 80, 22, 0.1);
 }
 
 .no-profile-icon {

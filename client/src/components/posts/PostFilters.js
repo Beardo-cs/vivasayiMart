@@ -7,6 +7,7 @@ const CATEGORIES = ['Vegetables', 'Fruits', 'Grains', 'Dairy', 'Poultry', 'Other
 // Search / filter bar. Text inputs are debounced so we don't query on every keystroke.
 const PostFilters = ({ filters, onChange }) => {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false); // phones: extra filters hidden until opened
   const [local, setLocal] = useState(filters);
 
   useEffect(() => { setLocal(filters); }, [filters]);
@@ -25,11 +26,20 @@ const PostFilters = ({ filters, onChange }) => {
     if (immediate) onChange(next);
   };
 
+  const activeCount = ['category', 'location', 'minPrice', 'maxPrice', 'inStock', 'saved'].filter(k => filters[k]).length
+    + (filters.sort && filters.sort !== 'newest' ? 1 : 0);
+
   const clear = () => onChange({ q: '', category: '', location: '', minPrice: '', maxPrice: '', inStock: false, saved: false, sort: 'newest' });
 
   return (
     <div className='posts-filters'>
-      <input type='text' placeholder={t('filters.search')} value={local.q || ''} onChange={e => setField('q', e.target.value)} />
+      <div className='filters-bar'>
+        <input type='search' aria-label={t('filters.search')} placeholder={t('filters.search')} value={local.q || ''} onChange={e => setField('q', e.target.value)} />
+        <button type='button' className='filters-toggle btn btn-light' onClick={() => setOpen(!open)} aria-expanded={open}>
+          ⚙ {t('filters.title')}{activeCount > 0 ? ` (${activeCount})` : ''}
+        </button>
+      </div>
+      <div className={`filters-extra${open ? ' open' : ''}`}>
       <select value={local.category || ''} onChange={e => setField('category', e.target.value, true)}>
         <option value=''>{t('filters.allCategories')}</option>
         {CATEGORIES.map(c => <option key={c} value={c}>{t(`categories.${c}`)}</option>)}
@@ -49,6 +59,7 @@ const PostFilters = ({ filters, onChange }) => {
         <input type='checkbox' checked={!!local.saved} onChange={e => setField('saved', e.target.checked, true)} /> {t('filters.savedOnly')}
       </label>
       <button type='button' className='btn btn-light' onClick={clear}>{t('filters.clear')}</button>
+      </div>
     </div>
   );
 };

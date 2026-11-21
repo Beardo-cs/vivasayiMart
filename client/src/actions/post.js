@@ -105,6 +105,7 @@ export const addPost = formData => async dispatch => {
         });
 
         dispatch(setAlert(i18n.t('alerts.postCreated'), 'success'));
+        return true;
     } catch (err) {
         const errors = err.response?.data?.errors;
         if (errors) {
@@ -114,6 +115,7 @@ export const addPost = formData => async dispatch => {
             type: POST_ERROR,
             payload: {msg: err.response?.statusText || err.message, status: err.response?.status }
         });
+        return false;
     }
 };
 

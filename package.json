@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.40.0",
+    "@sentry/node": "^11.16.0",
     "axios": "^1.13.4",
     "bcryptjs": "^3.0.3",
     "config": "^4.2.0",
