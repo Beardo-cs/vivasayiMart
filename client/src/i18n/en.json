@@ -590,7 +590,8 @@
           "list": [
             "Public: a farmer's farm page (name, farm name, area, products, ratings and reviews).",
             "Your phone number: shown only to you on your own listings. Between a buyer and a farmer it is shared only after the farmer confirms the order, and is hidden again if the order is cancelled.",
-            "Administrators can see reports and listings so they can keep the marketplace safe."
+            "Our team (administrators) can see reports, listings and orders, including the buyer's and farmer's phone numbers, so they can keep the marketplace safe and call either side about an order.",
+            "Some farmers ask our team to run their account for them. Our team then adds their products and answers their orders, and every change is saved with the team member's name."
           ]
         },
         {
@@ -652,7 +653,8 @@
             "List only produce you can actually supply, with honest photos, prices and stock.",
             "Keep stock and availability up to date.",
             "Do not list illegal, unsafe or misleading items.",
-            "We may hide or remove listings that are reported or break these rules."
+            "We may hide or remove listings that are reported or break these rules.",
+            "Farmers are approved by our team before buyers can see them. Badges show checks our team did, such as a phone call or a farm visit. They are not a promise about quality."
           ]
         },
         {
