@@ -1,6 +1,6 @@
 # Pilot readiness: trust, clear delivery, and selling on farmers' behalf
 
-*Design · 21 November 2026 · Status: draft, waiting for the founder's approval*
+*Design · 21 November 2026 · Status: approved by the founder on 21 November 2026*
 
 ## 1. Why this exists
 
