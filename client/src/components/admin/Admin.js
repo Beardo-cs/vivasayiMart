@@ -28,7 +28,10 @@ const ACTIVITY_LABELS = {
   'PUT /api/posts/:id': () => 'Edited a listing',
   'DELETE /api/posts/:id': () => 'Deleted a listing',
   'PUT /api/orders/:id/status': e => `Order ${e.details && e.details.status}`,
-  'POST /api/farmer-profile': () => 'Updated the farm profile'
+  'PUT /api/orders/seen': () => 'Opened new orders',
+  'POST /api/farmer-profile': () => 'Updated the farm profile',
+  'POST /api/ai/analyze-product': () => 'Used photo help for a listing',
+  'POST /api/ai/suggest-price': () => 'Asked for a price suggestion'
 };
 const activityLabel = e => {
   const label = ACTIVITY_LABELS[e.action] ? ACTIVITY_LABELS[e.action](e) : e.action;
