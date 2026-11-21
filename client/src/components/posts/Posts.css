@@ -235,6 +235,25 @@
 .order-status.cancelled { background: #f8d7da; color: #a12622; }
 .order-actions { margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
+/* Admin console */
+.admin-tabs { margin-bottom: 1rem; }
+.admin-add { margin-bottom: 1rem; }
+.admin-section { font-size: 1.1rem; margin: 0.25rem 0 0.75rem; }
+.admin-check { display: flex; align-items: center; gap: 0.5rem; margin: 0.6rem 0; font-size: 0.95rem; }
+.admin-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #dfe9d2;
+}
+.admin-badges .admin-check { margin: 0; }
+.admin-badges .btn { margin: 0; }
+.admin-activity { margin: 0.75rem 0 0; padding-left: 1.1rem; font-size: 0.9rem; color: #5a6b4a; }
+.admin-activity li { margin: 0.2rem 0; }
+
 .order-badge {
     background: #e53935;
     color: #fff;

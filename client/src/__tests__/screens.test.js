@@ -215,3 +215,58 @@ describe('Acting for a farmer', () => {
     expect(screen.queryByText(/Acting for/)).not.toBeInTheDocument();
   });
 });
+
+describe('Admin console', () => {
+  const Admin = require('../components/admin/Admin').default;
+  const ADMIN = { _id: 'a1', name: 'Founder', userType: 'consumer', isAdmin: true };
+
+  test('Needs attention lists farmers waiting for approval; approving removes them', async () => {
+    api.get.mockImplementation(url => Promise.resolve({
+      data: url === '/api/admin/attention'
+        ? { pendingFarmers: [{ _id: 'f9', name: 'Kumar', email: 'kumar@x.com', waitingSince: new Date().toISOString() }] }
+        : []
+    }));
+    api.put.mockResolvedValue({ data: { approval: { status: 'approved' } } });
+    jest.spyOn(window, 'prompt').mockReturnValueOnce('');
+    renderAt(<Admin />, { user: ADMIN, path: '/admin' });
+
+    expect(await screen.findByText('Kumar')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/api/admin/farmers/f9/approval', { status: 'approved', note: '' }));
+    expect(await screen.findByText('Nothing needs you right now.')).toBeInTheDocument();
+  });
+
+  test('declining needs a reason: cancelling the question changes nothing', async () => {
+    api.get.mockResolvedValue({ data: { pendingFarmers: [{ _id: 'f9', name: 'Kumar', email: 'k@x.com', waitingSince: new Date().toISOString() }] } });
+    jest.spyOn(window, 'prompt').mockReturnValueOnce('   ');
+    renderAt(<Admin />, { user: ADMIN, path: '/admin' });
+    fireEvent.click(await screen.findByRole('button', { name: 'Decline' }));
+    expect(api.put).not.toHaveBeenCalled();
+    expect(screen.getByText('Kumar')).toBeInTheDocument();
+  });
+
+  test('a farmer you added can be opened, and you land on their dashboard', async () => {
+    const farmer = {
+      _id: 'm1', name: 'Murugan', email: null, managed: true, isTest: false, farmName: 'Thottam', location: 'Melur',
+      approval: { status: 'approved' }, badges: [{ type: 'phone', at: new Date().toISOString() }]
+    };
+    api.get.mockImplementation(url => Promise.resolve({
+      data: url === '/api/admin/farmers' ? [farmer]
+        : url === '/api/auth' ? { ...farmer, userType: 'farmer', acting: { by: 'Founder', until: Date.now() + 3600000 } }
+        : { pendingFarmers: [] }
+    }));
+    api.post.mockResolvedValue({ data: { token: 'acting-token' } });
+    localStorage.setItem('token', 'admin-token');
+    renderAt(<><Admin /><Where /></>, { user: ADMIN, path: '/admin' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Farmers' }));
+    expect(await screen.findByText('Murugan')).toBeInTheDocument();
+    expect(screen.getByText(/Phone verified/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Open as Murugan' }));
+    await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/dashboard'));
+    expect(api.post).toHaveBeenCalledWith('/api/admin/act-as/m1');
+    expect(localStorage.getItem('adminToken')).toBe('admin-token');
+    expect(localStorage.getItem('token')).toBe('acting-token');
+    localStorage.clear();
+  });
+});
