@@ -10,6 +10,7 @@ const User = require('../../models/User');
 const Review = require('../../models/Review');
 const { normalizeTiers } = require('../../utils/pricing');
 const Favorite = require('../../models/Favorite');
+const { visibleFarmerIds, canSee } = require('../../services/visibility');
 
 // Phone numbers are shared only after an order is confirmed (see routes/api/orders.js),
 // so listings never expose them to anyone except the farmer who owns the listing.
@@ -131,11 +132,12 @@ router.get('/', auth, async(req, res) => {
         const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 12, 1), 50);
 
         const filter = {};
-        // hidden (moderated) listings only show up for their own farmer
         if (farmer && farmer === req.user.id) {
-            // own view: include hidden
+            filter.user = farmer;                    // own view: hidden listings too, even while waiting for approval
         } else {
             filter.hidden = { $ne: true };
+            const visible = await visibleFarmerIds(req.user.id);
+            filter.user = { $in: farmer ? visible.filter(id => id.toString() === farmer) : visible };
         }
 
         if (category && CATEGORIES.includes(category)) {
@@ -146,9 +148,6 @@ router.get('/', auth, async(req, res) => {
         }
         if (location) {
             filter.address = new RegExp(escapeRegex(String(location).trim()), 'i');
-        }
-        if (farmer && /^[0-9a-fA-F]{24}$/.test(farmer)) {
-            filter.user = farmer;
         }
         if (minPrice !== undefined || maxPrice !== undefined) {
             filter.price = {};
@@ -213,7 +212,9 @@ router.get('/', auth, async(req, res) => {
 // @access    Public
 router.get('/featured', async (req, res) => {
     try {
-        const posts = await Post.find({ hidden: { $ne: true }, available: true, quantityAvailable: { $gt: 0 } })
+        const posts = await Post.find({
+            user: { $in: await visibleFarmerIds(null) }, hidden: { $ne: true }, available: true, quantityAvailable: { $gt: 0 }
+        })
             .select('productName category price unit quantityAvailable address farmerName bulkPricing date')
             .sort({ date: -1 })
             .limit(6);
@@ -238,6 +239,9 @@ router.get('/:id', auth, async(req, res) => {
         if (post.hidden && post.user.toString() !== req.user.id) {
             const me = await User.findById(req.user.id);
             if (!isAdminUser(me)) return res.status(404).json({ msg: 'Post not found'});
+        }
+        if (post.user.toString() !== req.user.id && !canSee(await visibleFarmerIds(req.user.id), post.user)) {
+            return res.status(404).json({ msg: 'Post not found' });
         }
 
         res.json(hideContact(post, req.user.id));

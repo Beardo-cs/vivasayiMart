@@ -113,7 +113,7 @@ router.put('/role', [auth, check('userType', 'Choose farmer or consumer').isIn([
     try {
         const user = await User.findOneAndUpdate(
             { _id: req.user.id, userType: { $nin: ['farmer', 'consumer'] } },
-            { userType: req.body.userType },
+            { userType: req.body.userType, ...(req.body.userType === 'farmer' ? { approval: { status: 'pending' } } : {}) },
             { new: true }
         ).select('-password');
         if (!user) return res.status(400).json({ errors: [{ msg: 'Your role is already set' }] });

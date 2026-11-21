@@ -89,7 +89,9 @@ async (req, res) => {
         email,
         avatar,
         password,     //here pw is nmo hasded
-        userType      // farmer or consumer
+        userType,     // farmer or consumer
+        // new farmers stay hidden from buyers until an admin approves them
+        approval: userType === 'farmer' ? { status: 'pending' } : undefined
     });
 
     // Encrypt password

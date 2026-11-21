@@ -9,6 +9,7 @@ const User = require('../../models/User');
 const Post = require('../../models/Post');
 const Review = require('../../models/Review');
 const mongoose = require('mongoose');
+const { visibleFarmerIds, canSee } = require('../../services/visibility');
 
 const isObjectId = id => /^[0-9a-fA-F]{24}$/.test(id);
 
@@ -116,7 +117,9 @@ router.post(
 // @access    Public
 router.get('/', async (req, res) => {
     try {
-        const profiles = await FarmerProfile.find().sort({ date: -1 }).populate('user', ['name', 'avatar', 'farmerVerified']);
+        const profiles = await FarmerProfile.find({ user: { $in: await visibleFarmerIds(null) } })
+            .sort({ date: -1 })
+            .populate('user', ['name', 'avatar', 'farmerVerified']);
         const ids = profiles.map(p => p.user && p.user._id).filter(Boolean);
         const ratings = ids.length ? await Review.aggregate([
             { $match: { farmer: { $in: ids } } },
@@ -142,7 +145,7 @@ router.get('/:user_id/public', async (req, res) => {
     try {
         if (!isObjectId(req.params.user_id)) return res.status(404).json({ msg: 'Farmer not found' });
         const user = await User.findOne({ _id: req.params.user_id, userType: 'farmer' }).select('name avatar farmerVerified');
-        if (!user) return res.status(404).json({ msg: 'Farmer not found' });
+        if (!user || !canSee(await visibleFarmerIds(null), user._id)) return res.status(404).json({ msg: 'Farmer not found' });
 
         const [profile, products, summary] = await Promise.all([
             FarmerProfile.findOne({ user: user._id }).select('-mobileNumber -social.whatsapp'),
@@ -177,7 +180,7 @@ router.get('/:user_id', async (req, res) => {
     try {
         const profile = await FarmerProfile.findOne({ user: req.params.user_id }).select('-mobileNumber').populate('user', ['name', 'avatar']);
 
-        if (!profile) {
+        if (!profile || !canSee(await visibleFarmerIds(null), profile.user && profile.user._id)) {
             return res.status(400).json({ msg: 'Profile not found' });
         }
 

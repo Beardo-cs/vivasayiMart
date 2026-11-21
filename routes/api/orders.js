@@ -11,6 +11,7 @@ const Post = require('../../models/Post');
 const User = require('../../models/User');
 const Review = require('../../models/Review');
 const ConsumerProfile = require('../../models/ConsumerProfile');
+const { visibleFarmerIds, canSee } = require('../../services/visibility');
 
 // Each side's phone number is revealed only once the farmer has confirmed the order.
 const CONTACT_VISIBLE = ['confirmed', 'completed'];
@@ -56,11 +57,12 @@ const releaseStock = async (postId, qty) => {
 };
 
 // Validate one cart/order line and build (but don't save) the Order document.
+// visible: farmers this buyer may order from (services/visibility.js).
 // Returns { order } or { status, msg }.
-const prepareOrder = async ({ userId, buyerName, buyerMobile, postId, quantity, deliveryMethod, deliveryAddress, note, checkoutId }) => {
+const prepareOrder = async ({ userId, buyerName, buyerMobile, postId, quantity, deliveryMethod, deliveryAddress, note, checkoutId, visible }) => {
     if (!isObjectId(String(postId))) return { status: 400, msg: 'Invalid product' };
     const post = await Post.findById(postId);
-    if (!post || post.hidden) return { status: 404, msg: 'Product not found' };
+    if (!post || post.hidden || !canSee(visible, post.user)) return { status: 404, msg: 'Product not found' };
 
     const unit = post.unit || 'kg';
     const stock = post.quantityAvailable ?? post.weight;
@@ -144,7 +146,8 @@ router.post('/', [
         const result = await prepareOrder({
             userId: req.user.id,
             ...(await buyerDetails(req.user.id)),
-            postId, quantity: Number(req.body.quantity), deliveryMethod, deliveryAddress, note
+            postId, quantity: Number(req.body.quantity), deliveryMethod, deliveryAddress, note,
+            visible: await visibleFarmerIds(req.user.id)
         });
         if (result.msg) return res.status(result.status).json({ msg: result.msg });
 
@@ -186,12 +189,13 @@ router.post('/checkout', [
         });
 
         const buyer = await buyerDetails(req.user.id);
+        const visible = await visibleFarmerIds(req.user.id);
         const checkoutId = new mongoose.Types.ObjectId().toString();
         const orders = [];
         for (const [postId, quantity] of merged) {
             const result = await prepareOrder({
                 userId: req.user.id, ...buyer, postId, quantity,
-                deliveryMethod, deliveryAddress, note, checkoutId
+                deliveryMethod, deliveryAddress, note, checkoutId, visible
             });
             if (result.msg) return res.status(result.status).json({ msg: result.msg, postId });
             orders.push(result.order);
