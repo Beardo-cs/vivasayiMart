@@ -15,6 +15,7 @@ import FarmerPage from '../farmers/FarmerPage';
 import PostForm from '../posts/PostForm';
 import Legal from '../legal/Legal';
 import ChooseRole from '../auth/ChooseRole';
+import Account from '../auth/Account';
 import Orders from '../orders/Orders';
 import OrderPlaced from '../orders/OrderPlaced';
 import Cart from '../cart/Cart';
@@ -56,6 +57,7 @@ const Routes = () => {
                     {/* Consumer Routes */}
                     <Route path='/consumer-dashboard' element={<PrivateRoute><ConsumerDashboard /></PrivateRoute>} />
                     <Route path='/create-consumer-profile' element={<PrivateRoute><CreateConsumerProfile /></PrivateRoute>} />
+                    <Route path='/account' element={<PrivateRoute><Account /></PrivateRoute>} />
                     <Route path='/choose-role' element={<PrivateRoute><ChooseRole /></PrivateRoute>} />
                     <Route path='/dashboard' element={<PrivateRoute><Home /></PrivateRoute>} />
 

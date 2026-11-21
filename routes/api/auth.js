@@ -8,6 +8,7 @@ const { check, validationResult } = require('express-validator');
 const crypto = require('crypto');
 const User = require ('../../models/User');
 const { isAdminUser } = require('../../middleware/checkRole');
+const deleteAccount = require('../../services/accountDeletion');
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../../services/email');
 
 const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
@@ -117,6 +118,26 @@ router.put('/role', [auth, check('userType', 'Choose farmer or consumer').isIn([
         ).select('-password');
         if (!user) return res.status(400).json({ errors: [{ msg: 'Your role is already set' }] });
         res.json({ ...user.toObject(), isAdmin: isAdminUser(user) });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// @route     DELETE api/auth/account
+// @desc      Permanently delete my account and personal data (password required)
+// @access    Private
+router.delete('/account', [auth, check('password', 'Password is required').exists()], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ msg: 'User not found' });
+        if (!(await bcrypt.compare(String(req.body.password), user.password))) {
+            return res.status(400).json({ errors: [{ msg: 'Password is incorrect' }] });
+        }
+        const result = await deleteAccount(user.id);
+        res.json({ msg: 'Account deleted', ...result });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');

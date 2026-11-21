@@ -1058,3 +1058,10 @@ a { text-underline-offset: 3px; }
   .landing-panel .landing-roles, .landing-panel .landing-lang { justify-content: flex-start; }
   .landing-panel .x-large { font-size: clamp(2.6rem, 4.2vw, 3.8rem); }
 }
+
+/* phones with a notch / camera cut-out (used inside the Android and iOS apps too) */
+.navbar { padding-top: calc(0.5rem + env(safe-area-inset-top)); }
+.container { margin-top: calc(4.4rem + env(safe-area-inset-top)); }
+@media (min-width: 901px) { .container { margin-top: calc(5.5rem + env(safe-area-inset-top)); } }
+.toast-stack { top: calc(4rem + env(safe-area-inset-top)); }
+@media (max-width: 700px) { .landing-art { padding-top: calc(3.6rem + env(safe-area-inset-top)); } }

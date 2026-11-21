@@ -1,4 +1,5 @@
 // Offline / PWA helpers
+import { isNative } from './native';
 export const API_CACHE = 'vm-api-v1'; // must match public/sw.js
 
 // Forget cached API responses (call on login/logout so users never see each other's data)
@@ -9,7 +10,7 @@ export const clearApiCache = async () => {
 };
 
 export const registerServiceWorker = () => {
-  if (process.env.NODE_ENV !== 'production' || !('serviceWorker' in navigator)) return;
+  if (process.env.NODE_ENV !== 'production' || !('serviceWorker' in navigator) || isNative()) return;
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(err => console.warn('Service worker registration failed:', err));
   });

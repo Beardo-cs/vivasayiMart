@@ -374,7 +374,8 @@
     "noProducts": "No products in stock right now.",
     "inStock": "{{qty}} {{unit}} in stock",
     "loginToOrder": "Log in to order",
-    "recentReviews": "Customer reviews"
+    "recentReviews": "Customer reviews",
+    "shareLink": "Share link"
   },
   "profileForm": {
     "titleCreate": "Create Your Farmer Profile",
@@ -509,7 +510,9 @@
     "Market price service is unavailable right now": "Market price service is unavailable right now",
     "Server error": "Something went wrong on our side. Please try again.",
     "Your role is already set": "Your role is already set",
-    "Choose farmer or consumer": "Please choose farmer or buyer"
+    "Choose farmer or consumer": "Please choose farmer or buyer",
+    "Password is incorrect": "Password is incorrect",
+    "Account deleted": "Your account has been deleted."
   },
   "bottomNav": {
     "add": "Add",
@@ -596,7 +599,7 @@
         {
           "h": "Your choices",
           "p": [
-            "You can edit your profile and delete your listings at any time. To delete your account and personal data, contact us. We may keep basic order records for the other person in the order and for legal reasons."
+            "You can edit your profile and delete your listings at any time. To delete your account and personal data, open Account & privacy in the app or website and choose Delete my account. Open orders are cancelled; past orders stay as a basic record for the other person, with your name, phone number, address and notes removed."
           ]
         },
         {
@@ -680,5 +683,22 @@
     "title": "Welcome back! Who are you?",
     "text": "Your account was created before farmer and buyer roles existed. Please choose one to continue.",
     "once": "You can choose only once, so pick carefully."
+  },
+  "account": {
+    "title": "Account & privacy",
+    "cardDesc": "Policies and delete account",
+    "deleteTitle": "Delete my account",
+    "deleteStart": "Delete my account…",
+    "deleteWarn": "This cannot be undone. When you delete your account:",
+    "deleteBullets": [
+      "Your listings, profile, saved items and reports are deleted.",
+      "Orders that are still open are cancelled and the stock is returned.",
+      "Past orders stay as a record for the other person, but your name, phone number, address and notes are removed.",
+      "You will be logged out everywhere."
+    ],
+    "password": "Enter your password to confirm",
+    "sure": "I understand and want to delete my account",
+    "deleteButton": "Delete permanently",
+    "deleted": "Your account has been deleted."
   }
 }

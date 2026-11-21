@@ -49,6 +49,7 @@ app.post('/api/auth', limiter(15, 30, 'Too many login attempts, please try again
 app.post('/api/users', limiter(60, 20, 'Too many sign-up attempts, please try again later'));
 app.post('/api/auth/forgot', limiter(60, 5, 'Too many reset requests, please try again later'));
 app.post('/api/auth/reset', limiter(60, 10, 'Too many attempts, please try again later'));
+app.delete('/api/auth/account', limiter(60, 5, 'Too many attempts, please try again later'));
 app.post('/api/auth/resend-verification', limiter(60, 5, 'Too many requests, please try again later'));
 app.use('/api/ai', limiter(60, 60, 'AI request limit reached, please try again later'));
 app.use('/api/market-price', limiter(60, 240, 'Too many market price requests, please try again later'));

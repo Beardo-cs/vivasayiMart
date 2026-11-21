@@ -1,11 +1,10 @@
 import axios from 'axios';
 
-// Set base URL for API requests
-// In production (Vercel), use relative URLs so API calls go to the same domain
-// In development, use the local backend server
-const API_URL = process.env.NODE_ENV === 'production'
-  ? '' // Empty string for relative URLs in production
-  : (process.env.REACT_APP_API_URL || 'http://localhost:4000');
+import { API_BASE } from './native';
+
+// Website: same address in production, local server in development.
+// Android/iOS app: absolute address (see utils/native.js).
+const API_URL = API_BASE;
 
 const api = axios.create({
   baseURL: API_URL,

@@ -9,6 +9,7 @@ import api from '../../utils/api';
 import Loader from '../layout/Loader';
 import { Stars } from './Farmers';
 import { setAlert } from '../../actions/alert';
+import { PUBLIC_SITE, isNative, shareLink } from '../../utils/native';
 import '../posts/Posts.css';
 
 const FarmerPage = ({ isAuthenticated, setAlert }) => {
@@ -44,9 +45,11 @@ const FarmerPage = ({ isAuthenticated, setAlert }) => {
   }
 
   const { farmer, profile, products, rating } = data;
-  const url = `${window.location.origin}/farmer/${farmer._id}`;
+  const url = `${PUBLIC_SITE}/farmer/${farmer._id}`;
   const shareText = t('farmerPage.shareText', { name: (profile && profile.farmName) || farmer.name });
   const whatsappShare = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${url}`)}`;
+
+  const shareIt = () => shareLink({ title: (profile && profile.farmName) || farmer.name, text: shareText, url });
 
   const copyLink = async () => {
     try {
@@ -75,7 +78,9 @@ const FarmerPage = ({ isAuthenticated, setAlert }) => {
             <a className='btn btn-primary' href={whatsappShare} target='_blank' rel='noopener noreferrer'>
               <i className='fab fa-whatsapp'></i> {t('farmerPage.share')}
             </a>
-            <button type='button' className='btn btn-light' onClick={copyLink}>{t('farmerPage.copyLink')}</button>
+            {isNative()
+              ? <button type='button' className='btn btn-light' onClick={shareIt}>{t('farmerPage.shareLink')}</button>
+              : <button type='button' className='btn btn-light' onClick={copyLink}>{t('farmerPage.copyLink')}</button>}
           </div>
         </div>
         {profile && (

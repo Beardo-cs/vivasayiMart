@@ -1,0 +1,16 @@
+{
+  "appId": "com.vivasayimart.app",
+  "appName": "VivasayiMart",
+  "webDir": "build",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#2d5016",
+      "showSpinner": false
+    }
+  }
+}

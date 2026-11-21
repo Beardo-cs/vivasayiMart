@@ -83,23 +83,5 @@ router.post(
     }
 );
 
-// @route     DELETE api/consumer-profile
-// @desc      Delete consumer profile and user
-// @access    Private (Consumer only)
-router.delete('/', auth, checkConsumer, async (req, res) => {
-    try {
-        // Remove consumer profile
-        await ConsumerProfile.findOneAndDelete({ user: req.user.id });
-        
-        // Remove user
-        await User.findByIdAndDelete(req.user.id);
-
-        res.json({ msg: 'Consumer profile and user deleted' });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-    }
-});
-
 module.exports = router;
 

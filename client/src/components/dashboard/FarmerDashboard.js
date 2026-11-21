@@ -86,6 +86,11 @@ const FarmerDashboard = ({ auth: { user }, profile: { profile, loading }, getCur
                             <h3>{t('dashboard.editProfile')}</h3>
                             <p>{t('dashboard.editProfileDesc')}</p>
                         </Link>
+                        <Link to="/account" className="action-card farmer-card">
+                            <div className="card-icon">🔐</div>
+                            <h3>{t('account.title')}</h3>
+                            <p>{t('account.cardDesc')}</p>
+                        </Link>
                     </div>
 
                     <div className="stats-section">

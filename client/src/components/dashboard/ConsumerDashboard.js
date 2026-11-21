@@ -56,6 +56,11 @@ const ConsumerDashboard = ({ auth: { user, loading }, profile, getCurrentProfile
                     <h3>{t('nav.marketPrice')}</h3>
                     <p>{t('dashboard.marketDesc')}</p>
                 </Link>
+                <Link to="/account" className="action-card consumer-card">
+                    <div className="card-icon">🔐</div>
+                    <h3>{t('account.title')}</h3>
+                    <p>{t('account.cardDesc')}</p>
+                </Link>
                 <Link to="/create-consumer-profile" className="action-card consumer-card">
                     <div className="card-icon">👤</div>
                     <h3>{t('dashboard.myProfile')}</h3>

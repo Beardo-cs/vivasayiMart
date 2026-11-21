@@ -520,6 +520,10 @@ test('CORS: the site\'s own address always works; strangers are blocked quietly'
     assert.equal((await call('https://partner.example.org')).headers['access-control-allow-origin'], 'https://partner.example.org');
     delete process.env.CORS_ORIGINS;
     assert.equal((await call(null)).status, 200);
+    // the Android / iOS apps load their pages from these built-in addresses
+    for (const origin of ['capacitor://localhost', 'https://localhost']) {
+        assert.equal((await call(origin)).headers['access-control-allow-origin'], origin);
+    }
 });
 
 test('list responses leave out oversized legacy photos but keep normal ones', async () => {
@@ -623,4 +627,62 @@ test('old accounts without a role can choose one exactly once', async () => {
     assert.equal((await choose('consumer')).status, 400);                 // cannot switch afterwards
     assert.equal((await request(app).put('/api/auth/role').set(as(buyer)).send({ userType: 'farmer' })).status, 400); // existing users unchanged
     assert.equal((await User.findById(buyer.id)).userType, 'consumer');
+});
+
+test('delete account: needs the password, cancels active orders, returns stock, removes personal data', async () => {
+    const bcrypt = require('bcryptjs');
+    const Favorite = mongoose.model('favorite');
+    const Review = mongoose.model('review');
+    const hash = await bcrypt.hash('mypassword', 4);
+    await User.updateOne({ _id: buyer._id }, { password: hash });
+    await User.updateOne({ _id: farmer._id }, { password: hash });
+
+    const post = await makePost({ mobileNumber: '9000000001' });
+    const other = await makePost({ productName: 'Other', user: farmer2.id });
+    await request(app).put(`/api/favorites/${post.id}`).set(as(buyer));
+    await request(app).put(`/api/favorites/${other.id}`).set(as(buyer));
+    await request(app).post(`/api/posts/comment/${other.id}`).set(as(buyer)).send({ text: 'nice' });
+
+    // one confirmed order (stock reserved), one completed (already reviewed), one new request
+    const confirmed = (await placeOrder(buyer, post.id, 4, { note: 'ring the bell' })).body;
+    await setStatus(farmer, confirmed._id, 'confirmed');
+    const done = (await placeOrder(buyer, other.id, 1)).body;
+    await setStatus(farmer2, done._id, 'confirmed');
+    await setStatus(farmer2, done._id, 'completed');
+    await request(app).post('/api/reviews').set(as(buyer)).send({ orderId: done._id, rating: 4, comment: 'good' });
+    const fresh = (await placeOrder(buyer, other.id, 1)).body;
+    assert.equal((await Post.findById(post.id)).quantityAvailable, 6);
+
+    const del = body => request(app).delete('/api/auth/account').set(as(buyer)).send(body);
+    assert.equal((await del({})).status, 400);                                  // password required
+    assert.equal((await del({ password: 'wrong' })).status, 400);                // and must be right
+    assert.ok(await User.findById(buyer.id));
+
+    const ok = await del({ password: 'mypassword' });
+    assert.equal(ok.status, 200);
+    assert.equal(ok.body.cancelledOrders, 2);
+
+    assert.equal(await User.findById(buyer.id), null);                          // account gone
+    assert.equal((await Post.findById(post.id)).quantityAvailable, 10);          // reserved stock came back
+    assert.equal((await Order.findById(confirmed._id)).status, 'cancelled');
+    assert.equal((await Order.findById(fresh._id)).status, 'cancelled');
+    for (const id of [confirmed._id, done._id, fresh._id]) {                     // personal details removed, record kept
+        const o = (await Order.findById(id)).toObject();
+        assert.equal(o.buyerName, 'Deleted user');
+        assert.equal(o.buyerMobile, undefined);
+        assert.equal(o.note, undefined);
+    }
+    assert.equal((await Order.findById(done._id)).status, 'completed');          // history stays intact
+    assert.equal(await Favorite.countDocuments({ user: buyer._id }), 0);
+    assert.equal((await Review.findOne({ order: done._id })).buyerName, 'Deleted user');
+    assert.equal((await Post.findById(other.id)).comments.length, 0);
+
+    // deleting a farmer removes their listings and the reviews about them
+    const farmerPost = await makePost({ productName: 'Mine' });
+    const del2 = await request(app).delete('/api/auth/account').set(as(farmer)).send({ password: 'mypassword' });
+    assert.equal(del2.status, 200);
+    assert.equal(await Post.findById(farmerPost.id), null);
+    assert.equal(await User.findById(farmer.id), null);
+    // an unauthenticated call does nothing
+    assert.equal((await request(app).delete('/api/auth/account').send({ password: 'x' })).status, 401);
 });

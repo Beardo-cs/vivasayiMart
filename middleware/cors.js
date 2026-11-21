@@ -6,7 +6,11 @@ const cors = require('cors');
 const BUILT_IN = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://vivasayimart.vercel.app'
+    'https://vivasayimart.vercel.app',
+    // the Android / iOS apps (Capacitor) load their pages from these built-in addresses
+    'capacitor://localhost',
+    'https://localhost',
+    'http://localhost'
 ];
 
 const extraOrigins = () => (process.env.CORS_ORIGINS || '')

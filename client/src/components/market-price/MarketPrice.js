@@ -1,10 +1,11 @@
 import React, { useState, useRef, Fragment } from 'react';
 import Loader from '../layout/Loader';
+import { API_BASE } from '../../utils/native';
 import { useTranslation } from 'react-i18next';
 import '../dashboard/Dashboard.css';
 
 // Prices come through our own server, which holds the data.gov.in key
-const MARKET_API = `${process.env.NODE_ENV === 'production' ? '' : (process.env.REACT_APP_API_URL || 'http://localhost:4000')}/api/market-price`;
+const MARKET_API = `${API_BASE}/api/market-price`;
 
 const MarketPrice = () => {
   const { t } = useTranslation();

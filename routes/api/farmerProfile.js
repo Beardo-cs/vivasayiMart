@@ -191,23 +191,5 @@ router.get('/:user_id', async (req, res) => {
     }
 });
 
-// @route     DELETE api/farmer-profile
-// @desc      Delete farmer profile and user
-// @access    Private (Farmer only)
-router.delete('/', auth, checkFarmer, async (req, res) => {
-    try {
-        // Remove farmer profile
-        await FarmerProfile.findOneAndDelete({ user: req.user.id });
-        
-        // Remove user
-        await User.findByIdAndDelete(req.user.id);
-
-        res.json({ msg: 'Farmer profile and user deleted' });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-    }
-});
-
 module.exports = router;
 
