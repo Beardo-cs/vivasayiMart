@@ -65,8 +65,10 @@ const Account = ({ user, logout, setAlert }) => {
               <span>{t('account.sure')}</span>
             </label>
           </div>
-          <button type="submit" className="btn btn-danger" disabled={busy || !sure || !password}>{busy ? '...' : t('account.deleteButton')}</button>{' '}
-          <button type="button" className="btn btn-light" onClick={() => { setOpen(false); setPassword(''); setSure(false); }}>{t('orderPanel.cancel')}</button>
+          <div className="order-actions">
+            <button type="submit" className="btn btn-danger" disabled={busy || !sure || !password}>{busy ? '...' : t('account.deleteButton')}</button>
+            <button type="button" className="btn btn-light" onClick={() => { setOpen(false); setPassword(''); setSure(false); }}>{t('orderPanel.cancel')}</button>
+          </div>
         </form>
       )}
     </div>

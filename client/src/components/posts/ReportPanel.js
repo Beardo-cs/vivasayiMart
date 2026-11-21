@@ -43,8 +43,10 @@ const ReportPanel = ({ post, setAlert, onClose }) => {
       <div className='form-group'>
         <textarea rows='2' maxLength='1000' placeholder={t('report.details')} value={details} onChange={e => setDetails(e.target.value)} />
       </div>
-      <button type='submit' className='btn btn-danger' disabled={sending}>{sending ? '...' : t('report.send')}</button>{' '}
-      <button type='button' className='btn btn-light' onClick={onClose}>{t('orderPanel.cancel')}</button>
+      <div className='order-actions'>
+        <button type='submit' className='btn btn-danger' disabled={sending}>{sending ? '...' : t('report.send')}</button>
+        <button type='button' className='btn btn-light' onClick={onClose}>{t('orderPanel.cancel')}</button>
+      </div>
     </form>
   );
 };

@@ -89,8 +89,10 @@ const EditPostPanel = ({ post, updatePost, onClose }) => {
         <small className='form-text'>{t('editPanel.description')}</small>
         <textarea name='text' rows='3' value={form.text} onChange={onChange} required />
       </div>
-      <button type='submit' className='btn btn-primary' disabled={saving}>{saving ? '...' : t('editPanel.save')}</button>{' '}
-      <button type='button' className='btn btn-light' onClick={onClose}>{t('orderPanel.cancel')}</button>
+      <div className='order-actions'>
+        <button type='submit' className='btn btn-primary' disabled={saving}>{saving ? '...' : t('editPanel.save')}</button>
+        <button type='button' className='btn btn-light' onClick={onClose}>{t('orderPanel.cancel')}</button>
+      </div>
     </form>
   );
 };

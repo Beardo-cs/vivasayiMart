@@ -91,9 +91,11 @@ const OrderPanel = ({ post, stock, setAlert, addToCart, onClose }) => {
         <textarea name='note' rows='2' maxLength='500' placeholder={t('orderPanel.note')} value={form.note} onChange={onChange} />
       </div>
       <small className='form-text'>{t('orderPanel.payDirect')}</small>
-      <button type='submit' className='btn btn-primary' disabled={placing}>{placing ? t('orderPanel.sending') : t('orderPanel.send')}</button>{' '}
-      <button type='button' className='btn btn-dark' onClick={onAddToCart}>🛒 {t('orderPanel.addToCart')}</button>{' '}
-      <button type='button' className='btn btn-light' onClick={onClose}>{t('orderPanel.cancel')}</button>
+      <div className='order-actions'>
+        <button type='submit' className='btn btn-primary' disabled={placing}>{placing ? t('orderPanel.sending') : t('orderPanel.send')}</button>
+        <button type='button' className='btn btn-dark' onClick={onAddToCart}>🛒 {t('orderPanel.addToCart')}</button>
+        <button type='button' className='btn btn-light' onClick={onClose}>{t('orderPanel.cancel')}</button>
+      </div>
     </form>
   );
 };
