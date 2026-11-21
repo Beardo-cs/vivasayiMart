@@ -5,7 +5,17 @@ const router = express.Router();
 // @route     GET api/health
 // @desc      For uptime monitors (UptimeRobot, Better Stack, ...): 200 when the app and database are up
 // @access    Public
-router.get('/health', (req, res) => {
+router.get('/health', async (req, res) => {
+    // On a serverless cold start the database connection may still be opening: wait briefly
+    // for it instead of reporting "down" (which would trigger false alarms).
+    if (mongoose.connection.readyState !== 1) {
+        try {
+            await Promise.race([
+                mongoose.connection.asPromise(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+            ]);
+        } catch (err) { /* fall through: reported as down below */ }
+    }
     const dbUp = mongoose.connection.readyState === 1;
     res.status(dbUp ? 200 : 503).json({ ok: dbUp, db: dbUp ? 'up' : 'down', time: new Date().toISOString() });
 });
