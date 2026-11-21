@@ -396,7 +396,6 @@ button {
 /* Landing Page */
 .landing {
   position: relative;
-  background: url('./img/VivasayiMartLanding.png') no-repeat center/cover;
   min-height: 85vh;
 }
 
@@ -642,7 +641,7 @@ button {
 /* ---- Bottom tab bar (phones) ---- */
 .bottom-nav { display: none; }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   /* the tab bar replaces the main top links; logo, language, admin and logout stay on top */
   .navbar .nav-main { display: none; }
   .container { padding-bottom: 5.5rem; }
@@ -960,7 +959,7 @@ a { text-underline-offset: 3px; }
 .info-item { padding: 0.55rem 0.7rem; }
 
 /* phones: one-row top bar, bottom tab bar does the navigating */
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .navbar { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; text-align: left; padding: 0.5rem 0.9rem; }
   .navbar h1 { margin: 0; }
   .navbar h1 a { font-size: 1.1rem; gap: 0.35rem; }
@@ -1010,3 +1009,52 @@ a { text-underline-offset: 3px; }
 }
 .bottom-tab span { text-align: center; line-height: 1.15; }
 @media (max-width: 700px) { .landing-inner { padding-top: 6.5rem; } }
+
+/* =====================================================================
+   HOME PAGE ENTRANCE: illustration on top (full colour), headline panel below
+   ===================================================================== */
+.landing { background: none; min-height: 0; height: auto; position: relative; }
+.landing-art { position: relative; height: clamp(300px, 52vh, 560px); overflow: hidden; background: #cfe9f0; }
+.hero-scene { display: block; width: 100%; height: 100%; }
+.landing-panel {
+  position: relative;
+  margin-top: -30px;
+  padding: 2.2rem 1.25rem 2.4rem;
+  border-radius: 30px 30px 0 0;
+  background: linear-gradient(180deg, #2f5a17 0%, #214010 100%);
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 -10px 30px rgba(20, 40, 8, 0.25);
+}
+.landing-panel .x-large { font-size: clamp(2.2rem, 7vw, 3.6rem); margin-bottom: 0.1rem; }
+.landing-panel .landing-ta { font-size: 1.25rem; color: #cde8a8; margin-bottom: 0.6rem; font-weight: 700; }
+.landing-panel .lead { color: #eaf5db; text-shadow: none; max-width: 640px; margin: 0.6rem auto 1.1rem; font-size: clamp(1rem, 2.6vw, 1.25rem); }
+.landing-panel .landing-roles { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; margin: 0; }
+.landing-panel .btn-hero { background: #fff; color: #2d5016; min-height: 54px; padding: 0.7rem 1.6rem; font-size: 1.1rem; border-radius: 14px; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18); }
+.landing-panel .btn-hero.alt { background: #8bc34a; color: #1b3409; }
+.landing-panel .landing-login { margin-top: 1rem; color: #eaf5db; text-shadow: none; }
+.landing-panel .landing-login a { color: #fff; font-weight: 800; text-decoration: underline; }
+.landing-panel .landing-lang { position: static; justify-content: center; margin-top: 1rem; }
+@media (max-width: 700px) {
+  .landing-art { height: clamp(260px, 46vh, 420px); padding-top: 3.6rem; box-sizing: content-box; }
+  .landing-panel .btn-hero { flex: 1 1 100%; }
+}
+
+/* wide screens: text left, illustration right (buttons stay above the fold, produce stays in view) */
+@media (min-width: 1000px) {
+  .landing { display: grid; grid-template-columns: minmax(430px, 5fr) 6fr; min-height: max(640px, 100vh); }
+  .landing-art { order: 2; height: auto; min-height: 640px; }
+  .landing-panel {
+    order: 1;
+    margin: 0 -34px 0 0;
+    z-index: 2;
+    border-radius: 0 44px 44px 0;
+    display: flex; flex-direction: column; justify-content: center;
+    text-align: left;
+    padding: 7rem 3.5rem 3rem 4rem;
+    box-shadow: 14px 0 40px rgba(20, 40, 8, 0.28);
+  }
+  .landing-panel .lead { margin-left: 0; }
+  .landing-panel .landing-roles, .landing-panel .landing-lang { justify-content: flex-start; }
+  .landing-panel .x-large { font-size: clamp(2.6rem, 4.2vw, 3.8rem); }
+}

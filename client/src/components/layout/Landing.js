@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { setLanguage } from '../../i18n';
 import api from '../../utils/api';
+import HeroScene from './HeroScene';
 
 const CATEGORY_ICONS = { Vegetables: '🥬', Fruits: '🍎', Grains: '🌾', Dairy: '🥛', Poultry: '🐔', Other: '🌱' };
 
@@ -43,21 +44,23 @@ const Landing = ({isAuthenticated}) => {
   return (
     <Fragment>
       <section className="landing">
-        <div className="dark-overlay">
+        <div className="landing-art">
+          <HeroScene />
+        </div>
+        <div className="landing-panel">
+          <h1 className="x-large">{t('landing.title')}</h1>
+          {i18n.language !== 'ta' && <p className="landing-ta" lang="ta">விவசாயி மார்ட்</p>}
+          <p className="lead">{t('landing.tagline')}</p>
+          <div className="buttons landing-roles">
+            <Link to="/register?role=farmer" className="btn btn-hero">🌾 {t('landing.imFarmer')}</Link>
+            <Link to="/register?role=consumer" className="btn btn-hero alt">🛒 {t('landing.imBuyer')}</Link>
+          </div>
+          <p className="landing-login">
+            {t('landing.haveAccount')} <Link to="/login">{t('nav.login')}</Link>
+          </p>
           <div className="landing-lang" role="group" aria-label={t('landing.chooseLanguage')}>
             <button type="button" className={i18n.language === 'ta' ? 'active' : ''} onClick={() => setLanguage('ta')}>தமிழ்</button>
             <button type="button" className={i18n.language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>English</button>
-          </div>
-          <div className="landing-inner">
-            <h1 className="x-large">{t('landing.title')}</h1>
-            <p className="lead">{t('landing.tagline')}</p>
-            <div className="buttons landing-roles">
-              <Link to="/register?role=farmer" className="btn btn-primary">🌾 {t('landing.imFarmer')}</Link>
-              <Link to="/register?role=consumer" className="btn btn-primary">🛒 {t('landing.imBuyer')}</Link>
-            </div>
-            <p style={{ marginTop: '1rem' }}>
-              {t('landing.haveAccount')} <Link to="/login" style={{ color: '#fff', textDecoration: 'underline' }}>{t('nav.login')}</Link>
-            </p>
           </div>
         </div>
       </section>
