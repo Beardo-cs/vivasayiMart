@@ -8,36 +8,27 @@ const { check, validationResult } = require('express-validator');
 const crypto = require('crypto');
 const User = require ('../../models/User');
 const { isAdminUser } = require('../../middleware/checkRole');
+const { noActing } = require('../../middleware/acting');
 const deleteAccount = require('../../services/accountDeletion');
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../../services/email');
+const jwtSecret = require('../../utils/jwtSecret');
 
 const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
 const newToken = () => crypto.randomBytes(32).toString('hex');
 
-// Get JWT secret from environment variable first, then fall back to config
-let jwtSecret;
-if (process.env.jwtSecret) {
-  jwtSecret = process.env.jwtSecret;
-} else if (process.env.JWT_SECRET) {
-  jwtSecret = process.env.JWT_SECRET;
-} else {
-  try {
-    const config = require('config');
-    jwtSecret = config.get('jwtSecret');
-  } catch (err) {
-    console.error('JWT Secret not found');
-  }
-}
-
 // @route     GET api/auth
-// @desc      Test route
-// @access    Public
+// @desc      The signed-in user (and, while an admin acts for a farmer, who is acting and until when)
+// @access    Private
 router.get('/', auth, async (req, res) => {
     try {
         // findById method is used to find a single document by use its _id field.
         const user = await User.findById(req.user.id).select('-password'); // we dont need password
         if (!user) return res.status(404).json({ msg: 'User not found' });
-        res.json({ ...user.toObject(), isAdmin: isAdminUser(user) });
+        res.json({
+            ...user.toObject(),
+            isAdmin: isAdminUser(user),
+            acting: req.actor ? { by: req.actor.name, until: req.actingUntil } : undefined
+        });
     } catch(err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -66,7 +57,8 @@ async (req, res) => {
     // see if user exists
         let user= await User.findOne({ email});
 
-        if (!user) {
+        // farmers the team runs have no real email and nobody signs in to them
+        if (!user || user.managed) {
             return res
             .status (400)
             .json({errors: [ { msg: 'Invalid Credentials'}]});
@@ -107,7 +99,7 @@ async (req, res) => {
 // @desc      One-time role choice for old accounts that were created before roles existed.
 //            Never changes an existing role.
 // @access    Private
-router.put('/role', [auth, check('userType', 'Choose farmer or consumer').isIn(['farmer', 'consumer'])], async (req, res) => {
+router.put('/role', [auth, noActing, check('userType', 'Choose farmer or consumer').isIn(['farmer', 'consumer'])], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
     try {
@@ -127,7 +119,7 @@ router.put('/role', [auth, check('userType', 'Choose farmer or consumer').isIn([
 // @route     DELETE api/auth/account
 // @desc      Permanently delete my account and personal data (password required)
 // @access    Private
-router.delete('/account', [auth, check('password', 'Password is required').exists()], async (req, res) => {
+router.delete('/account', [auth, noActing, check('password', 'Password is required').exists()], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
     try {
@@ -155,7 +147,7 @@ router.post('/forgot', [check('email', 'Please include a valid email').isEmail()
     const generic = { msg: 'If that email is registered, a reset link has been sent.' };
     try {
         const user = await User.findOne({ email: req.body.email });
-        if (user) {
+        if (user && !user.managed) {
             const token = newToken();
             user.resetTokenHash = sha256(token);
             user.resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000);
@@ -234,11 +226,12 @@ router.post('/verify', [check('token', 'Token is required').not().isEmpty()], as
 // @route     POST api/auth/resend-verification
 // @desc      Send a fresh verification email to the logged-in user
 // @access    Private
-router.post('/resend-verification', auth, async (req, res) => {
+router.post('/resend-verification', auth, noActing, async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ msg: 'User not found' });
         if (user.emailVerified) return res.json({ msg: 'Your email is already verified' });
+        if (user.managed) return res.status(400).json({ msg: 'This account has no email address' });
 
         const token = newToken();
         user.verifyTokenHash = sha256(token);
@@ -251,6 +244,14 @@ router.post('/resend-verification', auth, async (req, res) => {
         console.error(err.message);
         res.status(500).send('Server error');
     }
+});
+
+// @route     POST api/auth/stop-acting
+// @desc      End acting for a farmer (the request itself is saved in the activity log)
+// @access    Private (acting session)
+router.post('/stop-acting', auth, (req, res) => {
+    if (!req.actor) return res.status(400).json({ msg: 'You are not acting for a farmer' });
+    res.json({ msg: 'Stopped acting' });
 });
 
 module.exports = router;

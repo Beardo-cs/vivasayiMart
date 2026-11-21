@@ -230,3 +230,106 @@ test('admin finds any account and marks test accounts', async () => {
     assert.equal(log.body[0].actor.name, 'boss');
     assert.equal(log.body[0].account.name, 'buyer');
 });
+
+const withToken = token => ({ 'x-auth-token': token });
+const actAs = async farmerId => (await request(app).post(`/api/admin/act-as/${farmerId}`).set(as(boss))).body.token;
+
+test('admins act only for farmers they added, for at most an hour', async () => {
+    const managed = (await addFarmer()).body;
+    const selfSignup = await makeFarmer('self');
+
+    assert.equal((await request(app).post(`/api/admin/act-as/${selfSignup.id}`).set(as(boss))).status, 400);
+    assert.equal((await request(app).post(`/api/admin/act-as/${buyer.id}`).set(as(boss))).status, 404);
+    assert.equal((await request(app).post(`/api/admin/act-as/${managed._id}`).set(as(buyer))).status, 403);
+
+    const res = await request(app).post(`/api/admin/act-as/${managed._id}`).set(as(boss));
+    assert.equal(res.status, 200);
+    const decoded = jwt.decode(res.body.token);
+    assert.equal(decoded.user.id, String(managed._id));
+    assert.equal(decoded.actor.id, boss.id);
+    assert.ok(decoded.exp - decoded.iat <= 3600);
+    assert.ok(res.body.until <= Date.now() + 3600 * 1000);
+
+    const me = await request(app).get('/api/auth').set(withToken(res.body.token));
+    assert.equal(me.status, 200);
+    assert.equal(me.body.name, 'Murugan');
+    assert.equal(me.body.acting.by, 'boss');
+    assert.equal(me.body.isAdmin, false);                                  // the console stays closed while acting
+    assert.ok(await Activity.findOne({ account: managed._id, actor: boss._id, action: 'act-as.start' }));
+
+    const own = await request(app).get('/api/auth').set(as(boss));
+    assert.equal(own.body.acting, undefined);
+});
+
+test('everything changed while acting is saved with the admin\'s name', async () => {
+    const managed = (await addFarmer()).body;
+    const token = await actAs(managed._id);
+
+    const added = await request(app).post('/api/posts').set(withToken(token)).send({
+        text: 'Fresh brinjal', farmerName: 'Murugan', productName: 'Brinjal', category: 'Vegetables', price: 30,
+        unit: 'kg', weight: 20, address: 'Melur', mobileNumber: '9876543210', productImage: 'data:image/png;base64,AAAA'
+    });
+    assert.equal(added.status, 200);
+
+    const placed = await order(buyer, added.body._id);
+    assert.equal(placed.status, 200);
+    const confirmed = await request(app).put(`/api/orders/${placed.body._id}/status`).set(withToken(token)).send({ status: 'confirmed' });
+    assert.equal(confirmed.status, 200);
+
+    const log = await Activity.find({ account: managed._id, actor: boss._id }).sort({ at: 1 });
+    const create = log.find(e => e.action === 'POST /api/posts');
+    assert.ok(create);
+    assert.equal(create.details.productName, 'Brinjal');
+    assert.equal(create.details.productImage, undefined);                  // photos are left out of the log
+    assert.equal(create.status, 200);
+    const confirm = log.find(e => e.action === 'PUT /api/orders/:id/status');
+    assert.equal(confirm.details.status, 'confirmed');
+    assert.equal(confirm.params.id, String(placed.body._id));
+    assert.equal(confirm.status, 200);
+
+    // the buyer's own actions are not acting, so nothing is recorded for them
+    assert.equal(await Activity.countDocuments({ account: buyer._id }), 0);
+});
+
+test('account, role and admin actions are blocked while acting', async () => {
+    const managed = (await addFarmer()).body;
+    const token = await actAs(managed._id);
+    const blocked = 'Not allowed while acting for a farmer';
+
+    const admin = await request(app).get('/api/admin/farmers').set(withToken(token));
+    assert.equal(admin.status, 403);
+    assert.equal(admin.body.msg, blocked);
+    assert.equal((await request(app).post(`/api/admin/act-as/${managed._id}`).set(withToken(token))).status, 403);
+    assert.equal((await request(app).put('/api/auth/role').set(withToken(token)).send({ userType: 'consumer' })).status, 403);
+    assert.equal((await request(app).delete('/api/auth/account').set(withToken(token)).send({ password: 'x' })).status, 403);
+    assert.equal((await request(app).post('/api/auth/resend-verification').set(withToken(token))).status, 403);
+    assert.ok(await User.findById(managed._id));                            // still there
+
+    // refused attempts are recorded too
+    assert.ok(await Activity.findOne({ account: managed._id, action: 'DELETE /api/auth/account', status: 403 }));
+});
+
+test('acting ends on stop, when the hour is up, or when the admin is no longer an admin', async () => {
+    const managed = (await addFarmer()).body;
+    const token = await actAs(managed._id);
+
+    assert.equal((await request(app).post('/api/auth/stop-acting').set(as(boss))).status, 400); // not acting
+    const stop = await request(app).post('/api/auth/stop-acting').set(withToken(token));
+    assert.equal(stop.status, 200);
+    assert.ok(await Activity.findOne({ account: managed._id, action: 'POST /api/auth/stop-acting' }));
+
+    const expired = jwt.sign({ user: { id: String(managed._id) }, actor: { id: boss.id } }, process.env.jwtSecret, { expiresIn: -10 });
+    assert.equal((await request(app).get('/api/auth').set(withToken(expired))).status, 401);
+
+    process.env.ADMIN_EMAILS = '';
+    const demoted = await request(app).get('/api/auth').set(withToken(token));
+    assert.equal(demoted.status, 401);
+    assert.equal(demoted.body.msg, 'Token is not valid');
+});
+
+test('nobody can sign in to a managed farmer or reset its password', async () => {
+    const managed = await User.findById((await addFarmer()).body._id);
+    assert.equal((await request(app).post('/api/auth').send({ email: managed.email, password: 'anything' })).status, 400);
+    assert.equal((await request(app).post('/api/auth/forgot').send({ email: managed.email })).status, 200);
+    assert.equal((await User.findById(managed._id).select('+resetTokenHash')).resetTokenHash, undefined);
+});

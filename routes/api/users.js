@@ -14,21 +14,7 @@ const { check, validationResult } = require('express-validator');
 
 //to pull name, email etc., pulling User module
 const User = require('../../models/User');
-
-// Get JWT secret from environment variable first, then fall back to config
-let jwtSecret;
-if (process.env.jwtSecret) {
-  jwtSecret = process.env.jwtSecret;
-} else if (process.env.JWT_SECRET) {
-  jwtSecret = process.env.JWT_SECRET;
-} else {
-  try {
-    const config = require('config');
-    jwtSecret = config.get('jwtSecret');
-  } catch (err) {
-    console.error('JWT Secret not found');
-  }
-}
+const jwtSecret = require('../../utils/jwtSecret');
 
 // @route     POST api/users
 // @desc      Register user

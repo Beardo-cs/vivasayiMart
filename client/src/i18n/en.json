@@ -471,6 +471,7 @@
     "Access denied. Farmers only.": "Only farmers can do this",
     "Access denied. Consumers only.": "Only buyers can do this",
     "Access denied. Admins only.": "Only admins can do this",
+    "Not allowed while acting for a farmer": "You can't do this while acting for a farmer",
     "Post not found": "Product not found",
     "Product not found": "Product not found",
     "Post removed": "Product removed",

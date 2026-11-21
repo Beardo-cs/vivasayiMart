@@ -1,24 +1,11 @@
 const jwt = require('jsonwebtoken');
-
-// Get JWT secret from environment variable first, then fall back to config
-let jwtSecret;
-
-if (process.env.jwtSecret) {
-  jwtSecret = process.env.jwtSecret;
-} else if (process.env.JWT_SECRET) {
-  jwtSecret = process.env.JWT_SECRET;
-} else {
-  // Fall back to config only in development
-  try {
-    const config = require('config');
-    jwtSecret = config.get('jwtSecret');
-  } catch (err) {
-    console.error('JWT Secret not found in environment variables or config');
-  }
-}
+const User = require('../models/User');
+const { isAdminUser } = require('./checkRole');
+const { recordActing } = require('./acting');
+const jwtSecret = require('../utils/jwtSecret');
 
 //middleware fn it takes 3 things(req,res,next), it has access to request-response cycle, next is a callback
-module.exports = function(req, res, next) {
+module.exports = async function(req, res, next) {
     // Get token from header
     const token = req.header('x-auth-token');
 
@@ -33,13 +20,25 @@ module.exports = function(req, res, next) {
     }
 
     // Verify token
+    let decoded;
     try {
-        const decoded = jwt.verify(token, jwtSecret);
+        decoded = jwt.verify(token, jwtSecret);
+    } catch (err) {
+        return res.status(401).json( { msg: 'Token is not valid'});
+    }
+    req.user = decoded.user;
+    if (!decoded.actor) return next();
 
-        req.user = decoded.user;
-        // calling the next. when we call this fn, next piece of middleware will going to run
+    // Acting for a farmer: the session ends as soon as the admin is no longer an admin
+    try {
+        const actor = await User.findById(decoded.actor.id).select('name email isAdmin');
+        if (!isAdminUser(actor)) return res.status(401).json({ msg: 'Token is not valid' });
+        req.actor = { id: actor.id, name: actor.name };
+        req.actingUntil = decoded.exp * 1000;
+        if (req.method !== 'GET') recordActing(req, res);
         next();
     } catch (err) {
-        res.status(401).json( { msg: 'Token is not valid'});
+        console.error(err.message);
+        res.status(500).send('Server Error');
     }
 };

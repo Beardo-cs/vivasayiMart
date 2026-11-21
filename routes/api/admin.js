@@ -5,8 +5,11 @@ const crypto = require('crypto');
 const gravatar = require('gravatar');
 const mongoose = require('mongoose');
 const { check, validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
 const auth = require('../../middleware/auth');
 const { checkAdmin } = require('../../middleware/checkRole');
+const { noActing } = require('../../middleware/acting');
+const jwtSecret = require('../../utils/jwtSecret');
 const Report = require('../../models/Report');
 const Post = require('../../models/Post');
 const User = require('../../models/User');
@@ -16,6 +19,7 @@ const Activity = require('../../models/Activity');
 const isObjectId = id => /^[0-9a-fA-F]{24}$/.test(id);
 const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const isTrue = v => v === true || v === 'true';
+const ACTING_SECONDS = 60 * 60;
 
 const record = (req, account, action, details) =>
     Activity.create({ actor: req.user.id, account, action, details });
@@ -33,8 +37,8 @@ const farmerSummary = (user, profile) => ({
     location: profile ? profile.location : null
 });
 
-// All routes here: logged-in admins only
-router.use(auth, checkAdmin);
+// All routes here: logged-in admins only, and never while acting for a farmer
+router.use(auth, noActing, checkAdmin);
 
 // @route     GET api/admin/reports?status=open|reviewed|dismissed|all
 // @desc      Reports with the listing and reporter, newest first
@@ -245,6 +249,29 @@ router.put('/farmers/:id/badges', [
         await farmer.save();
         await record(req, farmer._id, on ? 'badge.add' : 'badge.remove', { type });
         res.json(farmerSummary(farmer));
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route     POST api/admin/act-as/:id
+// @desc      Open a farmer's account for up to an hour (only farmers the team added).
+//            The token carries the admin as actor; see middleware/auth.js and middleware/acting.js
+router.post('/act-as/:id', async (req, res) => {
+    try {
+        if (!isObjectId(req.params.id)) return res.status(404).json({ msg: 'Farmer not found' });
+        const farmer = await User.findOne({ _id: req.params.id, userType: 'farmer' }).select('name managed');
+        if (!farmer) return res.status(404).json({ msg: 'Farmer not found' });
+        if (!farmer.managed) return res.status(400).json({ msg: 'You can only act for farmers you added' });
+
+        const token = jwt.sign(
+            { user: { id: farmer.id, userType: 'farmer' }, actor: { id: req.user.id } },
+            jwtSecret,
+            { expiresIn: ACTING_SECONDS }
+        );
+        await record(req, farmer._id, 'act-as.start');
+        res.json({ token, farmer: { _id: farmer._id, name: farmer.name }, until: jwt.decode(token).exp * 1000 });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

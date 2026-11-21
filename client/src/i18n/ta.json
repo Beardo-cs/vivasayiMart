@@ -471,6 +471,7 @@
     "Access denied. Farmers only.": "இதை விவசாயிகள் மட்டுமே செய்ய முடியும்",
     "Access denied. Consumers only.": "இதை வாங்குபவர்கள் மட்டுமே செய்ய முடியும்",
     "Access denied. Admins only.": "இதை நிர்வாகிகள் மட்டுமே செய்ய முடியும்",
+    "Not allowed while acting for a farmer": "விவசாயி சார்பாகச் செயல்படும்போது இதைச் செய்ய முடியாது",
     "Post not found": "பொருள் கிடைக்கவில்லை",
     "Product not found": "பொருள் கிடைக்கவில்லை",
     "Post removed": "பொருள் நீக்கப்பட்டது",
