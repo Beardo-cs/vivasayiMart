@@ -237,13 +237,13 @@ test('test farmers are seen only by test accounts and admins', async () => {
 ```js
 const BadgeSchema = new mongoose.Schema({
     type: { type: String, enum: ['phone', 'visit'], required: true },
-    by: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+    by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     at: { type: Date, default: Date.now },
     visitedOn: { type: Date }
 }, { _id: false });
 ```
 
-Then replace the `farmerVerified` field with:
+Then add these fields after `isAdmin`. Keep `farmerVerified` for now; Task 2 removes it together with the code that still uses it.
 
 ```js
     // Farmers the team runs for people without a smartphone: placeholder email, nobody signs in
@@ -251,7 +251,7 @@ Then replace the `farmerVerified` field with:
     // No status = an account from before approvals existed, treated as approved
     approval: {
         status: { type: String, enum: ['pending', 'approved', 'declined'] },
-        by: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+        by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         at: { type: Date },
         note: { type: String, maxlength: 500 }
     },
@@ -437,8 +437,8 @@ const mongoose = require('mongoose');
 
 // Admin actions, and everything done while acting for a farmer
 const ActivitySchema = new mongoose.Schema({
-    actor: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
-    account: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+    actor: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    account: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     action: { type: String, required: true },
     params: { type: mongoose.Schema.Types.Mixed },
     details: { type: mongoose.Schema.Types.Mixed },
@@ -1010,7 +1010,7 @@ The `legal.date` stays "21 November 2026".
 ### Task 8: release checks for step 1
 
 - [ ] Run the server tests, the app tests and the app build. All three pass.
-- [ ] Do a manual run with `npm run dev`, with `ADMIN_EMAILS` set to your email in `config/default.json` or the environment, at 360px wide, once in Tamil:
+- [ ] Do a manual run at 360px wide, once in Tamil. `config/default.json` points at the live database, so never run this against it: start a local or in-memory MongoDB and pass it with `mongoURI=...` in the environment, together with `ADMIN_EMAILS=<your test email>`:
   1. A farmer signs up and sees the waiting notice. A buyer can't find them. You approve them in Needs attention, and the buyer now sees their products.
   2. You add a managed farmer with the phone check and a visit date. The badges show on the farmer's cards and page.
   3. **Open as** the managed farmer. The banner shows on every screen and stays visible while scrolling.
@@ -1020,6 +1020,18 @@ The `legal.date` stays "21 November 2026".
   7. Start acting again and let it run out (temporarily set `expiresIn: 60` locally). You're returned to your own account with the "time ended" message. Undo the temporary change.
   8. Mark a buyer as a test account. They now see test farmers, and a normal buyer doesn't.
 - [ ] Check that the one existing listing in production, owned by an account with no role, will stop showing once deployed. This is expected (design 6.3).
+
+### Built differently from the plan
+
+What step 1 ended up doing where it differs from the tasks above:
+
+- Product cards and the directory show badges as icons only (📞 🏡), with the name as the accessible label and tooltip. The farmer's page shows the full explanations.
+- The acting banner is fixed at the bottom, above the tab bar: the farmer's name, a smaller "Changes are saved under your name" line, and Stop on the right. While acting, pages get extra room at the bottom (`body.is-acting`) so their last buttons can scroll clear of it.
+- Banners sit above the tab bar wherever the tab bar shows (up to 900px wide), not only below 700px.
+- **Open as** takes you to the farmer's dashboard.
+- Resend verification refuses farmers we run ("This account has no email address"), and their Account page shows no placeholder email.
+- The console's activity list has readable names for the background requests and refused actions recorded while acting: opening new orders, photo help, price suggestions, and the refused account actions.
+- The manual run was scripted: headless Chrome at 360px against an in-memory database. The hour running out was checked with short-lived tokens instead of editing `expiresIn`.
 
 ### Ship step 1
 
