@@ -37,7 +37,7 @@ const Account = ({ user, logout, setAlert }) => {
 
   return (
     <>
-    <PageHeader icon="🔐" title={t('account.title')} subtitle={`${user.name} · ${user.email}`} />
+    <PageHeader icon="🔐" title={t('account.title')} subtitle={user.managed ? user.name : `${user.name} · ${user.email}`} />
     <div className="legal">
       <p className="updated">{user.userType === 'farmer' ? t('register.farmer') : t('register.consumer')}</p>
 
