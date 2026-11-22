@@ -28,7 +28,7 @@ Open `config/default.json` and replace `YOUR_GEMINI_API_KEY_HERE` with your actu
 ```json
 {
     "mongoURI": "mongodb+srv://...",
-    "jwtSecret": "mysecrettoken",
+    "jwtSecret": "<long random string>",
     "githubClientId": "...",
     "githubSecret": "...",
     "geminiApiKey": "AIzaSy..."  ← Paste your API key here

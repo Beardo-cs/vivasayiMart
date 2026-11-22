@@ -15,18 +15,20 @@
 4. Add these variables (copy from `.env.production` file):
 
 ```
-mongoURI = mongodb+srv://vivasayimart:jN1fNe2BQ256ZQEm@farmerskart.wgzqrlw.mongodb.net/vivasayimart?retryWrites=true&w=majority
-MONGO_URI = mongodb+srv://vivasayimart:jN1fNe2BQ256ZQEm@farmerskart.wgzqrlw.mongodb.net/vivasayimart?retryWrites=true&w=majority
-jwtSecret = mysecrettoken
-JWT_SECRET = mysecrettoken
-geminiApiKey = AIzaSyBLKOC60dr4SZMzAoYz9gFCM16uMly5BUI
-GEMINI_API_KEY = AIzaSyBLKOC60dr4SZMzAoYz9gFCM16uMly5BUI
+mongoURI = mongodb+srv://<user>:<password>@<cluster>.mongodb.net/vivasayimart?retryWrites=true&w=majority
+MONGO_URI = <same value as mongoURI>
+jwtSecret = <long random string, e.g. the output of: openssl rand -hex 32>
+JWT_SECRET = <same value as jwtSecret>
+geminiApiKey = <your Gemini API key>
+GEMINI_API_KEY = <same value as geminiApiKey>
 NODE_ENV = production
-githubClientId = a6ddfc7af951dc24f0f0
-GITHUB_CLIENT_ID = a6ddfc7af951dc24f0f0
-githubSecret = 3e87cb0cf00de4fcad6f00b4e9647438b67562fa
-GITHUB_SECRET = 3e87cb0cf00de4fcad6f00b4e9647438b67562fa
+githubClientId = <your GitHub OAuth client ID>
+GITHUB_CLIENT_ID = <same value as githubClientId>
+githubSecret = <your GitHub OAuth client secret>
+GITHUB_SECRET = <same value as githubSecret>
 ```
+
+Never write the real values in this file: the repository is public.
 
 5. For each variable, select **all environments**: Production, Preview, Development
 6. Click **Save** for each
@@ -71,7 +73,7 @@ Or if connected to GitHub, Vercel will auto-deploy when you push.
 # Test login endpoint
 curl 'https://vivasayimart.vercel.app/api/auth' \
   -H 'content-type: application/json' \
-  --data-raw '{"email":"Test@gmail.com","password":"123456"}'
+  --data-raw '{"email":"<your email>","password":"<your password>"}'
 ```
 
 Expected: Should return a JWT token (not 500 error)
