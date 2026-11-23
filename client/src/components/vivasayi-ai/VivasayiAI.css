@@ -1,0 +1,145 @@
+/* Vivasayi AI (crop health preview). App.css loads after this file, so rules are scoped
+   under .ai-page (or the dialog) to win over its element-wide defaults. */
+.ai-page { max-width: 760px; margin: 0 auto 1.5rem; }
+.ai-page h2 { font-size: 1.15rem; margin: 0 0 0.6rem; color: var(--primary-color); }
+.ai-page p { margin: 0.4rem 0; }
+
+.ai-page .ai-preview, .ai-page .ai-sample {
+  background: #fff8e1; border: 1px solid #f0c36d; color: #5c3d00;
+  border-radius: var(--radius-sm); padding: 0.7rem 0.9rem; margin: 0.9rem 0; font-size: 0.95rem;
+}
+.ai-page .ai-sample strong { display: block; font-size: 1.05rem; }
+.ai-page .ai-muted { color: var(--text-muted); }
+.ai-page .ai-note { background: var(--surface-soft); border-radius: var(--radius-sm); padding: 0.6rem 0.8rem; }
+.ai-page .ai-warn {
+  color: #7a4100; background: #fff3e0; border-radius: 8px; padding: 0.35rem 0.6rem; font-size: 0.9rem; margin: 0.4rem 0;
+}
+.ai-page .ai-message { margin: 0.8rem 0 0; font-weight: 700; color: var(--primary-color); }
+
+.ai-link {
+  background: none; border: 0; padding: 0.4rem 0; min-height: var(--touch);
+  color: var(--primary-color); font: inherit; font-weight: 700; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+
+.ai-page .ai-section, .ai-page .ai-group {
+  background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1rem; margin: 0.9rem 0;
+}
+.ai-page .ai-section ul { list-style: disc; margin: 0; padding-left: 1.2rem; }
+.ai-page .ai-section li { margin: 0.25rem 0; }
+
+/* Home */
+.ai-start { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin: 1rem 0 0.4rem; }
+.ai-start .btn { flex: 1 1 14rem; }
+.ai-page .ai-history { margin: 0; padding: 0; }
+.ai-history li + li { border-top: 1px solid var(--border-color); }
+.ai-history a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; min-height: var(--touch); color: inherit; text-decoration: none; }
+.ai-page .ai-history img, .ai-history-icon {
+  width: 3.2rem; height: 3.2rem; flex-shrink: 0; border-radius: 10px; object-fit: cover;
+  display: flex; align-items: center; justify-content: center; background: var(--surface-soft); font-size: 1.5rem;
+}
+.ai-history small { display: block; color: var(--text-muted); }
+.ai-tag {
+  font-style: normal; font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+  background: var(--surface-soft); color: var(--primary-color); border-radius: 999px; padding: 0.1rem 0.5rem; margin-left: 0.4rem;
+}
+
+/* Intro dialog */
+.ai-backdrop {
+  position: fixed; inset: 0; z-index: 1100; display: flex; align-items: center; justify-content: center;
+  padding: 1rem; background: rgba(27, 52, 9, 0.55);
+}
+.ai-dialog {
+  width: 100%; max-width: 30rem; max-height: 90vh; overflow-y: auto;
+  background: #fff; border-radius: var(--radius); padding: 1.3rem; box-shadow: var(--shadow-lg);
+}
+.ai-dialog h2 { margin: 0 0 0.6rem; font-size: 1.3rem; color: var(--primary-color); }
+.ai-caution { font-weight: 700; color: #5c3d00; background: #fff8e1; border-radius: var(--radius-sm); padding: 0.6rem 0.8rem; }
+.ai-data-note { font-size: 0.92rem; color: var(--text-secondary); }
+.ai-dialog-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
+.ai-dialog-actions .btn { flex: 1 1 10rem; }
+
+/* Questions */
+.ai-page .ai-steps { border-radius: var(--radius-sm); margin-top: 0.9rem; }
+.ai-page .ai-question { border: 0; margin: 0 0 1rem; padding: 0; min-width: 0; }
+.ai-page .ai-question legend, .ai-page .ai-question > label { display: block; padding: 0; margin-bottom: 0.45rem; font-weight: 700; }
+.ai-page input[type='text'], .ai-page select {
+  display: block; width: 100%; min-height: var(--touch); padding: 0.55rem 0.8rem;
+  font: inherit; font-size: 1rem; color: var(--text-primary); background: #fff;
+  border: 2px solid var(--border-color); border-radius: var(--radius-sm);
+}
+.ai-page input[type='text']:focus, .ai-page select:focus { outline: none; border-color: var(--secondary-color); box-shadow: var(--focus); }
+.ai-required { color: #c62828; }
+.ai-pills { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.ai-pill {
+  position: relative; display: inline-flex; align-items: center; min-height: var(--touch); padding: 0.4rem 0.9rem;
+  border: 2px solid var(--border-color); border-radius: 999px; background: #fff; font-weight: 600; cursor: pointer;
+}
+.ai-pills .ai-pill input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.ai-pill.on { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+.ai-pill:focus-within { box-shadow: var(--focus); }
+
+/* Photos */
+.ai-file { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.ai-page .ai-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.7rem; margin: 0.8rem 0 0; padding: 0; }
+.ai-slot {
+  display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; padding: 0.7rem;
+  border: 2px dashed var(--border-color); border-radius: var(--radius-sm); background: var(--surface-soft);
+}
+.ai-slot.filled { border-style: solid; background: #fff; }
+.ai-page .ai-slot h3 { margin: 0; font-size: 0.95rem; }
+.ai-page .ai-slot p { margin: 0; font-size: 0.85rem; }
+.ai-page .ai-slot img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; }
+.ai-slot-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; }
+.ai-page .ai-slot-actions .btn { flex: 1 1 auto; min-height: 40px; padding: 0.35rem 0.6rem; font-size: 0.9rem; }
+.ai-page .ai-shows { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.8rem; color: var(--text-muted); }
+.ai-page .ai-shows select { min-height: 36px; padding: 0.25rem 0.4rem; font-size: 0.85rem; }
+
+/* Review */
+.ai-page .ai-answers { margin: 0 0 0.4rem; }
+.ai-answers div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0.6rem; padding: 0.45rem 0; border-bottom: 1px solid var(--border-color); }
+.ai-answers dt { color: var(--text-muted); }
+.ai-answers dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+.ai-thumbs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.ai-page .ai-thumbs img { width: 5.5rem; height: 5.5rem; object-fit: cover; border-radius: 10px; }
+
+.ai-page .ai-actions { flex-wrap: wrap; }
+.ai-page .ai-actions .btn { padding-left: 0.9rem; padding-right: 0.9rem; }
+
+/* Waiting for the result */
+.ai-processing { text-align: center; padding: 3rem 1rem; }
+.ai-spinner {
+  display: inline-block; width: 3rem; height: 3rem; border-radius: 50%;
+  border: 4px solid var(--border-color); border-top-color: var(--primary-color); animation: ai-spin 0.9s linear infinite;
+}
+@keyframes ai-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ai-spinner { animation: none; } }
+
+/* Result */
+.ai-page .ai-outcome { margin: 0.9rem 0; padding: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius); background: var(--surface-soft); }
+.ai-outcome small { font-weight: 700; color: var(--text-muted); }
+.ai-page .ai-outcome h2 { margin: 0.15rem 0 0; font-size: 1.35rem; color: var(--text-primary); }
+.ai-page .ai-outcome.needsCheck { border-color: #f0b400; background: #fffaf0; }
+.ai-page .ai-outcome.insufficient { border-color: #b0bec5; background: #f5f7f8; }
+
+.ai-listen { margin: 0.9rem 0; }
+.ai-listen-main { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.ai-listen-main .btn { flex: 1 1 10rem; }
+.ai-listen-options { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 1rem; margin-top: 0.6rem; }
+.ai-listen-options label { display: flex; align-items: center; gap: 0.4rem; font-weight: 600; }
+.ai-page .ai-listen-options select { width: auto; min-height: 40px; padding: 0.3rem 0.6rem; }
+.ai-page .ai-transcript { list-style: decimal; margin: 0.6rem 0 0; padding: 0.8rem 0.8rem 0.8rem 2rem; background: var(--surface-soft); border-radius: var(--radius-sm); }
+.ai-transcript li { margin: 0.25rem 0; }
+.ai-transcript li.on { background: #fff3c4; border-radius: 4px; }
+
+.ai-cause { border-top: 1px solid var(--border-color); padding-top: 0.7rem; margin-top: 0.7rem; }
+.ai-page .ai-cause h3 { margin: 0 0 0.3rem; font-size: 1rem; }
+.ai-cause dl { margin: 0; }
+.ai-cause dt { margin-top: 0.35rem; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); }
+.ai-cause dd { margin: 0; }
+.ai-page .ai-guidance { border-color: #f0c36d; background: #fffaf0; }
+.ai-page .ai-expert.urgent { border: 2px solid #c62828; background: #fff5f5; }
+
+.ai-result-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.2rem 0 0.6rem; }
+.ai-result-actions .btn { flex: 1 1 9rem; }
+.ai-back { display: inline-block; margin: 0.4rem 0 1rem; font-weight: 700; }

@@ -10,6 +10,7 @@ import useOrderBadge from '../../utils/useOrderBadge';
 import { useTranslation } from 'react-i18next';
 import { setLanguage } from '../../i18n';
 import { setAlert } from '../../actions/alert';
+import { canUseCropHealth } from '../vivasayi-ai/access';
 
 const Navbar = ({  auth: { isAuthenticated, loading, user }, cartCount, logout, setAlert }) => {
   const { t, i18n } = useTranslation();
@@ -57,6 +58,14 @@ const Navbar = ({  auth: { isAuthenticated, loading, user }, cartCount, logout, 
             {orderBadge > 0 && <span className="order-badge">{orderBadge}</span>}
             </Link>
           </li>
+          {canUseCropHealth(user) && (
+          <li className="nav-main">
+            <Link to="/vivasayi-ai">
+            <i className="fas fa-seedling"></i>{' '}
+            <span className="hide-sm">{t('cropHealth.title')}</span>
+            </Link>
+          </li>
+          )}
           <li className="nav-main">
             <Link to="/market-price">
             <i className="fas fa-chart-line"></i>{' '}

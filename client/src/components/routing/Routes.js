@@ -26,6 +26,10 @@ import VerifyEmail from '../auth/VerifyEmail';
 import MarketPrice from '../market-price/MarketPrice';
 import NotFound from '../layout/NotFound';
 import PrivateRoute from '../routing/PrivateRoute';
+import CropHealthRoute from '../vivasayi-ai/CropHealthRoute';
+import VivasayiHome from '../vivasayi-ai/VivasayiHome';
+import NewCheck from '../vivasayi-ai/NewCheck';
+import CheckResult from '../vivasayi-ai/CheckResult';
 
 const LegacyProfileRedirect = () => {
     const { id } = useParams();
@@ -70,6 +74,11 @@ const Routes = () => {
                     <Route path='/order-placed' element={<PrivateRoute><OrderPlaced /></PrivateRoute>} />
                     <Route path='/orders' element={<PrivateRoute><Orders /></PrivateRoute>} />
                     <Route path='/market-price' element={<MarketPrice />} />
+
+                    {/* Vivasayi AI preview */}
+                    <Route path='/vivasayi-ai' element={<PrivateRoute><CropHealthRoute><VivasayiHome /></CropHealthRoute></PrivateRoute>} />
+                    <Route path='/vivasayi-ai/new' element={<PrivateRoute><CropHealthRoute><NewCheck /></CropHealthRoute></PrivateRoute>} />
+                    <Route path='/vivasayi-ai/assessments/:id' element={<PrivateRoute><CropHealthRoute><CheckResult /></CropHealthRoute></PrivateRoute>} />
                     <Route path='*' element={<NotFound />} />
 
                 </RouterRoutes>

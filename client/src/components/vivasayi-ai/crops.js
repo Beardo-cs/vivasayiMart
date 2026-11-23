@@ -28,19 +28,19 @@ export const detailsComplete = check =>
   CROPS.includes(check.crop) && !!check.stage && !!check.onset && !!check.locality.trim() &&
   (!hasSymptoms(check) || !!check.extent);
 
-export const newCheck = (from = null) => ({
+const BLANK = {
+  crop: '', stage: '', locality: '', onset: '', extent: '', parts: [], spreading: '',
+  weather: '', treatment: '', treatmentWhen: '', photos: []
+};
+
+// A follow-up keeps the crop and place. Adding information keeps every answer and photo and
+// opens at the photos. Either way it is a new check: the earlier one is never changed.
+export const newCheck = (from = null, { addInfo = false } = {}) => ({
+  ...BLANK,
+  ...(from && { crop: from.crop, stage: from.stage, locality: from.locality }),
+  ...(from && addInfo && Object.fromEntries(Object.keys(BLANK).map(k => [k, from[k]]))),
   id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
   parentId: from ? from.id : null,
-  step: 0,
-  crop: from ? from.crop : '',
-  stage: from ? from.stage : '',
-  onset: '',
-  extent: '',
-  locality: from ? from.locality : '',
-  parts: [],
-  spreading: '',
-  weather: '',
-  treatment: '',
-  treatmentWhen: '',
-  photos: []
+  parentCreatedAt: from ? from.createdAt : null,
+  step: from && addInfo ? 1 : 0
 });

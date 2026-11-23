@@ -7,6 +7,7 @@ import Loader from '../layout/Loader';
 import PageHeader from '../layout/PageHeader';
 import api from '../../utils/api';
 import { getCurrentProfile } from '../../actions/profile';
+import { canUseCropHealth } from '../vivasayi-ai/access';
 import './Dashboard.css';
 
 const FarmerDashboard = ({ auth: { user }, profile: { profile, loading }, getCurrentProfile }) => {
@@ -64,6 +65,13 @@ const FarmerDashboard = ({ auth: { user }, profile: { profile, loading }, getCur
                             <h3>{t('posts.addProduct')}</h3>
                             <p>{t('dashboard.addDesc')}</p>
                         </Link>
+                        {canUseCropHealth(user) && (
+                            <Link to="/vivasayi-ai" className="action-card farmer-card">
+                                <div className="card-icon">🌿</div>
+                                <h3>{t('cropHealth.start')}</h3>
+                                <p>{t('cropHealth.dashboardDesc')}</p>
+                            </Link>
+                        )}
                         <Link to="/posts?mine=1" className="action-card farmer-card">
                             <div className="card-icon">📦</div>
                             <h3>{t('nav.myProducts')}</h3>

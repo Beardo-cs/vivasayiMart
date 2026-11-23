@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useOrderBadge from '../../utils/useOrderBadge';
+import { canUseCropHealth } from '../vivasayi-ai/access';
 
 const BottomNav = ({ isAuthenticated, user, cartCount }) => {
   const { t } = useTranslation();
@@ -17,7 +18,9 @@ const BottomNav = ({ isAuthenticated, user, cartCount }) => {
     { to: '/posts?mine=1', icon: 'fa-box', label: t('nav.myProducts') },
     { to: '/add-product', icon: 'fa-plus-circle', label: t('bottomNav.add'), highlight: true },
     { to: '/orders', icon: 'fa-receipt', label: t('nav.orders'), badge: ordersBadge },
-    { to: '/market-price', icon: 'fa-chart-line', label: t('bottomNav.prices') }
+    canUseCropHealth(user)
+      ? { to: '/vivasayi-ai', icon: 'fa-seedling', label: t('bottomNav.ai'), end: false }
+      : { to: '/market-price', icon: 'fa-chart-line', label: t('bottomNav.prices') }
   ];
   const buyerTabs = [
     { to: '/consumer-dashboard', icon: 'fa-home', label: t('bottomNav.home') },
@@ -34,7 +37,7 @@ const BottomNav = ({ isAuthenticated, user, cartCount }) => {
         <NavLink
           key={tab.to}
           to={tab.to}
-          end={!tab.to.includes('?')}
+          end={tab.end ?? !tab.to.includes('?')}
           className={({ isActive }) => `bottom-tab${tab.highlight ? ' highlight' : ''}${isActive && !tab.to.includes('?') ? ' active' : ''}`}
         >
           <i className={`fas ${tab.icon}`}></i>
