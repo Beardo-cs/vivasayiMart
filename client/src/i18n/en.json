@@ -535,7 +535,8 @@
     "home": "Home",
     "label": "Main navigation",
     "prices": "Prices",
-    "shop": "Shop"
+    "shop": "Shop",
+    "ai": "Vivasayi AI"
   },
   "orderPlaced": {
     "continue": "Continue shopping",
@@ -718,5 +719,260 @@
     "sure": "I understand and want to delete my account",
     "deleteButton": "Delete permanently",
     "deleted": "Your account has been deleted."
+  },
+  "cropHealth": {
+    "title": "Vivasayi AI",
+    "subtitle": "Your crop health assistant",
+    "preview": "Preview: results are samples, not about your photos. Your photos stay on this phone.",
+    "start": "Check my crop",
+    "continueDraft": "Continue your saved check",
+    "startOver": "Start a new check",
+    "discardDraft": "Discard your saved check and start again?",
+    "howItWorks": "How it works",
+    "history": "Your checks",
+    "historyEmpty": "No checks yet. Your checks stay on this phone, and only you can see them.",
+    "followUp": "Follow-up",
+    "dashboardDesc": "Photos and a few questions",
+    "intro": {
+      "body": "Upload crop photos and answer a few questions to get possible causes and suggested next checks.",
+      "notDiagnosis": "This is an AI-assisted assessment, not a confirmed diagnosis. Do not apply fertilizer or crop-protection chemicals solely on this result.",
+      "start": "Start crop check",
+      "notNow": "Not now",
+      "dataLink": "How photos and data are used",
+      "data": "In this preview, your photos and answers stay on this phone. Nothing is sent to us or anyone else, and results are samples. You can delete a check at any time, and logging out removes them all."
+    },
+    "steps": {
+      "label": "Steps",
+      "details": "Crop details",
+      "photos": "Photos",
+      "review": "Review",
+      "result": "Result"
+    },
+    "back": "Back",
+    "saveDraft": "Save draft",
+    "draftSaved": "Draft saved on this phone.",
+    "continue": "Continue",
+    "submit": "Get result",
+    "processing": "Preparing a sample result…",
+    "saveFailed": "Couldn't save on this phone. It may be full: delete old checks and try again.",
+    "required": "Please answer the questions marked *.",
+    "q": {
+      "yourCrop": "Your crop",
+      "whatYouSee": "What you are seeing",
+      "recent": "Recent conditions",
+      "crop": "Which crop?",
+      "stage": "Growth stage",
+      "locality": "District or nearest town",
+      "localityHint": "Helps compare with local conditions.",
+      "onset": "When did you first notice the problem?",
+      "extent": "How much of the crop is affected?",
+      "parts": "Which parts look affected?",
+      "spreading": "Is it spreading?",
+      "weather": "Recent rain or watering",
+      "treatment": "Fertilizer or pesticide in the last month?",
+      "treatmentWhen": "When was it applied?"
+    },
+    "crops": {
+      "tomato": "Tomato",
+      "paddy": "Paddy",
+      "other": "Other crop"
+    },
+    "otherCrop": "Vivasayi AI can only check tomato and paddy for now. More crops are coming.",
+    "stages": {
+      "seedling": "Seedling",
+      "vegetative": "Growing leaves",
+      "flowering": "Flowering",
+      "fruiting": "Fruiting",
+      "nursery": "Nursery",
+      "tillering": "Tillering",
+      "grainFilling": "Grain filling",
+      "notSure": "Not sure"
+    },
+    "onset": {
+      "days": "In the last few days",
+      "weeks": "A few weeks ago",
+      "longer": "More than a month ago",
+      "none": "No problem, just checking",
+      "notSure": "Not sure"
+    },
+    "extent": {
+      "onePlant": "One plant",
+      "scattered": "A few plants here and there",
+      "largeArea": "A large part of the field",
+      "notSure": "Not sure"
+    },
+    "parts": {
+      "leaves": "Leaves",
+      "stem": "Stem",
+      "flowers": "Flowers",
+      "fruit": "Fruit",
+      "panicle": "Panicle or grain",
+      "roots": "Roots"
+    },
+    "yesNo": {
+      "yes": "Yes",
+      "no": "No",
+      "notSure": "Not sure"
+    },
+    "weather": {
+      "heavyRain": "Heavy rain or standing water",
+      "dry": "Dry spell or less water",
+      "normal": "Normal",
+      "notSure": "Not sure"
+    },
+    "treatment": {
+      "none": "No",
+      "fertilizer": "Fertilizer",
+      "pesticide": "Pesticide or fungicide",
+      "both": "Both",
+      "notSure": "Not sure"
+    },
+    "treatmentWhen": {
+      "week": "In the last week",
+      "month": "1 to 4 weeks ago",
+      "notSure": "Not sure"
+    },
+    "photos": {
+      "intro": "Add up to 6 photos from one field. The first three help the most.",
+      "safety": "Stay safe: don't uproot plants, touch freshly sprayed plants, or go anywhere risky for a photo.",
+      "camera": "Camera",
+      "gallery": "Gallery",
+      "retake": "Retake",
+      "remove": "Remove",
+      "shows": "This photo shows",
+      "needOne": "Add at least one photo to continue.",
+      "reading": "Adding photo…",
+      "failed": "That photo couldn't be added. Try another one.",
+      "warn": {
+        "dark": "Looks dark. Try again in daylight.",
+        "blurry": "May be blurry. Hold steady and tap the screen to focus.",
+        "duplicate": "Looks like another photo here. Try a different view."
+      }
+    },
+    "slots": {
+      "field": {
+        "title": "Field or patch",
+        "hint": "Step back to show how many plants look affected"
+      },
+      "wholePlant": {
+        "title": "Whole affected plant",
+        "hint": "One plant, top to bottom"
+      },
+      "closeUp": {
+        "title": "Close-up of the problem",
+        "hint": "Fill the photo with the spots, marks or damage"
+      },
+      "underside": {
+        "title": "Underside or another angle",
+        "hint": "Turn a leaf over, or try another side"
+      },
+      "healthy": {
+        "title": "A healthier plant",
+        "hint": "From the same field, to compare"
+      },
+      "extra": {
+        "title": "Anything else",
+        "hint": "Optional, for example the stem or fruit"
+      }
+    },
+    "review": {
+      "edit": "Edit answers",
+      "editPhotos": "Edit photos",
+      "notAnswered": "Not answered",
+      "notice": "This preview doesn't look at your photos yet. You'll get a sample result that shows how results will look."
+    },
+    "result": {
+      "sample": "Sample result",
+      "sampleNote": "This is an example of how results will look. It is not based on your photos.",
+      "followUpTo": "Follow-up to your check on {{date}}",
+      "outcomeLabel": "Result",
+      "seen": "What the photos show",
+      "seenSample": "In a real check, this lists what can be seen in your photos, such as brown spots on lower leaves or yellow leaf edges.",
+      "causes": "Possible causes",
+      "causesNote": "Examples. More than one can apply.",
+      "fits": "What fits",
+      "missing": "What is missing",
+      "nextCheck": "Next check",
+      "cannotConfirm": "What can't be confirmed",
+      "nextChecks": "Next checks",
+      "addPhotosTitle": "More photos needed",
+      "addPhotos": "Add these photos so a check is possible:",
+      "noIssueNote": "This doesn't prove the crop is healthy or that the whole field is fine. Some problems are hidden or too early to see.",
+      "guidance": "Treatment advice",
+      "guidanceNone": "None yet: reviewed guidance for this crop isn't ready. Don't apply fertilizer or crop-protection chemicals based on this result.",
+      "expert": "When to get expert help",
+      "sources": "Sources",
+      "sourcesNone": "None yet. Real checks will list reviewed sources and when they were last reviewed.",
+      "photosTitle": "Your photos",
+      "addInfo": "Add information",
+      "checkAgain": "Check again",
+      "share": "Share",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this check from this phone?",
+      "notFound": "This check isn't on this phone.",
+      "back": "Back to Vivasayi AI",
+      "copied": "Copied. Paste it into WhatsApp or a message."
+    },
+    "outcome": {
+      "noIssue": "No clear visible issue",
+      "needsCheck": "Visible symptoms need more checks",
+      "insufficient": "Not enough to go on"
+    },
+    "causes": {
+      "leafSpot": {
+        "title": "A leaf spot disease (fungus or bacteria)",
+        "fits": "Spots that appear within a few days are common with leaf spot diseases, especially after rain.",
+        "missing": "We can't tell whether the spots have rings, a yellow edge, or growth underneath.",
+        "next": "Look closely at 5 affected leaves, top and underside, and note what the spots look like."
+      },
+      "water": {
+        "title": "Too much or too little water",
+        "fits": "Yellowing and drooping can come from waterlogged or dry soil.",
+        "missing": "We don't know how wet the soil is near the roots.",
+        "next": "Feel the soil a finger deep near affected plants and near healthy ones."
+      },
+      "nutrient": {
+        "title": "A nutrient shortage",
+        "fits": "Yellowing that starts on older, lower leaves can point to a nutrient shortage.",
+        "missing": "Without a soil test, this can't be told apart from other causes.",
+        "next": "If you have a recent soil test report, keep it ready."
+      }
+    },
+    "cannot": {
+      "exact": "The exact disease or pest",
+      "soil": "Whether soil or water is the cause",
+      "field": "How much of the field is affected beyond these photos"
+    },
+    "next": {
+      "count": "Walk the field and count how many plants show the problem.",
+      "compare": "Compare an affected plant with a healthy one nearby.",
+      "photosAgain": "Take new photos in 3 to 5 days to see if it is spreading.",
+      "week": "Check again in a week, or sooner if you notice changes.",
+      "underside": "Look at the underside of a few leaves."
+    },
+    "expert": {
+      "normal": "Show the plants to your local agriculture office or Krishi Vigyan Kendra (KVK) if the problem spreads, many plants wilt suddenly, or before you use any chemical.",
+      "urgent": "Because it is spreading or covers a large area, show the plants to your local agriculture office or Krishi Vigyan Kendra (KVK) soon."
+    },
+    "listen": {
+      "listen": "Listen to summary",
+      "pause": "Pause",
+      "resume": "Resume",
+      "replay": "Replay",
+      "language": "Language",
+      "speed": "Speed",
+      "showText": "Show text",
+      "hideText": "Hide text",
+      "noVoice": "This phone has no {{lang}} voice. Read the text below, or listen in another language.",
+      "unavailable": "Audio isn't available here yet. Read the text below.",
+      "failed": "Audio stopped. Read the text below, or try again.",
+      "languages": {
+        "ta": "Tamil",
+        "en": "English"
+      }
+    },
+    "share": {
+      "title": "Vivasayi AI crop check (sample)"
+    }
   }
 }

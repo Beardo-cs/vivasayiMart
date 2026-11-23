@@ -17,8 +17,8 @@ export const PUBLIC_SITE = isNative()
   ? (process.env.REACT_APP_PUBLIC_URL || 'https://vivasayimart.vercel.app')
   : window.location.origin;
 
-// Share a link: the system share sheet in the app, the browser's share sheet or the clipboard on the web.
-// Resolves 'shared' | 'copied' | 'cancelled'.
+// Share a link, or just text: the system share sheet in the app, the browser's share sheet or the
+// clipboard on the web. Resolves 'shared' | 'copied' | 'cancelled'.
 export const shareLink = async ({ title, text, url }) => {
   try {
     if (isNative()) {
@@ -30,7 +30,7 @@ export const shareLink = async ({ title, text, url }) => {
       await navigator.share({ title, text, url });
       return 'shared';
     }
-    await navigator.clipboard.writeText(url);
+    await navigator.clipboard.writeText(url || text);
     return 'copied';
   } catch (err) {
     return 'cancelled'; // user closed the sheet, or clipboard blocked

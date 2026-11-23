@@ -14,6 +14,7 @@ import {
 } from './types';
 import setAuthToken from '../utils/setAuthToken';
 import { clearApiCache } from '../utils/offline';
+import { clearAllChecks } from '../utils/cropStore';
 import { ADMIN_TOKEN_KEY } from '../utils/actingSession';
 import i18n from '../i18n';
 
@@ -133,6 +134,7 @@ export const login = ( email, password ) => async dispatch => {
 // Logout / Clear Profile
 export const logout = () => dispatch => {
     clearApiCache();
+    clearAllChecks();
     localStorage.removeItem(ADMIN_TOKEN_KEY);
     // Dispatch logout start to show loader
     dispatch ({ type: LOGOUT_START });
