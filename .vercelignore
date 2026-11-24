@@ -4,6 +4,8 @@ client/node_modules
 .env
 .env.local
 .DS_Store
+.superpowers
+.claude
 *.log
 npm-debug.log*
 yarn-debug.log*
