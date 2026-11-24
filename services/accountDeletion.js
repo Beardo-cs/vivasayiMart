@@ -15,6 +15,7 @@ const Favorite = require('../models/Favorite');
 const Report = require('../models/Report');
 const FarmerProfile = require('../models/FarmerProfile');
 const ConsumerProfile = require('../models/ConsumerProfile');
+const CropCheck = require('../models/CropCheck');
 
 const DELETED_NAME = 'Deleted user';
 
@@ -68,6 +69,7 @@ module.exports = async function deleteAccount(userId) {
     await Review.updateMany({ buyer: userId }, { $set: { buyerName: DELETED_NAME } });
     await Favorite.deleteMany({ user: userId });
     await Report.deleteMany({ reporter: userId });
+    await CropCheck.deleteMany({ user: userId });
     await Post.updateMany({}, { $pull: { comments: { user: userId }, likes: { user: userId } } });
 
     // 5. profiles and the account itself

@@ -73,7 +73,7 @@ const VivasayiHome = () => {
                   <span>
                     <strong>{t(`cropHealth.crops.${c.crop}`)}</strong> · {shortDate(c.createdAt)}
                     {c.parentId && <em className="ai-tag">{t('cropHealth.followUp')}</em>}
-                    <small>{t(`cropHealth.outcome.${c.result.outcome}`)}</small>
+                    <small>{c.result.version ? t(`cropHealth.outcome.${c.result.outcome}`) : t('cropHealth.result.legacyShort')}</small>
                   </span>
                 </Link>
               </li>

@@ -1,6 +1,6 @@
 const Activity = require('../models/Activity');
 
-const LEFT_OUT = new Set(['password', 'productImage', 'profileImage']);
+const LEFT_OUT = new Set(['password', 'productImage', 'profileImage', 'photos']);
 
 // What was sent, for the activity log: no passwords or photos, long text clipped
 const summarise = body => {

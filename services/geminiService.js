@@ -226,6 +226,8 @@ Consider current market trends, location, and seasonal factors. Only respond wit
 
 module.exports = {
   analyzeProductImage,
-  getPriceSuggestion
+  getPriceSuggestion,
+  client: () => ai,
+  VISION_MODEL
 };
 

@@ -29,6 +29,14 @@ const draw = (source, w, h) => {
   return { canvas, ctx };
 };
 
+// A smaller copy for sending, when the photos together are too big for one request.
+export const shrinkPhoto = async (src, maxSide, quality) => {
+  const img = await loadImage(src);
+  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+  const smaller = draw(img, Math.round(img.width * scale), Math.round(img.height * scale));
+  return smaller ? smaller.canvas.toDataURL('image/jpeg', quality) : src;
+};
+
 // Re-drawing the photo shrinks it and drops its location and camera details.
 export const readPhoto = async file => {
   const original = await readFile(file);

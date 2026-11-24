@@ -559,7 +559,7 @@
   },
   "legal": {
     "updated": "Last updated: {{date}}",
-    "date": "21 November 2026",
+    "date": "23 November 2026",
     "contactTitle": "Contact us",
     "summary": {
       "privacy": "In short: we collect only what is needed to run the marketplace. Your phone number is shared with the other person only after the farmer confirms an order.",
@@ -578,6 +578,7 @@
             "Your phone number, address or area, and farm details if you are a farmer",
             "Photos and descriptions of products you list, and prices and stock",
             "Your orders, reviews, saved items and reports you send",
+            "If you use Vivasayi AI: a short record of each crop check (date, crop and main finding), kept for 6 months. The crop photos and your answers stay on your phone.",
             "Technical information such as the type of phone or browser, used to fix problems"
           ]
         },
@@ -604,7 +605,7 @@
           "list": [
             "Vercel (website hosting) and MongoDB Atlas (database)",
             "Resend (sending emails)",
-            "Google Gemini (product photos, product names and areas are sent to recognise the product and suggest a price)",
+            "Google Gemini (product photos, product names and areas are sent to recognise the product and suggest a price; for Vivasayi AI, crop photos and answers are sent to check crop health)",
             "data.gov.in (market prices; no personal data is sent)"
           ]
         },
@@ -674,7 +675,8 @@
         {
           "h": "AI suggestions",
           "p": [
-            "Product recognition and price suggestions are made by AI and can be wrong. Please check them before you publish a listing."
+            "Product recognition and price suggestions are made by AI and can be wrong. Please check them before you publish a listing.",
+            "Vivasayi AI crop checks are made by AI and can be wrong. They are not a diagnosis: check the signs yourself, and ask an agriculture officer before using any pesticide or fungicide."
           ]
         },
         {
@@ -723,7 +725,7 @@
   "cropHealth": {
     "title": "Vivasayi AI",
     "subtitle": "Your crop health assistant",
-    "preview": "Preview: results are samples, not about your photos. Your photos stay on this phone.",
+    "preview": "Trial: results are made by AI from your photos and can be wrong. The advice is a draft that experts are still reviewing.",
     "start": "Check my crop",
     "continueDraft": "Continue your saved check",
     "startOver": "Start a new check",
@@ -734,12 +736,12 @@
     "followUp": "Follow-up",
     "dashboardDesc": "Photos and a few questions",
     "intro": {
-      "body": "Upload crop photos and answer a few questions to get possible causes and suggested next checks.",
-      "notDiagnosis": "This is an AI-assisted assessment, not a confirmed diagnosis. Do not apply fertilizer or crop-protection chemicals solely on this result.",
+      "body": "Take crop photos and answer a few questions. Vivasayi AI suggests possible problems, how to check them, and what to do.",
+      "notDiagnosis": "This is an AI-assisted assessment, not a confirmed diagnosis. Check the signs yourself before you act, and ask an expert before using any pesticide or fungicide.",
       "start": "Start crop check",
       "notNow": "Not now",
       "dataLink": "How photos and data are used",
-      "data": "In this preview, your photos and answers stay on this phone. Nothing is sent to us or anyone else, and results are samples. You can delete a check at any time, and logging out removes them all."
+      "data": "When you ask for a result, your photos and answers are sent to Google Gemini, an AI service, to be checked. We don't keep your photos on our server. We keep a short record (date, crop and main finding) for 6 months to run the service. Your checks stay on this phone: you can delete any check, and logging out removes them all."
     },
     "steps": {
       "label": "Steps",
@@ -753,7 +755,17 @@
     "draftSaved": "Draft saved on this phone.",
     "continue": "Continue",
     "submit": "Get result",
-    "processing": "Preparing a sample result…",
+    "processing": "Checking your photos…",
+    "processingNote": "This can take up to a minute. Please keep this screen open.",
+    "errors": {
+      "offline": "You're offline. Your check is saved: try again when you have a connection.",
+      "timeout": "Checking took too long. Your check is saved: please try again.",
+      "limit": "Too many checks for now. Your check is saved: please try again later.",
+      "busy": "Vivasayi AI has reached its limit for now. Your check is saved: please try again later.",
+      "notAllowed": "Vivasayi AI isn't open for this account yet.",
+      "photos": "A photo couldn't be sent. Retake or remove it, then try again.",
+      "failed": "Couldn't check the photos right now. Your check is saved: please try again in a few minutes."
+    },
     "saveFailed": "Couldn't save on this phone. It may be full: delete old checks and try again.",
     "required": "Please answer the questions marked *.",
     "q": {
@@ -879,30 +891,37 @@
       "edit": "Edit answers",
       "editPhotos": "Edit photos",
       "notAnswered": "Not answered",
-      "notice": "This preview doesn't look at your photos yet. You'll get a sample result that shows how results will look."
+      "notice": "When you tap Get result, your photos and answers are sent to Google Gemini to be checked. We don't keep the photos on our server."
     },
     "result": {
-      "sample": "Sample result",
-      "sampleNote": "This is an example of how results will look. It is not based on your photos.",
+      "aiNote": "Checked by AI from your photos and answers. It can be wrong, and it is not a diagnosis.",
+      "legacy": "This check was made during the preview, so its result was only a sample. Check again to get a real result.",
+      "legacyShort": "Preview sample",
       "followUpTo": "Follow-up to your check on {{date}}",
       "outcomeLabel": "Result",
+      "unsupportedOther": "The photos look like {{other}}, not {{crop}}. Vivasayi AI can only check tomato and paddy for now.",
+      "unsupportedNone": "The photos don't seem to show {{crop}}. Take photos of the crop itself and check again.",
       "seen": "What the photos show",
-      "seenSample": "In a real check, this lists what can be seen in your photos, such as brown spots on lower leaves or yellow leaf edges.",
       "causes": "Possible causes",
-      "causesNote": "Examples. More than one can apply.",
+      "causesNote": "Most likely first. More than one can apply.",
+      "likely": "Likely",
+      "possible": "Possible",
       "fits": "What fits",
-      "missing": "What is missing",
-      "nextCheck": "Next check",
+      "against": "What doesn't fit, or couldn't be seen",
+      "nextCheck": "How to check",
+      "whatToDo": "What to do",
+      "fertilizer": "Fertilizer",
+      "sprayNote": "Before you spray anything, ask your agriculture office or KVK which product is approved for this, and follow its label.",
+      "noMatch": "Nothing on Vivasayi AI's list of {{crop}} problems clearly matches. Show the plants to an expert.",
       "cannotConfirm": "What can't be confirmed",
       "nextChecks": "Next checks",
       "addPhotosTitle": "More photos needed",
       "addPhotos": "Add these photos so a check is possible:",
       "noIssueNote": "This doesn't prove the crop is healthy or that the whole field is fine. Some problems are hidden or too early to see.",
-      "guidance": "Treatment advice",
-      "guidanceNone": "None yet: reviewed guidance for this crop isn't ready. Don't apply fertilizer or crop-protection chemicals based on this result.",
       "expert": "When to get expert help",
+      "helpline": "Kisan Call Centre (free): 1800-180-1551",
       "sources": "Sources",
-      "sourcesNone": "None yet. Real checks will list reviewed sources and when they were last reviewed.",
+      "reviewNote": "The advice is drafted from Tamil Nadu Agricultural University (TNAU) guidance. An agronomist hasn't reviewed it yet (version {{version}}).",
       "photosTitle": "Your photos",
       "addInfo": "Add information",
       "checkAgain": "Check again",
@@ -916,36 +935,16 @@
     "outcome": {
       "noIssue": "No clear visible issue",
       "needsCheck": "Visible symptoms need more checks",
-      "insufficient": "Not enough to go on"
-    },
-    "causes": {
-      "leafSpot": {
-        "title": "A leaf spot disease (fungus or bacteria)",
-        "fits": "Spots that appear within a few days are common with leaf spot diseases, especially after rain.",
-        "missing": "We can't tell whether the spots have rings, a yellow edge, or growth underneath.",
-        "next": "Look closely at 5 affected leaves, top and underside, and note what the spots look like."
-      },
-      "water": {
-        "title": "Too much or too little water",
-        "fits": "Yellowing and drooping can come from waterlogged or dry soil.",
-        "missing": "We don't know how wet the soil is near the roots.",
-        "next": "Feel the soil a finger deep near affected plants and near healthy ones."
-      },
-      "nutrient": {
-        "title": "A nutrient shortage",
-        "fits": "Yellowing that starts on older, lower leaves can point to a nutrient shortage.",
-        "missing": "Without a soil test, this can't be told apart from other causes.",
-        "next": "If you have a recent soil test report, keep it ready."
-      }
+      "insufficient": "Not enough to go on",
+      "unsupported": "Not a crop Vivasayi AI can check"
     },
     "cannot": {
-      "exact": "The exact disease or pest",
+      "exact": "The exact cause (disease, pest or nutrient shortage)",
       "soil": "Whether soil or water is the cause",
       "field": "How much of the field is affected beyond these photos"
     },
     "next": {
       "count": "Walk the field and count how many plants show the problem.",
-      "compare": "Compare an affected plant with a healthy one nearby.",
       "photosAgain": "Take new photos in 3 to 5 days to see if it is spreading.",
       "week": "Check again in a week, or sooner if you notice changes.",
       "underside": "Look at the underside of a few leaves."
@@ -972,7 +971,7 @@
       }
     },
     "share": {
-      "title": "Vivasayi AI crop check (sample)"
+      "title": "Vivasayi AI crop check"
     }
   }
 }

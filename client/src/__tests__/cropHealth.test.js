@@ -8,7 +8,7 @@ import rootReducer from '../reducers';
 import i18n, { setLanguage } from '../i18n';
 import { canUseCropHealth } from '../components/vivasayi-ai/access';
 import { newCheck } from '../components/vivasayi-ai/crops';
-import { sampleResult, summaryLines } from '../components/vivasayi-ai/sampleResult';
+import { requestCheck, failureReason, assessmentLines } from '../components/vivasayi-ai/assessment';
 import { brightness, sharpness, averageHash, photoWarnings } from '../components/vivasayi-ai/photoChecks';
 import * as cropStore from '../utils/cropStore';
 
@@ -18,10 +18,11 @@ jest.mock('../utils/api', () => ({
   __esModule: true,
   default: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn(), defaults: { headers: { common: {} } } }
 }));
+const api = require('../utils/api').default;
 
 // jsdom can't decode images, so a picked photo comes back already measured
-jest.mock('../components/vivasayi-ai/photos', () => ({ readPhoto: jest.fn() }));
-const { readPhoto } = require('../components/vivasayi-ai/photos');
+jest.mock('../components/vivasayi-ai/photos', () => ({ readPhoto: jest.fn(), shrinkPhoto: jest.fn() }));
+const { readPhoto, shrinkPhoto } = require('../components/vivasayi-ai/photos');
 
 const FARMER = { _id: 'f1', name: 'Farmer Fay', userType: 'farmer', emailVerified: true };
 const TESTER = { ...FARMER, isTest: true };
@@ -50,11 +51,46 @@ const gray = (width, height, valueAt) => {
 const answered = (over = {}) => ({
   ...newCheck(),
   crop: 'tomato', stage: 'flowering', onset: 'days', extent: 'scattered', locality: 'Salem',
-  photos: ['field', 'wholePlant', 'closeUp'].map(slot => ({ slot, src: 'data:,' })),
+  photos: ['field', 'wholePlant', 'closeUp'].map(slot => ({ slot, src: `data:image/jpeg;base64,${slot}` })),
   ...over
 });
 
-beforeEach(() => setLanguage('en'));
+// What the server sends back: problems from its reviewed list, with their advice in both languages.
+const text = (en, ta) => ({ en, ta });
+const BLIGHT = {
+  id: 'earlyBlight', kind: 'disease', urgent: false, likelihood: 'likely',
+  name: text('Early blight (spots with rings)', 'முன் கருகல் நோய் (வளையப் புள்ளிகள்)'),
+  fits: text('Ring-shaped spots on the lower leaves.', 'கீழ் இலைகளில் வளையப் புள்ளிகள்.'),
+  against: null,
+  check: text('Look for brown spots with rings on older leaves.', 'பழைய இலைகளில் வளையங்களுடன் பழுப்புப் புள்ளிகள் உள்ளதா என்று பாருங்கள்.'),
+  steps: { en: ['Remove badly affected lower leaves.'], ta: ['மோசமாகப் பாதிக்கப்பட்ட கீழ் இலைகளை அகற்றுங்கள்.'] },
+  fertilizer: text("Fertilizer won't cure this. Keep to your usual fertilizer schedule.", 'உரம் இதைக் குணப்படுத்தாது. வழக்கமான உர அட்டவணையையே பின்பற்றுங்கள்.'),
+  sources: [{ title: 'TNAU Agritech: tomato diseases', url: 'https://agritech.tnau.ac.in/tomato-diseases' }]
+};
+const NITROGEN = {
+  id: 'nitrogenShortage', kind: 'nutrient', urgent: false, likelihood: 'possible',
+  name: text('Nitrogen shortage', 'தழைச்சத்துக் குறைபாடு'),
+  fits: text('Older leaves are pale.', 'பழைய இலைகள் வெளிறியுள்ளன.'),
+  against: text('Young leaves are pale too.', 'இளம் இலைகளும் வெளிறியுள்ளன.'),
+  check: text('Pale yellow starts on the oldest leaves.', 'வெளிர் மஞ்சள் பழைய இலைகளில் தொடங்கும்.'),
+  steps: { en: ['Check that the field drains well.'], ta: ['வயலில் நீர் வடிகிறதா என்று பாருங்கள்.'] },
+  fertilizer: text('Spray urea at 1% (10 g in 1 litre of water), twice, a week apart (TNAU).', 'யூரியா 1% (1 லிட்டர் நீரில் 10 கிராம்), ஒரு வார இடைவெளியில் இரண்டு முறை தெளிக்கவும் (TNAU).'),
+  sources: [{ title: 'TNAU Agritech: tomato nutrition', url: 'https://agritech.tnau.ac.in/tomato-nutrition' }]
+};
+const RESULT = {
+  version: 1, outcome: 'needsCheck', cropSeen: 'tomato', otherCrop: null,
+  observations: [text('Brown spots on the lower leaves.', 'கீழ் இலைகளில் பழுப்புப் புள்ளிகள்.')],
+  causes: [BLIGHT, NITROGEN], missingPhotos: [], urgent: false,
+  model: 'gemini-test', promptVersion: 'crop-check-1', guidanceVersion: '2026-11-23-draft'
+};
+const result = (over = {}) => ({ ...RESULT, ...over });
+const httpError = (status, data = {}) => Object.assign(new Error(`HTTP ${status}`), { response: { status, data, headers: {} } });
+
+beforeEach(() => {
+  setLanguage('en');
+  api.post.mockReset();
+  shrinkPhoto.mockReset();
+});
 afterAll(() => i18n.changeLanguage('en'));
 
 describe('Who sees Vivasayi AI', () => {
@@ -69,37 +105,89 @@ describe('Who sees Vivasayi AI', () => {
   });
 });
 
-describe('Sample results', () => {
-  test('without the three key photos it asks for the missing ones', () => {
-    const result = sampleResult(answered({ photos: [{ slot: 'closeUp' }, { slot: 'healthy' }] }));
-    expect(result.outcome).toBe('insufficient');
-    expect(result.missing).toEqual(['field', 'wholePlant']);
+describe('Sending a check', () => {
+  test('sends the answers the farmer reviewed and the photos; the same check keeps the same id', async () => {
+    api.post.mockResolvedValue({ data: RESULT });
+    const check = answered({ onset: 'none', extent: 'scattered', parts: ['leaves'], spreading: 'yes', treatment: 'none', treatmentWhen: 'week' });
+    expect(await requestCheck(check)).toEqual(RESULT);
+
+    const [url, body, options] = api.post.mock.calls[0];
+    expect(url).toBe('/api/ai/crop-check');
+    expect(body).toMatchObject({ crop: 'tomato', onset: 'none', extent: '', parts: [], spreading: '', treatmentWhen: '', locality: 'Salem' });
+    expect(body.photos).toEqual([
+      { slot: 'field', mimeType: 'image/jpeg', data: 'field' },
+      { slot: 'wholePlant', mimeType: 'image/jpeg', data: 'wholePlant' },
+      { slot: 'closeUp', mimeType: 'image/jpeg', data: 'closeUp' }
+    ]);
+    expect(options.timeout).toBeGreaterThan(60000);
+    expect(shrinkPhoto).not.toHaveBeenCalled();
+
+    await requestCheck(check);
+    await requestCheck({ ...check, photos: [{ slot: 'field', src: 'data:image/jpeg;base64,other' }] });
+    const ids = api.post.mock.calls.map(([, sent]) => sent.checkId);
+    expect(ids[0]).toMatch(new RegExp(`^${check.id}-`));
+    expect(ids[1]).toBe(ids[0]);
+    expect(ids[2]).not.toBe(ids[0]);
   });
 
-  test('a routine check with no symptoms finds no clear issue', () => {
-    expect(sampleResult(answered({ onset: 'none', extent: '' })).outcome).toBe('noIssue');
+  test('photos too big to send together are sent as smaller copies', async () => {
+    api.post.mockResolvedValue({ data: RESULT });
+    shrinkPhoto.mockResolvedValue('data:image/jpeg;base64,small');
+    const big = `data:image/jpeg;base64,${'A'.repeat(1100 * 1024)}`;
+    await requestCheck(answered({ photos: [{ slot: 'closeUp', src: big }] }));
+    expect(shrinkPhoto).toHaveBeenCalledWith(big, 1024, 0.8);
+    expect(api.post.mock.calls[0][1].photos).toEqual([{ slot: 'closeUp', mimeType: 'image/jpeg', data: 'small' }]);
   });
 
-  test('symptoms give possible causes and next checks; spreading makes expert help urgent', () => {
-    const result = sampleResult(answered());
-    expect(result.outcome).toBe('needsCheck');
-    expect(result.causes.length).toBeGreaterThan(1);
-    expect(result.urgent).toBe(false);
-    expect(sampleResult(answered({ spreading: 'yes' })).urgent).toBe(true);
-    expect(sampleResult(answered({ extent: 'largeArea' })).urgent).toBe(true);
+  test('each failure gets its own message', () => {
+    expect(failureReason(new Error('Network Error'))).toBe('offline');
+    expect(failureReason(Object.assign(new Error('timeout of 90000ms exceeded'), { code: 'ECONNABORTED' }))).toBe('timeout');
+    expect(failureReason(httpError(429, { msg: 'Too many crop checks' }))).toBe('limit');
+    expect(failureReason(httpError(504, '<html>'))).toBe('timeout');
+    expect(failureReason(httpError(504, { code: 'timeout' }))).toBe('timeout');
+    expect(failureReason(httpError(403, { code: 'notAllowed' }))).toBe('notAllowed');
+    expect(failureReason(httpError(400, { code: 'photos' }))).toBe('photos');
+    expect(failureReason(httpError(413))).toBe('photos');
+    expect(failureReason(httpError(503, { code: 'unavailable' }))).toBe('failed');
+    expect(failureReason(httpError(503, { code: 'busy' }))).toBe('busy');
+    expect(failureReason(Object.assign(new Error('x'), { reason: 'photos' }))).toBe('photos');
+    for (const reason of ['offline', 'timeout', 'limit', 'busy', 'notAllowed', 'photos', 'failed']) {
+      expect(i18n.getFixedT('ta')(`cropHealth.errors.${reason}`)).toMatch(/[\u0B80-\u0BFF]/);
+    }
+  });
+});
+
+describe('Result text (what Listen reads and Share sends)', () => {
+  const lines = (res, lang = 'en') => assessmentLines({ crop: 'tomato', result: res }, i18n.getFixedT(lang), lang);
+
+  test('says it is AI, then what was seen, each cause with how to check, what to do and fertilizer', () => {
+    const en = lines(result({ urgent: true }));
+    expect(en[0]).toMatch(/^Checked by AI/);
+    expect(en[1]).toBe('Result: Visible symptoms need more checks.');
+    expect(en).toContain('Brown spots on the lower leaves.');
+    expect(en).toContain('Early blight (spots with rings) (Likely).');
+    expect(en).toContain('How to check: Look for brown spots with rings on older leaves.');
+    expect(en).toContain('Remove badly affected lower leaves.');
+    expect(en).toContain('Fertilizer: Spray urea at 1% (10 g in 1 litre of water), twice, a week apart (TNAU).');
+    expect(en.filter(l => /Before you spray anything/.test(l))).toHaveLength(1); // the disease, not the nutrient shortage
+    expect(en.join(' ')).toMatch(/Because it is spreading/);
+    expect(en[en.length - 1]).toMatch(/1800-180-1551/);
   });
 
-  test('the summary says it is a sample, warns against chemicals, and is complete in Tamil', () => {
-    const result = sampleResult(answered({ spreading: 'yes' }));
-    const en = summaryLines(result, i18n.getFixedT('en'));
-    expect(en[0]).toMatch(/not based on your photos/);
-    expect(en.join(' ')).toMatch(/Don't apply fertilizer or crop-protection chemicals/);
-    expect(en.join(' ')).toMatch(/soon/);
-    expect(en.join(' ')).not.toMatch(/%|\d+\s*(ml|g|kg)\b/); // no scores or doses
+  test('is complete in Tamil', () => {
+    const ta = lines(result(), 'ta').join(' ');
+    expect(ta).toMatch(/AI சோதித்தது/);
+    expect(ta).toMatch(/முன் கருகல் நோய்/);
+    expect(ta).not.toMatch(/cropHealth\.|Early blight/);
+  });
 
-    const ta = summaryLines(result, i18n.getFixedT('ta')).join(' ');
-    expect(ta).toMatch(/மாதிரி|எடுத்துக்காட்டு/);
-    expect(ta).not.toMatch(/cropHealth\./); // every line has a Tamil text
+  test('other crops, too few photos, nothing on the list, and old preview checks', () => {
+    expect(lines(result({ outcome: 'unsupported', causes: [], otherCrop: text('Brinjal', 'கத்தரி') })).join(' '))
+      .toMatch(/The photos look like Brinjal, not Tomato/);
+    expect(lines(result({ outcome: 'insufficient', causes: [], missingPhotos: ['field', 'closeUp'] })))
+      .toContain('Add these photos so a check is possible: Field or patch, Close-up of the problem.');
+    expect(lines(result({ causes: [] })).join(' ')).toMatch(/Nothing on Vivasayi AI's list of Tomato problems clearly matches/);
+    expect(lines({ outcome: 'needsCheck', causes: ['leafSpot'] })).toEqual([expect.stringMatching(/made during the preview/)]);
   });
 });
 
@@ -184,9 +272,9 @@ describe('Vivasayi AI screens', () => {
     expect(await screen.findByRole('img', { name: slotTitle })).toBeInTheDocument();
   };
 
-  const saved = async (over = {}) => {
+  const saved = async (over = {}, res = RESULT) => {
     const check = { ...answered(over), id: 'k1', createdAt: new Date('2026-11-20T10:00:00').getTime() };
-    await cropStore.saveCheck('f1', { ...check, result: sampleResult(check) });
+    await cropStore.saveCheck('f1', { ...check, result: res });
     return check;
   };
 
@@ -233,7 +321,7 @@ describe('Vivasayi AI screens', () => {
     expect(within(dialog).getByRole('button', { name: 'Start crop check' })).toHaveFocus();
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'How photos and data are used' }));
-    expect(within(dialog).getByText(/Nothing is sent to us/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/sent to Google Gemini.*We don't keep your photos on our server/)).toBeInTheDocument();
 
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByRole('dialog')).toBeNull();
@@ -245,7 +333,9 @@ describe('Vivasayi AI screens', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  test('a full check: questions, photos, review, then a result clearly marked as a sample', async () => {
+  test('a full check: questions, photos, review, then the AI result with what to do', async () => {
+    let answer;
+    api.post.mockImplementation(() => new Promise(resolve => { answer = () => resolve({ data: result({ urgent: true }) }); }));
     renderAt(<App />, { path: '/vivasayi-ai/new' });
 
     fireEvent.click(await screen.findByRole('radio', { name: 'Tomato' }));
@@ -270,18 +360,48 @@ describe('Vivasayi AI screens', () => {
     expect(screen.getByText('Salem')).toBeInTheDocument();
     expect(screen.getByText('Leaves')).toBeInTheDocument();
     expect(screen.getAllByRole('img')).toHaveLength(3);
+    expect(screen.getByText(/sent to Google Gemini to be checked/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Get result' }));
-    expect(screen.getByText('Preparing a sample result…')).toBeInTheDocument();
+    expect(await screen.findByText('Checking your photos…')).toBeInTheDocument();
+    await waitFor(() => expect(api.post).toHaveBeenCalled());
+    expect(api.post.mock.calls[0][1]).toMatchObject({ crop: 'tomato', stage: 'flowering', spreading: 'yes', parts: ['leaves'] });
+    expect(api.post.mock.calls[0][1].photos.map(p => p.slot)).toEqual(['field', 'wholePlant', 'closeUp']);
+    expect((await cropStore.getDraft('f1')).step).toBe(2); // kept while waiting
+    act(() => answer());
 
-    expect(await screen.findByRole('heading', { name: 'Visible symptoms need more checks' }, { timeout: 3000 })).toBeInTheDocument();
-    expect(screen.getByRole('note')).toHaveTextContent(/^Sample result.*It is not based on your photos/);
-    expect(screen.getByRole('heading', { name: 'A leaf spot disease (fungus or bacteria)' })).toBeInTheDocument();
-    expect(section('Treatment advice')).toHaveTextContent(/Don't apply fertilizer or crop-protection chemicals based on this result/);
+    expect(await screen.findByRole('heading', { name: 'Visible symptoms need more checks' })).toBeInTheDocument();
+    expect(screen.getByRole('note')).toHaveTextContent(/^Checked by AI from your photos and answers/);
+    expect(section('What the photos show')).toHaveTextContent('Brown spots on the lower leaves.');
+    const blight = screen.getByRole('heading', { name: 'Early blight (spots with rings) Likely' }).closest('article');
+    expect(within(blight).getByText("Fertilizer won't cure this. Keep to your usual fertilizer schedule.")).toBeInTheDocument();
+    expect(within(blight).getByText(/Before you spray anything, ask your agriculture office or KVK/)).toBeInTheDocument();
+    const nitrogen = screen.getByRole('heading', { name: 'Nitrogen shortage Possible' }).closest('article');
+    expect(within(nitrogen).getByText(/urea at 1% \(10 g in 1 litre of water\)/)).toBeInTheDocument();
+    expect(within(nitrogen).getByText('Young leaves are pale too.')).toBeInTheDocument();
+    expect(within(nitrogen).queryByText(/Before you spray/)).toBeNull();
     expect(section('When to get expert help')).toHaveTextContent(/Because it is spreading/);
+    expect(screen.getByRole('link', { name: /Kisan Call Centre/ })).toHaveAttribute('href', 'tel:18001801551');
+    expect(within(section('Sources')).getByRole('link', { name: 'TNAU Agritech: tomato nutrition' })).toHaveAttribute('href', 'https://agritech.tnau.ac.in/tomato-nutrition');
+    expect(section('Sources')).toHaveTextContent(/hasn't reviewed it yet \(version 2026-11-23-draft\)/);
     expect(await cropStore.getDraft('f1')).toBeUndefined();
 
     fireEvent.click(screen.getByRole('link', { name: 'Back to Vivasayi AI' }));
     expect(await screen.findByRole('link', { name: /Tomato/ })).toBeInTheDocument();
+  });
+
+  test('when checking fails, the check stays as a draft and can be sent again', async () => {
+    api.post.mockRejectedValueOnce(httpError(503, { code: 'unavailable' })).mockResolvedValueOnce({ data: RESULT });
+    await cropStore.saveDraft('f1', { ...answered(), step: 2 });
+    renderAt(<App />, { path: '/vivasayi-ai/new' });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Get result' }));
+    expect(await screen.findByText(/Couldn't check the photos right now. Your check is saved/)).toBeInTheDocument();
+    expect((await cropStore.getDraft('f1')).photos).toHaveLength(3);
+    expect(await cropStore.listChecks('f1')).toEqual([]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Get result' }));
+    expect(await screen.findByRole('heading', { name: 'Visible symptoms need more checks' })).toBeInTheDocument();
+    expect(api.post.mock.calls[1][1].checkId).toBe(api.post.mock.calls[0][1].checkId); // nothing changed
   });
 
   test('photo hints: dark and repeated photos are pointed out, never refused', async () => {
@@ -324,7 +444,11 @@ describe('Vivasayi AI screens', () => {
   });
 
   test('not enough photos: Add information keeps the answers and makes a new, linked check', async () => {
-    await saved({ photos: [{ slot: 'closeUp', src: 'data:image/jpeg;base64,c', hash: '0'.repeat(64) }] });
+    api.post.mockResolvedValue({ data: RESULT });
+    await saved(
+      { photos: [{ slot: 'closeUp', src: 'data:image/jpeg;base64,c', hash: '0'.repeat(64) }] },
+      result({ outcome: 'insufficient', causes: [], observations: [], missingPhotos: ['field', 'wholePlant'] })
+    );
     renderAt(<App />, { path: '/vivasayi-ai/assessments/k1' });
 
     expect(await screen.findByRole('heading', { name: 'Not enough to go on' })).toBeInTheDocument();
@@ -340,7 +464,8 @@ describe('Vivasayi AI screens', () => {
     expect(screen.getByText('Salem')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Get result' }));
 
-    expect(await screen.findByRole('heading', { name: 'Visible symptoms need more checks' }, { timeout: 3000 })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Visible symptoms need more checks' })).toBeInTheDocument();
+    expect(api.post.mock.calls[0][1].photos.map(p => p.slot)).toEqual(['field', 'wholePlant', 'closeUp']);
     expect(screen.getByText('Follow-up to your check on 20 Nov 2026')).toBeInTheDocument();
     const checks = await cropStore.listChecks('f1');
     expect(checks).toHaveLength(2);
@@ -356,8 +481,9 @@ describe('Vivasayi AI screens', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'Share' }));
     expect(await screen.findByText(/Copied/)).toBeInTheDocument();
-    expect(writeText.mock.calls[0][0]).toMatch(/^Vivasayi AI crop check \(sample\): Tomato, Salem/);
-    expect(writeText.mock.calls[0][0]).toMatch(/not based on your photos/);
+    expect(writeText.mock.calls[0][0]).toMatch(/^Vivasayi AI crop check: Tomato, Salem/);
+    expect(writeText.mock.calls[0][0]).toMatch(/Checked by AI/);
+    expect(writeText.mock.calls[0][0]).toMatch(/Early blight \(spots with rings\) \(Likely\)/);
 
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(await screen.findByText(/No checks yet/)).toBeInTheDocument();
@@ -386,7 +512,7 @@ describe('Vivasayi AI screens', () => {
       renderAt(<App />, { path: '/vivasayi-ai/assessments/k1' });
 
       fireEvent.click(await screen.findByRole('button', { name: 'Listen to summary' }));
-      expect(spoken[0].text).toMatch(/not based on your photos/);
+      expect(spoken[0].text).toMatch(/^Checked by AI/);
       expect(spoken[0].lang).toBe('en-IN');
       act(() => spoken[0].onend());
       expect(spoken[1].text).toBe('Result: Visible symptoms need more checks.');
@@ -398,12 +524,13 @@ describe('Vivasayi AI screens', () => {
       expect(spoken[2].text).toBe(spoken[1].text);
 
       fireEvent.click(screen.getByRole('button', { name: 'Show text' }));
-      expect(document.querySelector('.ai-transcript')).toHaveTextContent(/not based on your photos/);
+      expect(document.querySelector('.ai-transcript')).toHaveTextContent(/Early blight \(spots with rings\)/);
 
       fireEvent.change(screen.getByLabelText('Language'), { target: { value: 'ta' } });
       fireEvent.click(screen.getByRole('button', { name: 'Listen to summary' }));
       expect(spoken[3].lang).toBe('ta-IN');
-      expect(spoken[3].text).toMatch(/எடுத்துக்காட்டு/);
+      expect(spoken[3].text).toMatch(/AI சோதித்தது/);
+      expect(document.querySelector('.ai-transcript')).toHaveTextContent(/முன் கருகல் நோய்/); // the advice too, not only the app's own text
     });
 
     test('no Tamil voice on the phone: says so and shows the text instead', async () => {
@@ -415,7 +542,7 @@ describe('Vivasayi AI screens', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Listen to summary' }));
       expect(spoken).toHaveLength(0);
       expect(screen.getByText(/This phone has no Tamil voice/)).toBeInTheDocument();
-      expect(document.querySelector('.ai-transcript')).toHaveTextContent(/எடுத்துக்காட்டு/);
+      expect(document.querySelector('.ai-transcript')).toHaveTextContent(/AI சோதித்தது/);
     });
 
     test('where there is no speech at all, the text is shown from the start', async () => {
@@ -423,16 +550,39 @@ describe('Vivasayi AI screens', () => {
       renderAt(<App />, { path: '/vivasayi-ai/assessments/k1' });
       expect(await screen.findByText(/Audio isn't available here yet/)).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Listen to summary' })).toBeNull();
-      expect(document.querySelector('.ai-transcript')).toHaveTextContent(/not based on your photos/);
+      expect(document.querySelector('.ai-transcript')).toHaveTextContent(/Checked by AI/);
     });
   });
 
-  test('works in Tamil', async () => {
+  test('works in Tamil, advice included', async () => {
     setLanguage('ta');
     await saved();
     renderAt(<App />, { path: '/vivasayi-ai/assessments/k1' });
     expect(await screen.findByRole('heading', { name: 'தெரியும் அறிகுறிகளுக்கு மேலும் சரிபார்ப்பு தேவை' })).toBeInTheDocument();
-    expect(screen.getByText('மாதிரி முடிவு')).toBeInTheDocument();
-    expect(document.body).not.toHaveTextContent(/cropHealth\./);
+    expect(screen.getByRole('heading', { name: 'முன் கருகல் நோய் (வளையப் புள்ளிகள்) வாய்ப்பு அதிகம்' })).toBeInTheDocument();
+    const nitrogen = screen.getByRole('heading', { name: 'தழைச்சத்துக் குறைபாடு இருக்கலாம்' }).closest('article');
+    expect(within(nitrogen).getByText(/யூரியா 1%/)).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent(/cropHealth\.|Early blight/);
+  });
+
+  test('photos of another crop say what they look like, with no causes', async () => {
+    await saved({}, result({ outcome: 'unsupported', cropSeen: 'otherCrop', otherCrop: text('Brinjal', 'கத்தரி'), causes: [], observations: [] }));
+    renderAt(<App />, { path: '/vivasayi-ai/assessments/k1' });
+    const outcome = (await screen.findByRole('heading', { name: 'Not a crop Vivasayi AI can check' })).closest('section');
+    expect(outcome).toHaveTextContent(/The photos look like Brinjal, not Tomato/);
+    expect(screen.queryByRole('heading', { name: 'Possible causes' })).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Sources' })).toBeNull();
+  });
+
+  test('a check from the preview says its result was a sample', async () => {
+    await saved({}, { outcome: 'needsCheck', causes: ['leafSpot', 'water'], cannotConfirm: ['exact'], urgent: false });
+    const { unmount } = renderAt(<App />, { path: '/vivasayi-ai/assessments/k1' });
+    expect(await screen.findByText(/made during the preview, so its result was only a sample/)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Possible causes' })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Check again' })).toBeInTheDocument();
+    unmount();
+
+    renderAt(<App />, { path: '/vivasayi-ai' });
+    expect(await screen.findByText('Preview sample')).toBeInTheDocument();
   });
 });

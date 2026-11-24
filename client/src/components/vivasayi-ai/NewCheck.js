@@ -7,14 +7,12 @@ import DetailsStep from './DetailsStep';
 import PhotoStep from './PhotoStep';
 import ReviewStep from './ReviewStep';
 import { newCheck, detailsComplete } from './crops';
-import { sampleResult } from './sampleResult';
+import { requestCheck, failureReason } from './assessment';
 import { getCheck, getDraft, saveDraft, saveCheck, clearDraft } from '../../utils/cropStore';
 import '../posts/Posts.css';
 import './VivasayiAI.css';
 
 const STEPS = ['details', 'photos', 'review', 'result'];
-const PROCESSING_MS = 1200;
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const NewCheck = () => {
   const { t } = useTranslation();
@@ -25,6 +23,19 @@ const NewCheck = () => {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const topRef = useRef(null);
+  const messageRef = useRef(null);
+  const onScreen = useRef(true);
+
+  useEffect(() => {
+    onScreen.current = true;
+    return () => { onScreen.current = false; };
+  }, []);
+
+  // after a failed check the page comes back scrolled to the top, far from the message
+  useEffect(() => {
+    const el = messageRef.current;
+    if (message && el && el.scrollIntoView) el.scrollIntoView({ block: 'center' });
+  }, [message]);
 
   const recheckId = params.get('recheck');
   const addInfo = params.get('add') === '1';
@@ -75,15 +86,27 @@ const NewCheck = () => {
     if (await store(check)) setMessage(t('cropHealth.draftSaved'));
   };
 
+  // The draft is saved first, so a failed check or a closed app loses nothing. A result that
+  // arrives after the farmer left this screen still goes into their list of checks.
   const submit = async () => {
     if (busy) return;
     setBusy(true);
-    const { step, key, ...answers } = check;
-    const record = { ...answers, createdAt: Date.now(), result: sampleResult(check) };
+    setMessage('');
+    await store(check);
+    let result;
     try {
-      await Promise.all([saveCheck(user._id, record), wait(PROCESSING_MS)]);
+      result = await requestCheck(check);
+    } catch (err) {
+      setBusy(false);
+      setMessage(t(`cropHealth.errors.${failureReason(err)}`));
+      return;
+    }
+    const { step, key, ...answers } = check;
+    const record = { ...answers, createdAt: Date.now(), result };
+    try {
+      await saveCheck(user._id, record);
       await clearDraft(user._id);
-      navigate(`/vivasayi-ai/assessments/${record.id}`, { replace: true });
+      if (onScreen.current) navigate(`/vivasayi-ai/assessments/${record.id}`, { replace: true });
     } catch (err) {
       setBusy(false);
       setMessage(t('cropHealth.saveFailed'));
@@ -96,7 +119,7 @@ const NewCheck = () => {
         <div className="ai-processing" role="status">
           <span className="ai-spinner" aria-hidden="true"></span>
           <p><strong>{t('cropHealth.processing')}</strong></p>
-          <p className="ai-muted">{t('cropHealth.review.notice')}</p>
+          <p className="ai-muted">{t('cropHealth.processingNote')}</p>
         </div>
       </div>
     );
@@ -119,7 +142,7 @@ const NewCheck = () => {
       {check.step === 1 && <PhotoStep photos={check.photos} onChange={photos => update({ photos })} />}
       {check.step === 2 && <ReviewStep check={check} go={go} />}
 
-      {message && <p className="ai-message" role="status">{message}</p>}
+      {message && <p className="ai-message" role="status" ref={messageRef}>{message}</p>}
       <div className="wizard-actions ai-actions">
         <button type="button" className="btn btn-light" onClick={onBack}>{t('cropHealth.back')}</button>
         {!unsupported && (

@@ -1,4 +1,4 @@
-/* Vivasayi AI (crop health preview). App.css loads after this file, so rules are scoped
+/* Vivasayi AI (crop health). App.css loads after this file, so rules are scoped
    under .ai-page (or the dialog) to win over its element-wide defaults. */
 .ai-page { max-width: 760px; margin: 0 auto 1.5rem; }
 .ai-page h2 { font-size: 1.15rem; margin: 0 0 0.6rem; color: var(--primary-color); }
@@ -122,7 +122,7 @@
 .ai-page .ai-outcome h2 { margin: 0.15rem 0 0; font-size: 1.35rem; color: var(--text-primary); }
 @media (max-width: 600px) { .ai-page .ai-outcome h2 { font-size: 1.2rem; } }
 .ai-page .ai-outcome.needsCheck { border-color: #f0b400; background: #fffaf0; }
-.ai-page .ai-outcome.insufficient { border-color: #b0bec5; background: #f5f7f8; }
+.ai-page .ai-outcome.insufficient, .ai-page .ai-outcome.unsupported { border-color: #b0bec5; background: #f5f7f8; }
 
 .ai-listen { margin: 0.9rem 0; }
 .ai-listen-main { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -135,12 +135,17 @@
 .ai-transcript li.on { background: #fff3c4; border-radius: 4px; }
 
 .ai-cause { border-top: 1px solid var(--border-color); padding-top: 0.7rem; margin-top: 0.7rem; }
-.ai-page .ai-cause h3 { margin: 0 0 0.3rem; font-size: 1rem; }
+.ai-page .ai-cause h3 { margin: 0 0 0.3rem; font-size: 1.05rem; }
+.ai-page .ai-cause h3 .ai-tag { vertical-align: middle; }
+.ai-tag.likely { background: #fff3c4; color: #5c3d00; }
+.ai-page .ai-cause h4 { margin: 0.8rem 0 0.3rem; font-size: 0.95rem; color: var(--primary-color); }
 .ai-cause dl { margin: 0; }
 .ai-cause dt { margin-top: 0.35rem; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); }
 .ai-cause dd { margin: 0; }
-.ai-page .ai-guidance { border-color: #f0c36d; background: #fffaf0; }
+.ai-page .ai-fertilizer { margin-top: 0.7rem; padding: 0.1rem 0.8rem 0.5rem; border-left: 4px solid #8bc34a; background: #f6faef; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.ai-page .ai-fertilizer h4 { margin-top: 0.5rem; }
 .ai-page .ai-expert.urgent { border: 2px solid #c62828; background: #fff5f5; }
+.ai-page .ai-expert .btn { margin-top: 0.3rem; }
 
 .ai-result-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.2rem 0 0.6rem; }
 .ai-result-actions .btn { flex: 1 1 9rem; }
